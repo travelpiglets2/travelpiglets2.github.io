@@ -7,221 +7,201 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  :root{
-    --bg:#0f1923;--card:#162535;--accent:#00b4d8;--accent2:#0088a8;
-    --text:#e0eaf5;--muted:#6b8baa;--border:#1e3550;
-    --green:#00c897;--orange:#f97316;--yellow:#f59e0b;--red:#ef4444;
-    --planA:#00b4d8;--planB:#8b5cf6;--planC:#10b981;--planD:#f97316;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+:root{
+  --bg:#0f1923;--card:#162535;--accent:#00b4d8;--accent2:#0088a8;
+  --text:#e0eaf5;--muted:#6b8baa;--border:#1e3550;
+  --green:#00c897;--orange:#f97316;--yellow:#f59e0b;--red:#ef4444;
+  --purple:#8b5cf6;
+  --planA:#00b4d8;--planB:#8b5cf6;--planC:#10b981;--planD:#f97316;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
 
-  /* ── Header ── */
-  .header{
-    background:linear-gradient(135deg,#0a1520 0%,#162535 100%);
-    border-bottom:1px solid var(--border);
-    padding:18px 20px 14px;
-    position:sticky;top:0;z-index:1000;
-  }
-  .header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-  .header-title{display:flex;align-items:center;gap:10px;}
-  .header-title h1{font-size:1.35rem;font-weight:700;color:var(--accent);}
-  .header-title span{font-size:1.6rem;}
-  .header-sub{font-size:.78rem;color:var(--muted);margin-top:2px;}
-  .clock{font-size:.85rem;color:var(--accent);font-weight:600;letter-spacing:.5px;}
+/* ── Header ── */
+.header{
+  background:linear-gradient(135deg,#0a1520 0%,#162535 100%);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px 12px;position:sticky;top:0;z-index:1000;
+}
+.header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.header-title{display:flex;align-items:center;gap:10px;}
+.header-title h1{font-size:1.3rem;font-weight:700;color:var(--accent);}
+.header-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
+.clock{font-size:.85rem;color:var(--accent);font-weight:600;letter-spacing:.5px;}
 
-  /* ── Input Section ── */
-  .input-section{padding:20px 20px 10px;max-width:960px;margin:0 auto;}
-  .gps-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
-  .gps-dot{width:12px;height:12px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background .3s;}
-  .gps-dot.active{background:var(--green);animation:pulse-gps 1.5s infinite;}
-  @keyframes pulse-gps{0%,100%{box-shadow:0 0 0 0 rgba(0,200,151,.4);}50%{box-shadow:0 0 0 7px rgba(0,200,151,0);}}
-  .gps-label{font-size:.85rem;color:var(--muted);}
-  .gps-coords{font-size:.8rem;color:var(--accent);font-weight:600;}
+/* ── Input Section ── */
+.input-section{padding:16px 20px 10px;max-width:980px;margin:0 auto;}
+.gps-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.gps-dot{width:11px;height:11px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background .3s;}
+.gps-dot.active{background:var(--green);animation:pulse-gps 1.5s infinite;}
+@keyframes pulse-gps{0%,100%{box-shadow:0 0 0 0 rgba(0,200,151,.4);}50%{box-shadow:0 0 0 7px rgba(0,200,151,0);}}
+.gps-label{font-size:.83rem;color:var(--muted);}
+.gps-coords{font-size:.8rem;color:var(--accent);font-weight:600;}
+.dest-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;}
+.dest-input{
+  flex:1;min-width:200px;
+  background:#0d1e2e;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.92rem;padding:10px 14px;outline:none;transition:border .2s;
+}
+.dest-input:focus{border-color:var(--accent);}
+.dest-input::placeholder{color:var(--muted);}
 
-  .dest-row{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;}
-  .dest-input{
-    flex:1;min-width:200px;
-    background:#0d1e2e;border:1px solid var(--border);border-radius:10px;
-    color:var(--text);font-size:.95rem;padding:11px 16px;outline:none;
-    transition:border .2s;
-  }
-  .dest-input:focus{border-color:var(--accent);}
-  .dest-input::placeholder{color:var(--muted);}
+/* Buttons */
+.btn{padding:10px 16px;border-radius:10px;border:none;font-size:.86rem;font-weight:600;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#0a1520;}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-gps{background:#1a3048;color:var(--accent);border:1px solid var(--border);}
+.btn-gps:hover{background:#1e3a56;}
+.btn-grab{background:var(--orange);color:#fff;}
+.btn-grab:hover{background:#e05a00;}
+.btn-pick{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
+.btn-pick:hover{background:#1e3a56;color:var(--text);}
+.btn-pick.active{background:rgba(0,180,216,.15);color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 10px rgba(0,180,216,.25);}
+.btn-refresh-now{
+  padding:7px 15px;background:var(--accent);color:#0a1520;
+  font-weight:700;font-size:.82rem;border:none;border-radius:8px;
+  cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.btn-refresh-now:hover{background:var(--accent2);}
+.btn-refresh-now:disabled{background:#1e3a4a;color:#90a4ae;cursor:not-allowed;}
+.btn-copy{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-size:.74rem;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .2s;
+  align-self:flex-end;margin-top:2px;
+}
+.btn-copy:hover{border-color:var(--accent);color:var(--accent);}
 
-  .btn{
-    padding:11px 18px;border-radius:10px;border:none;
-    font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;
-    display:flex;align-items:center;gap:7px;white-space:nowrap;
-  }
-  .btn-primary{background:var(--accent);color:#0a1520;}
-  .btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
-  .btn-gps{background:#1a3048;color:var(--accent);border:1px solid var(--border);}
-  .btn-gps:hover{background:#1e3a56;}
-  .btn-grab{background:var(--orange);color:#fff;}
-  .btn-grab:hover{background:#e05a00;}
+/* Pick-mode banner */
+#pickBanner{
+  display:none;background:rgba(0,200,151,.1);border:1px solid rgba(0,200,151,.35);
+  border-radius:10px;padding:9px 14px;margin-top:10px;
+  font-size:.84rem;color:var(--green);font-weight:600;
+  align-items:center;gap:10px;
+}
+#pickBanner.show{display:flex;}
+.cancel-pick{margin-left:auto;font-size:.74rem;color:var(--muted);background:none;
+  border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;}
+.cancel-pick:hover{color:var(--text);}
+.disclaimer{
+  font-size:.73rem;color:var(--muted);background:#0d1e2e;border:1px solid var(--border);
+  border-left:3px solid var(--yellow);border-radius:8px;padding:9px 13px;margin-top:10px;line-height:1.6;
+}
 
-  /* Pick-on-map toggle button */
-  .btn-pick{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
-  .btn-pick:hover{background:#1e3a56;color:var(--text);}
-  .btn-pick.active{
-    background:rgba(0,180,216,.15);color:var(--accent);
-    border:1px solid var(--accent);
-    box-shadow:0 0 10px rgba(0,180,216,.25);
-  }
+/* ── Refresh bar ── */
+.refresh-bar-wrap{
+  max-width:980px;margin:0 auto 0;padding:6px 20px;
+  display:flex;align-items:center;gap:10px;
+  background:#10202f;border-bottom:1px solid var(--border);
+}
+.countdown-label{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+.refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:6px;overflow:hidden;}
+.refresh-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#48cae4);border-radius:4px;transition:width 1s linear;}
+#countdownText{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:36px;}
+#lastUpdate{font-size:.74rem;color:var(--muted);white-space:nowrap;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #48cae4;border-top-color:transparent;
+  border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-  /* Refresh button (mybus.html style) */
-  .btn-refresh-now{
-    padding:7px 16px;background:var(--accent);color:#0a1520;
-    font-weight:700;font-size:.82rem;border:none;border-radius:8px;
-    cursor:pointer;transition:background .2s;
-    display:flex;align-items:center;gap:6px;white-space:nowrap;
-  }
-  .btn-refresh-now:hover{background:var(--accent2);}
-  .btn-refresh-now:disabled{background:#1e3a4a;color:#90a4ae;cursor:not-allowed;}
+/* ── Map ── */
+.map-wrap{max-width:980px;margin:0 auto;padding:12px 20px 8px;}
+#map{height:290px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+#map.pick-mode{cursor:crosshair !important;}
+#map.pick-mode .leaflet-container{cursor:crosshair !important;}
 
-  .btn-copy{
-    background:transparent;border:1px solid var(--border);
-    color:var(--muted);font-size:.75rem;padding:5px 11px;border-radius:6px;
-    cursor:pointer;transition:all .2s;
-  }
-  .btn-copy:hover{border-color:var(--accent);color:var(--accent);}
+/* ── Plans Grid ── */
+.plans-section{max-width:980px;margin:0 auto;padding:0 20px 30px;}
+.plans-title{font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:14px;
+  letter-spacing:.8px;text-transform:uppercase;}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;}
 
-  /* Pick-mode banner */
-  #pickBanner{
-    display:none;
-    background:rgba(0,200,151,.1);border:1px solid rgba(0,200,151,.35);
-    border-radius:10px;padding:10px 16px;margin-top:12px;
-    font-size:.85rem;color:var(--green);font-weight:600;
-    animation:fadeIn .3s ease;
-    align-items:center;gap:10px;
-  }
-  #pickBanner.show{display:flex;}
-  #pickBanner .cancel-pick{
-    margin-left:auto;font-size:.75rem;color:var(--muted);
-    background:none;border:1px solid var(--border);border-radius:6px;
-    padding:3px 10px;cursor:pointer;
-  }
-  #pickBanner .cancel-pick:hover{color:var(--text);}
+/* ── Plan Card ── */
+.plan-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:16px;display:flex;flex-direction:column;gap:10px;
+  animation:fadeIn .4s ease both;transition:transform .2s,box-shadow .2s;
+}
+.plan-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,180,216,.1);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.plan-card.grab{border-color:rgba(249,115,22,.3);}
+.plan-card.grab:hover{box-shadow:0 8px 28px rgba(249,115,22,.12);}
 
-  .disclaimer{
-    font-size:.74rem;color:var(--muted);
-    background:#0d1e2e;border:1px solid var(--border);
-    border-left:3px solid var(--yellow);
-    border-radius:8px;padding:10px 14px;margin-top:12px;line-height:1.6;
-  }
+.card-header{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.plan-badge{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:800;flex-shrink:0;
+}
+.pill{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+.pill-green{background:rgba(0,200,151,.15);color:var(--green);border:1px solid rgba(0,200,151,.3);}
+.pill-blue{background:rgba(0,180,216,.15);color:var(--accent);border:1px solid rgba(0,180,216,.3);}
+.pill-purple{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
+.pill-orange{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);}
+.card-title{font-size:.92rem;font-weight:700;color:var(--text);}
+.card-sub{font-size:.76rem;color:var(--muted);}
+.divider{border:none;border-top:1px solid var(--border);}
 
-  /* ── Refresh bar ── */
-  .refresh-bar-wrap{
-    max-width:960px;margin:0 auto 4px;padding:6px 20px;
-    display:flex;align-items:center;gap:10px;
-    background:#10202f;border-bottom:1px solid var(--border);
-  }
-  .countdown-label{font-size:.78rem;color:var(--muted);white-space:nowrap;}
-  .refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:6px;overflow:hidden;}
-  .refresh-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#48cae4);border-radius:4px;transition:width 1s linear;}
-  #countdownText{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:40px;}
-  #lastUpdate{font-size:.75rem;color:var(--muted);white-space:nowrap;}
+/* ── Timeline Stepper ── */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-step{display:flex;gap:10px;position:relative;}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;}
+.tl-circle{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;flex-shrink:0;z-index:1;border:2px solid transparent;
+}
+.tl-circle.walk{background:rgba(107,139,170,.15);border-color:rgba(107,139,170,.4);color:var(--muted);}
+.tl-circle.bus{background:rgba(0,180,216,.15);border-color:rgba(0,180,216,.4);color:var(--accent);}
+.tl-circle.mrt{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:var(--green);}
+.tl-circle.transfer{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.4);color:var(--purple);}
+.tl-circle.alight{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--red);}
+.tl-circle.dest{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.5);color:var(--green);}
+.tl-line{width:2px;flex:1;background:var(--border);margin:2px 0;min-height:10px;}
+.tl-body{flex:1;padding:2px 0 12px;}
+.tl-type{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px;}
+.tl-main{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px;}
+.tl-sub{font-size:.76rem;color:var(--muted);line-height:1.45;}
+.tl-sub .hi{color:var(--accent);font-weight:600;}
+.tl-sub .live{color:var(--green);font-weight:700;}
+.tl-sub .stop-tag{
+  display:inline-block;font-family:monospace;font-size:.7rem;
+  background:#0d1e2e;border:1px solid var(--border);
+  border-radius:4px;padding:1px 5px;color:var(--accent);margin-right:4px;
+}
+.bus-badge{
+  display:inline-flex;align-items:center;
+  font-size:.82rem;font-weight:800;padding:2px 9px;border-radius:7px;
+  color:#0a1520;margin-bottom:4px;
+}
+.mrt-badge{
+  display:inline-flex;align-items:center;
+  font-size:.78rem;font-weight:800;padding:2px 9px;border-radius:7px;
+  background:var(--green);color:#0a1520;margin-bottom:4px;
+}
 
-  /* Spinner */
-  .spinner{
-    display:inline-block;width:13px;height:13px;
-    border:2px solid #48cae4;border-top-color:transparent;
-    border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
+/* ── Stats row ── */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;}
+.stat{text-align:center;flex:1;}
+.stat-num{font-size:1.2rem;font-weight:800;}
+.stat-lbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.grab-fare{font-size:1.4rem;font-weight:800;color:var(--orange);}
+.grab-range{font-size:.77rem;color:var(--muted);}
 
-  /* ── Map ── */
-  .map-wrap{max-width:960px;margin:0 auto;padding:12px 20px 10px;}
-  #map{height:300px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
-  /* Crosshair cursor when pick mode active */
-  #map.pick-mode{cursor:crosshair !important;}
-  #map.pick-mode .leaflet-container{cursor:crosshair !important;}
+/* ── Skeleton ── */
+.skeleton{
+  background:linear-gradient(90deg,#162535 25%,#1e3550 50%,#162535 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:13px;
+}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skeleton-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.error-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:16px;text-align:center;color:var(--red);font-size:.86rem;}
 
-  /* ── Plans Grid ── */
-  .plans-section{max-width:960px;margin:0 auto;padding:0 20px 30px;}
-  .plans-title{font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.8px;text-transform:uppercase;}
-  .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-
-  /* ── Plan Card ── */
-  .plan-card{
-    background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:18px;display:flex;flex-direction:column;gap:12px;
-    animation:fadeIn .4s ease both;transition:transform .2s,box-shadow .2s;
-  }
-  .plan-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,180,216,.1);}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-
-  .plan-card.grab{border-color:rgba(249,115,22,.3);}
-  .plan-card.grab:hover{box-shadow:0 8px 30px rgba(249,115,22,.15);}
-
-  .card-header{display:flex;align-items:center;justify-content:space-between;}
-  .plan-badge{
-    width:34px;height:34px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:.85rem;font-weight:800;flex-shrink:0;
-  }
-  .pill{
-    font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;
-    text-transform:uppercase;letter-spacing:.5px;
-  }
-  .pill-green{background:rgba(0,200,151,.15);color:var(--green);border:1px solid rgba(0,200,151,.3);}
-  .pill-blue{background:rgba(0,180,216,.15);color:var(--accent);border:1px solid rgba(0,180,216,.3);}
-  .pill-purple{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
-  .pill-orange{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);}
-
-  .card-title{font-size:.95rem;font-weight:700;color:var(--text);}
-  .card-sub{font-size:.78rem;color:var(--muted);}
-
-  .step{display:flex;gap:10px;align-items:flex-start;}
-  .step-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
-  .step-body{flex:1;}
-  .step-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
-  .step-value{font-size:.88rem;color:var(--text);font-weight:500;line-height:1.45;}
-  .step-value.accent{color:var(--accent);}
-
-  .divider{border:none;border-top:1px solid var(--border);}
-
-  .stat-row{display:flex;gap:12px;flex-wrap:wrap;}
-  .stat{text-align:center;flex:1;}
-  .stat-num{font-size:1.25rem;font-weight:800;color:var(--accent);}
-  .stat-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-
-  .grab-fare{font-size:1.5rem;font-weight:800;color:var(--orange);}
-  .grab-range{font-size:.78rem;color:var(--muted);}
-
-  /* ── Skeleton loader ── */
-  .skeleton{
-    background:linear-gradient(90deg,#162535 25%,#1e3550 50%,#162535 75%);
-    background-size:200% 100%;
-    animation:shimmer 1.5s infinite;
-    border-radius:8px;height:14px;
-  }
-  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-  .skeleton-card{
-    background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:18px;display:flex;flex-direction:column;gap:14px;
-  }
-
-  .error-card{
-    background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
-    border-radius:16px;padding:18px;text-align:center;
-    color:var(--red);font-size:.88rem;
-  }
-
-  .bus-num{
-    display:inline-block;background:var(--accent);color:#0a1520;
-    font-weight:800;font-size:.78rem;padding:1px 7px;border-radius:6px;margin-right:3px;
-  }
-  .bus-num.mrt{background:var(--green);color:#0a1520;}
-  .live{color:var(--green);font-weight:700;}
-
-  @media(max-width:600px){
-    .plans-grid{grid-template-columns:1fr;}
-    .dest-row{flex-direction:column;}
-    .btn{justify-content:center;}
-    .refresh-bar-wrap{flex-wrap:wrap;gap:8px;}
-  }
+@media(max-width:600px){
+  .plans-grid{grid-template-columns:1fr;}
+  .dest-row{flex-direction:column;}
+  .btn{justify-content:center;}
+  .refresh-bar-wrap{flex-wrap:wrap;gap:7px;}
+}
 </style>
 </head>
 <body>
@@ -248,7 +228,6 @@
     <span class="gps-coords" id="gpsCoords">Not detected yet</span>
     <button class="btn btn-gps" onclick="getGPS()">📍 Get My Location</button>
   </div>
-
   <div class="dest-row">
     <input class="dest-input" id="destInput" type="text"
       placeholder="Enter destination — or 🗺️ click map to pin it"
@@ -256,13 +235,10 @@
     <button class="btn btn-primary" id="planBtn" onclick="planJourney()">🔍 Plan Journey</button>
     <button class="btn btn-pick" id="pickBtn" onclick="togglePickMode()" title="Click the map to set destination">🗺️ Pick on Map</button>
   </div>
-
-  <!-- Pick-mode banner -->
   <div id="pickBanner">
     📍 <strong>Pick mode ON</strong> — Click anywhere on the map to set your destination
     <button class="cancel-pick" onclick="togglePickMode()">✕ Cancel</button>
   </div>
-
   <div class="disclaimer">
     ⚠️ <strong>Note:</strong> Route suggestions are estimated based on nearest bus stops and live arrival data.
     Please verify with <strong>LTA MyTransport</strong> or <strong>Google Maps</strong> before travelling.
@@ -293,108 +269,94 @@
 <div class="plans-section">
   <div class="plans-title">✈️ Suggested Travel Plans</div>
   <div class="plans-grid" id="plansGrid">
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  GLOBALS
-// ══════════════════════════════════════════════
-const REFRESH_SEC = 300; // 5 minutes
+// ═══════════════════════════════════════════════════════
+const REFRESH_SEC = 300;
 let userLat=null, userLng=null;
 let allStops={};
 let nearbyStops=[];
 let destLat=null, destLng=null, destName='';
 let map, userMarker, destMarker, routeLine;
+let stopMarkers=[];
 let refreshTimer=null, refreshSecsLeft=REFRESH_SEC;
-let arrivalCache={};
+let isRefreshing=false;
 let pickModeActive=false;
 let currentStops4=[], currentNearDest=[], currentTotalDist=0;
-let isRefreshing=false;
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  SGT CLOCK
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function updateClock(){
-  const sgt=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
-  const h=String(sgt.getHours()).padStart(2,'0');
-  const m=String(sgt.getMinutes()).padStart(2,'0');
-  const s=String(sgt.getSeconds()).padStart(2,'0');
-  document.getElementById('clock').textContent=h+':'+m+':'+s+' SGT';
+  const s=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  document.getElementById('clock').textContent=
+    String(s.getHours()).padStart(2,'0')+':'+
+    String(s.getMinutes()).padStart(2,'0')+':'+
+    String(s.getSeconds()).padStart(2,'0')+' SGT';
 }
 setInterval(updateClock,1000); updateClock();
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  HAVERSINE
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function haversine(lat1,lng1,lat2,lng2){
-  const R=6371000, rad=Math.PI/180;
+  const R=6371000,rad=Math.PI/180;
   const dLat=(lat2-lat1)*rad, dLng=(lng2-lng1)*rad;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  MAP INIT
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function initMap(){
   map=L.map('map',{zoomControl:true}).setView([1.3521,103.8198],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© OpenStreetMap contributors',maxZoom:19
   }).addTo(map);
-
-  // Map click — pick destination
   map.on('click',function(e){
     if(!pickModeActive) return;
     const {lat,lng}=e.latlng;
-    setDestMarker(lat,lng,'Reverse geocoding…');
-    // Reverse geocode
+    setDestMarker(lat,lng,'Locating…');
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
       {headers:{'Accept-Language':'en'}})
       .then(r=>r.json())
-      .then(data=>{
-        const name = data.display_name
-          ? data.display_name.split(',').slice(0,2).join(', ')
-          : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      .then(d=>{
+        const name=d.display_name
+          ?d.display_name.split(',').slice(0,2).join(', ')
+          :`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         destLat=lat; destLng=lng; destName=name;
         document.getElementById('destInput').value=name;
         if(destMarker) destMarker.bindPopup(`<b>📍 ${name}</b>`).openPopup();
-        disablePickMode();
-        planJourney();
+        disablePickMode(); planJourney();
       })
       .catch(()=>{
         const name=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         destLat=lat; destLng=lng; destName=name;
         document.getElementById('destInput').value=name;
-        disablePickMode();
-        planJourney();
+        disablePickMode(); planJourney();
       });
   });
 }
 initMap();
 
-// ── Custom icons ──
-const userIcon=L.divIcon({className:'',
-  html:`<div style="width:16px;height:16px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 4px rgba(0,180,216,.25);"></div>`,
-  iconSize:[16,16],iconAnchor:[8,8]});
-const stopIcon=L.divIcon({className:'',
-  html:`<div style="width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,
-  iconSize:[11,11],iconAnchor:[5,5]});
-const destIcon=L.divIcon({className:'',
-  html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,
-  iconSize:[18,18],iconAnchor:[9,9]});
+// ── Icons ──
+const userIcon=L.divIcon({className:'',html:`<div style="width:15px;height:15px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 4px rgba(0,180,216,.25);"></div>`,iconSize:[15,15],iconAnchor:[7,7]});
+const stopIcon=L.divIcon({className:'',html:`<div style="width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,iconSize:[10,10],iconAnchor:[5,5]});
+const destIcon=L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,iconSize:[18,18],iconAnchor:[9,9]});
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  PICK MODE
-// ══════════════════════════════════════════════
-function togglePickMode(){
-  if(pickModeActive) disablePickMode();
-  else enablePickMode();
-}
+// ═══════════════════════════════════════════════════════
+function togglePickMode(){ pickModeActive ? disablePickMode() : enablePickMode(); }
 function enablePickMode(){
   pickModeActive=true;
   document.getElementById('pickBtn').classList.add('active');
@@ -409,133 +371,134 @@ function disablePickMode(){
 }
 function setDestMarker(lat,lng,label){
   if(destMarker) map.removeLayer(destMarker);
-  destMarker=L.marker([lat,lng],{icon:destIcon})
-    .addTo(map).bindPopup(`<b>📍 ${label}</b>`).openPopup();
+  destMarker=L.marker([lat,lng],{icon:destIcon}).addTo(map)
+    .bindPopup(`<b>📍 ${label}</b>`).openPopup();
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  GPS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function getGPS(){
-  if(!navigator.geolocation){ alert('Geolocation not supported.'); return; }
+  if(!navigator.geolocation){alert('Geolocation not supported.');return;}
   document.getElementById('gpsCoords').textContent='Detecting…';
   navigator.geolocation.getCurrentPosition(pos=>{
-    userLat=pos.coords.latitude;
-    userLng=pos.coords.longitude;
+    userLat=pos.coords.latitude; userLng=pos.coords.longitude;
     document.getElementById('gpsCoords').textContent=
       userLat.toFixed(5)+'°N, '+userLng.toFixed(5)+'°E';
     document.getElementById('gpsDot').classList.add('active');
     map.setView([userLat,userLng],15);
     if(userMarker) map.removeLayer(userMarker);
-    userMarker=L.marker([userLat,userLng],{icon:userIcon})
-      .addTo(map).bindPopup('<b>📍 You are here</b>').openPopup();
+    userMarker=L.marker([userLat,userLng],{icon:userIcon}).addTo(map)
+      .bindPopup('<b>📍 You are here</b>').openPopup();
     loadStops();
-  },err=>{
+  },()=>{
     document.getElementById('gpsCoords').textContent='GPS denied / unavailable';
   },{enableHighAccuracy:true,timeout:10000});
 }
 
-// ══════════════════════════════════════════════
-//  LOAD ALL BUS STOPS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  LOAD BUS STOPS
+// ═══════════════════════════════════════════════════════
 async function loadStops(){
   try{
     const r=await fetch('https://data.busrouter.sg/v1/stops.json');
     allStops=await r.json();
     findNearbyStops();
-  }catch(e){ console.warn('Stops load failed',e); }
+  }catch(e){console.warn('Stops load failed',e);}
 }
 function findNearbyStops(){
   if(!userLat||!Object.keys(allStops).length) return;
-  const distances=[];
-  for(const[id,data] of Object.entries(allStops)){
-    const[lng,lat,name,road]=data;
-    const d=haversine(userLat,userLng,lat,lng);
-    distances.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name,road,dist:d});
+  const dist=[];
+  for(const[id,d] of Object.entries(allStops)){
+    const[lng,lat,name,road]=d;
+    dist.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',dist:haversine(userLat,userLng,parseFloat(lat),parseFloat(lng))});
   }
-  distances.sort((a,b)=>a.dist-b.dist);
-  nearbyStops=distances.slice(0,8);
-  // Add stop markers
+  dist.sort((a,b)=>a.dist-b.dist);
+  nearbyStops=dist.slice(0,10);
+  stopMarkers.forEach(m=>map.removeLayer(m));
+  stopMarkers=[];
   nearbyStops.slice(0,5).forEach(s=>{
-    L.marker([s.lat,s.lng],{icon:stopIcon}).addTo(map)
-      .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop ${s.id} · ${Math.round(s.dist)}m</small>`);
+    const m=L.marker([s.lat,s.lng],{icon:stopIcon}).addTo(map)
+      .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop <b>${s.id}</b> · ${Math.round(s.dist)}m</small>`);
+    stopMarkers.push(m);
   });
 }
 
-// ══════════════════════════════════════════════
-//  GEOCODE (Nominatim)
-// ══════════════════════════════════════════════
-async function geocodeDest(query){
-  const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=sg&format=json&limit=1`;
-  const r=await fetch(url,{headers:{'Accept-Language':'en'}});
-  const data=await r.json();
-  if(data&&data.length>0){
-    return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon),
-      name:data[0].display_name.split(',').slice(0,2).join(', ')};
+// ── Find stop nearest to midpoint ──
+function midpointStop(lat1,lng1,lat2,lng2){
+  const midLat=(lat1+lat2)/2, midLng=(lng1+lng2)/2;
+  let best=null, bestD=Infinity;
+  for(const[id,d] of Object.entries(allStops)){
+    const[lng,lat,name,road]=d;
+    const dist=haversine(midLat,midLng,parseFloat(lat),parseFloat(lng));
+    if(dist<bestD){bestD=dist;best={id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',dist:bestD};}
   }
+  return best;
+}
+
+// ═══════════════════════════════════════════════════════
+//  GEOCODE
+// ═══════════════════════════════════════════════════════
+async function geocodeDest(query){
+  const r=await fetch(
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=sg&format=json&limit=1`,
+    {headers:{'Accept-Language':'en'}});
+  const d=await r.json();
+  if(d&&d.length>0)
+    return{lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon),
+      name:d[0].display_name.split(',').slice(0,2).join(', ')};
   return null;
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  BUS ARRIVALS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 async function fetchArrivals(stopId){
   try{
     const r=await fetch(`https://arrivelah2.busrouter.sg/?id=${stopId}`);
-    const d=await r.json();
-    arrivalCache[stopId]=d;
-    return d;
-  }catch(e){ return arrivalCache[stopId]||null; }
+    return await r.json();
+  }catch(e){return null;}
+}
+function fmtTime(isoStr){
+  if(!isoStr) return '--:--';
+  return new Date(isoStr).toLocaleTimeString('en-SG',
+    {hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Singapore'});
 }
 function minsUntil(isoStr){
   if(!isoStr) return null;
   return Math.max(0,Math.round((new Date(isoStr)-new Date())/60000));
 }
+// Returns {no, wait, timeStr, dir} or null
 function getBus(arrival,idx){
   if(!arrival||!arrival.services||!arrival.services[idx]) return null;
   const svc=arrival.services[idx];
-  const wait=minsUntil(svc.next&&svc.next.time?svc.next.time:svc.next);
+  const timeIso=svc.next&&svc.next.time?svc.next.time:svc.next;
+  const wait=minsUntil(timeIso);
   if(wait===null) return null;
-  return{no:svc.no,wait,dir:svc.next_direction||''};
+  return{no:svc.no, wait, timeStr:fmtTime(timeIso), dir:svc.next_direction||''};
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  MRT STATIONS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const MRT_STATIONS=[
-  {name:'Tampines MRT',lat:1.3540,lng:103.9454,line:'EWL'},
-  {name:'Bedok MRT',lat:1.3240,lng:103.9297,line:'EWL'},
-  {name:'Tanah Merah MRT',lat:1.3271,lng:103.9465,line:'EWL'},
-  {name:'Simei MRT',lat:1.3432,lng:103.9533,line:'EWL'},
-  {name:'Pasir Ris MRT',lat:1.3730,lng:103.9493,line:'EWL'},
-  {name:'Expo MRT',lat:1.3353,lng:103.9614,line:'EWL/CCL'},
-  {name:'Changi Airport MRT',lat:1.3574,lng:103.9882,line:'EWL'},
-  {name:'Paya Lebar MRT',lat:1.3180,lng:103.8931,line:'EWL/CCL'},
-  {name:'Aljunied MRT',lat:1.3163,lng:103.8828,line:'EWL'},
-  {name:'Kembangan MRT',lat:1.3210,lng:103.9127,line:'EWL'},
-  {name:'Eunos MRT',lat:1.3196,lng:103.9022,line:'EWL'},
-  {name:'Kovan MRT',lat:1.3601,lng:103.8856,line:'NEL'},
-  {name:'Hougang MRT',lat:1.3712,lng:103.8927,line:'NEL'},
-  {name:'Buangkok MRT',lat:1.3824,lng:103.8929,line:'NEL'},
-  {name:'Sengkang MRT',lat:1.3915,lng:103.8954,line:'NEL'},
-  {name:'Punggol MRT',lat:1.4053,lng:103.9022,line:'NEL'},
-  {name:'Orchard MRT',lat:1.3040,lng:103.8318,line:'NSL'},
-  {name:'City Hall MRT',lat:1.2931,lng:103.8520,line:'NSL/EWL'},
-  {name:'Raffles Place MRT',lat:1.2837,lng:103.8515,line:'NSL/EWL'},
-  {name:'Marina Bay MRT',lat:1.2763,lng:103.8546,line:'NSL/CEL'},
-  {name:'Ang Mo Kio MRT',lat:1.3700,lng:103.8494,line:'NSL'},
-  {name:'Bishan MRT',lat:1.3514,lng:103.8485,line:'NSL/CCL'},
-  {name:'Jurong East MRT',lat:1.3330,lng:103.7423,line:'NSL/EWL'},
-  {name:'Woodlands MRT',lat:1.4370,lng:103.7866,line:'NSL'},
-  {name:'Boon Lay MRT',lat:1.3388,lng:103.7056,line:'EWL'},
-  {name:'Dhoby Ghaut MRT',lat:1.2989,lng:103.8456,line:'NSL/NEL/CCL'},
-  {name:'Harbourfront MRT',lat:1.2653,lng:103.8202,line:'NEL/CCL'},
-  {name:'Outram Park MRT',lat:1.2802,lng:103.8394,line:'EWL/NEL'},
-  {name:'Chinatown MRT',lat:1.2847,lng:103.8444,line:'NEL/DTL'},
-  {name:'Little India MRT',lat:1.3066,lng:103.8494,line:'NEL/DTL'},
-  {name:'Bugis MRT',lat:1.3008,lng:103.8555,line:'EWL/DTL'},
-  {name:'Promenade MRT',lat:1.2934,lng:103.8614,line:'CCL/DTL'},
-  {name:'Bayfront MRT',lat:1.2822,lng:103.8596,line:'CCL/DTL'},
+  {name:'Tampines',lat:1.3540,lng:103.9454,line:'EWL'},{name:'Bedok',lat:1.3240,lng:103.9297,line:'EWL'},
+  {name:'Tanah Merah',lat:1.3271,lng:103.9465,line:'EWL'},{name:'Simei',lat:1.3432,lng:103.9533,line:'EWL'},
+  {name:'Pasir Ris',lat:1.3730,lng:103.9493,line:'EWL'},{name:'Expo',lat:1.3353,lng:103.9614,line:'EWL/CCL'},
+  {name:'Changi Airport',lat:1.3574,lng:103.9882,line:'EWL'},{name:'Paya Lebar',lat:1.3180,lng:103.8931,line:'EWL/CCL'},
+  {name:'Aljunied',lat:1.3163,lng:103.8828,line:'EWL'},{name:'Kembangan',lat:1.3210,lng:103.9127,line:'EWL'},
+  {name:'Eunos',lat:1.3196,lng:103.9022,line:'EWL'},{name:'Kovan',lat:1.3601,lng:103.8856,line:'NEL'},
+  {name:'Hougang',lat:1.3712,lng:103.8927,line:'NEL'},{name:'Buangkok',lat:1.3824,lng:103.8929,line:'NEL'},
+  {name:'Sengkang',lat:1.3915,lng:103.8954,line:'NEL'},{name:'Punggol',lat:1.4053,lng:103.9022,line:'NEL'},
+  {name:'Orchard',lat:1.3040,lng:103.8318,line:'NSL'},{name:'City Hall',lat:1.2931,lng:103.8520,line:'NSL/EWL'},
+  {name:'Raffles Place',lat:1.2837,lng:103.8515,line:'NSL/EWL'},{name:'Marina Bay',lat:1.2763,lng:103.8546,line:'NSL/CEL'},
+  {name:'Ang Mo Kio',lat:1.3700,lng:103.8494,line:'NSL'},{name:'Bishan',lat:1.3514,lng:103.8485,line:'NSL/CCL'},
+  {name:'Jurong East',lat:1.3330,lng:103.7423,line:'NSL/EWL'},{name:'Woodlands',lat:1.4370,lng:103.7866,line:'NSL'},
+  {name:'Boon Lay',lat:1.3388,lng:103.7056,line:'EWL'},{name:'Dhoby Ghaut',lat:1.2989,lng:103.8456,line:'NSL/NEL/CCL'},
+  {name:'HarbourFront',lat:1.2653,lng:103.8202,line:'NEL/CCL'},{name:'Outram Park',lat:1.2802,lng:103.8394,line:'EWL/NEL'},
+  {name:'Chinatown',lat:1.2847,lng:103.8444,line:'NEL/DTL'},{name:'Little India',lat:1.3066,lng:103.8494,line:'NEL/DTL'},
+  {name:'Bugis',lat:1.3008,lng:103.8555,line:'EWL/DTL'},{name:'Promenade',lat:1.2934,lng:103.8614,line:'CCL/DTL'},
+  {name:'Bayfront',lat:1.2822,lng:103.8596,line:'CCL/DTL'},
 ];
 function nearestMRT(lat,lng){
   let best=null,bestD=Infinity;
@@ -546,261 +509,217 @@ function nearestMRT(lat,lng){
   return best;
 }
 
-// ══════════════════════════════════════════════
-//  FARE ESTIMATE
-// ══════════════════════════════════════════════
-function estimateFare(distM){
-  const base=3.90, perUnit=0.55, unitM=400;
-  const fare=base+(distM/unitM)*perUnit;
-  return{low:Math.max(base,fare*0.85).toFixed(2),high:(fare*1.35).toFixed(2)};
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function walkTime(m){return Math.ceil(m/80);}
+function rideTime(m){return Math.max(4,Math.round(m/350));}
+function estimateFare(m){
+  const f=3.90+(m/400)*0.55;
+  return{low:Math.max(3.90,f*0.85).toFixed(2),high:(f*1.35).toFixed(2)};
 }
-function walkTime(distM){ return Math.ceil(distM/80); }
-
-// ══════════════════════════════════════════════
-//  COPY ETA
-// ══════════════════════════════════════════════
-function copyETA(text){
-  navigator.clipboard.writeText(text)
-    .then(()=>alert('📋 Copied: '+text))
-    .catch(()=>prompt('Copy this:',text));
+function etaClock(addMin){
+  const n=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  n.setMinutes(n.getMinutes()+addMin);
+  return n.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function copyETA(txt){
+  navigator.clipboard.writeText(txt)
+    .then(()=>alert('📋 Copied: '+txt))
+    .catch(()=>prompt('Copy this:',txt));
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  PLAN JOURNEY — MAIN
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 async function planJourney(){
   const dest=document.getElementById('destInput').value.trim();
-  if(!dest){ alert('Please enter or pick a destination.'); return; }
-  if(!userLat){ alert('Please get your GPS location first.'); return; }
+  if(!dest){alert('Please enter or pick a destination.');return;}
+  if(!userLat){alert('Please get your GPS location first.');return;}
 
   document.getElementById('plansGrid').innerHTML=skeletonCards(4);
   setRefreshLoading(true);
 
-  // Geocode only if dest not already set by map click
-  if(!destLat || document.getElementById('destInput').value!==destName){
+  // Geocode if needed
+  if(!destLat||document.getElementById('destInput').value.trim()!==destName){
     let geo=null;
-    try{ geo=await geocodeDest(dest); }catch(e){}
+    try{geo=await geocodeDest(dest);}catch(e){}
     if(!geo){
       document.getElementById('plansGrid').innerHTML=
         `<div class="error-card" style="grid-column:1/-1;">❌ Could not find "<strong>${dest}</strong>" in Singapore.<br>Try a more specific name or use 🗺️ Pick on Map.</div>`;
-      setRefreshLoading(false);
-      return;
+      setRefreshLoading(false);return;
     }
     destLat=geo.lat; destLng=geo.lng; destName=geo.name;
     setDestMarker(destLat,destLng,destName);
+    document.getElementById('destInput').value=destName;
   }
 
-  // Destination stops
-  const destStops=[];
-  for(const[id,data] of Object.entries(allStops)){
-    const[lng,lat,name,road]=data;
-    const d=haversine(destLat,destLng,parseFloat(lat),parseFloat(lng));
-    destStops.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name,road,dist:d});
+  // Collect dest-side stops
+  const dStops=[];
+  for(const[id,d] of Object.entries(allStops)){
+    const[lng,lat,name,road]=d;
+    dStops.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',
+      dist:haversine(destLat,destLng,parseFloat(lat),parseFloat(lng))});
   }
-  destStops.sort((a,b)=>a.dist-b.dist);
-  const nearDest=destStops.slice(0,3);
+  dStops.sort((a,b)=>a.dist-b.dist);
+  const nearDest=dStops.slice(0,3);
 
   const totalDist=haversine(userLat,userLng,destLat,destLng);
 
   // Fit map
-  const bounds=L.latLngBounds([[userLat,userLng],[destLat,destLng]]);
-  map.fitBounds(bounds,{padding:[50,50]});
-
-  // Dashed route line
+  map.fitBounds(L.latLngBounds([[userLat,userLng],[destLat,destLng]]),{padding:[50,50]});
   if(routeLine) map.removeLayer(routeLine);
-  if(nearbyStops[0]){
-    routeLine=L.polyline([
-      [userLat,userLng],
-      [nearbyStops[0].lat,nearbyStops[0].lng],
-      [destLat,destLng]
-    ],{color:'#00b4d8',weight:2,dashArray:'7,7',opacity:.7}).addTo(map);
-  }
+  if(nearbyStops[0])
+    routeLine=L.polyline([[userLat,userLng],[nearbyStops[0].lat,nearbyStops[0].lng],[destLat,destLng]],
+      {color:'#00b4d8',weight:2,dashArray:'7,7',opacity:.7}).addTo(map);
 
-  // Fetch bus arrivals
   const stops4=nearbyStops.slice(0,4);
   const arrivalResults=await Promise.all(stops4.map(s=>fetchArrivals(s.id)));
 
-  // Cache for refresh
-  currentStops4=stops4;
-  currentNearDest=nearDest;
-  currentTotalDist=totalDist;
+  currentStops4=stops4; currentNearDest=nearDest; currentTotalDist=totalDist;
 
-  const plans=buildPlans(stops4,arrivalResults,nearDest,totalDist);
-  renderPlans(plans);
+  renderPlans(buildPlans(stops4,arrivalResults,nearDest,totalDist));
   updateLastUpdate();
   setRefreshLoading(false);
   startRefreshCycle();
 }
 
-// ══════════════════════════════════════════════
-//  MANUAL REFRESH
-// ══════════════════════════════════════════════
-async function manualRefresh(){
-  if(isRefreshing||!currentStops4.length) return;
-  setRefreshLoading(true);
-  const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
-  const plans=buildPlans(currentStops4,arr,currentNearDest,currentTotalDist);
-  renderPlans(plans);
-  updateLastUpdate();
-  setRefreshLoading(false);
-  // Reset countdown
-  refreshSecsLeft=REFRESH_SEC;
-  updateCountdownUI();
-}
-
-function setRefreshLoading(on){
-  isRefreshing=on;
-  const btn=document.getElementById('btnRefreshNow');
-  const icon=document.getElementById('refreshIcon');
-  btn.disabled=on;
-  icon.innerHTML=on?`<span class="spinner"></span>`:'↻';
-}
-function updateLastUpdate(){
-  document.getElementById('lastUpdate').textContent=
-    'Updated '+new Date().toLocaleTimeString('en-SG',
-      {timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-
-// ══════════════════════════════════════════════
-//  REFRESH CYCLE — 5 MIN COUNTDOWN
-// ══════════════════════════════════════════════
-function startRefreshCycle(){
-  if(refreshTimer) clearInterval(refreshTimer);
-  refreshSecsLeft=REFRESH_SEC;
-  updateCountdownUI();
-  refreshTimer=setInterval(async()=>{
-    if(isRefreshing) return;
-    refreshSecsLeft=Math.max(0,refreshSecsLeft-1);
-    updateCountdownUI();
-    if(refreshSecsLeft<=0){
-      refreshSecsLeft=REFRESH_SEC;
-      if(currentStops4.length){
-        setRefreshLoading(true);
-        const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
-        const plans=buildPlans(currentStops4,arr,currentNearDest,currentTotalDist);
-        renderPlans(plans);
-        updateLastUpdate();
-        setRefreshLoading(false);
-      }
-    }
-  },1000);
-}
-function updateCountdownUI(){
-  const m=Math.floor(refreshSecsLeft/60);
-  const s=String(refreshSecsLeft%60).padStart(2,'0');
-  document.getElementById('countdownText').textContent=m+':'+s;
-  document.getElementById('refreshBar').style.width=(refreshSecsLeft/REFRESH_SEC*100)+'%';
-}
-
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  BUILD PLANS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function buildPlans(stops,arrivals,nearDest,totalDist){
-  const plans=[];
-
-  // ── Plan A: soonest bus, 1 transit ──
+  // ── Plan A: 1 transit, nearest stop, soonest bus ──
   const sA=stops[0], arrA=arrivals[0];
   const busA=getBus(arrA,0);
-  const walkA=walkTime(sA?sA.dist:300);
-  const rideA=Math.max(5,Math.round(totalDist/350));
-  const wdA=walkTime(nearDest[0]?nearDest[0].dist:300);
-  const etaA=walkA+(busA?busA.wait:5)+rideA+wdA;
-  plans.push({
+  const wA=walkTime(sA?sA.dist:300), rA=rideTime(totalDist), wdA=walkTime(nearDest[0]?nearDest[0].dist:300);
+  const etaA=wA+(busA?busA.wait:5)+rA+wdA;
+  const planA={
     id:'A',label:'Plan A',color:'var(--planA)',pill:'pill-green',pillText:'Recommended',
     transits:1,totalMin:etaA,
+    copyText:`ETA via Bus ${busA?busA.no:'?'}: ~${etaA} min, departs ${busA?busA.timeStr:'?'} from Stop ${sA?sA.id:''} ${sA?sA.name:''}`,
     steps:[
-      {icon:'🚶',label:'Walk to bus stop',value:sA?`${sA.name} (${sA.road}) · ${Math.round(sA.dist)}m · ~${walkA} min`:'Nearest bus stop'},
-      {icon:'🚌',label:'Board bus',value:busA
-        ?`<span class="bus-num">${busA.no}</span> Next in <span class="live">${busA.wait} min</span> · direct to destination`
-        :`Live data unavailable — please check SG BusRouter`},
-      {icon:'📍',label:'Alight & walk to destination',value:nearDest[0]?`${nearDest[0].name} · walk ${Math.round(nearDest[0].dist)}m (~${wdA} min) to ${destName}`:`Walk to ${destName}`},
-    ],
-    copyText:`ETA via Bus ${busA?busA.no:'?'}: ~${etaA} min (departs in ${busA?busA.wait:'?'} min from ${sA?sA.name:'stop'})`
-  });
+      {type:'walk',icon:'🚶',typeLabel:'Walk',
+        main:`Walk to Bus Stop`,
+        sub:`<span class="stop-tag">${sA?sA.id:'—'}</span><span class="hi">${sA?sA.name:''}</span>${sA&&sA.road?' · '+sA.road:''}<br>${sA?Math.round(sA.dist)+'m':'—'} · ~${wA} min`},
+      {type:'bus',icon:'🚌',typeLabel:'Board Bus',
+        main:`<span class="bus-badge" style="background:var(--planA);">Bus ${busA?busA.no:'?'}</span>`,
+        sub:`Board at: <span class="stop-tag">${sA?sA.id:'—'}</span><span class="hi">${sA?sA.name:''}</span><br>`+
+          (busA?`Next arrival: <span class="live">${busA.wait} min (${busA.timeStr})</span><br>`:'Live data unavailable<br>')+
+          (busA&&busA.dir?`Direction: ${busA.dir}<br>`:'')+
+          `Estimated ride: ~${rA} min`},
+      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
+        main:`Alight near destination`,
+        sub:`Alight at: <span class="stop-tag">${nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[0]?nearDest[0].name:''}</span><br>`+
+          `Walk ${nearDest[0]?Math.round(nearDest[0].dist)+'m':'—'} (~${wdA} min) to <span class="hi">${destName}</span>`},
+    ]
+  };
 
-  // ── Plan B: 2nd stop, 2 transits ──
+  // ── Plan B: 2 transits, 2nd stop, midpoint transfer ──
   const sB=stops[1]||stops[0], arrB=arrivals[1]||arrivals[0];
   const busB1=getBus(arrB,0), busB2=getBus(arrB,1);
-  const walkB=walkTime(sB?sB.dist:400);
+  const midStop=midpointStop(userLat,userLng,destLat,destLng);
+  const wB=walkTime(sB?sB.dist:400);
   const leg1=Math.max(4,Math.round(totalDist/2/350));
   const leg2=Math.max(4,Math.round(totalDist/2/350));
   const xferWait=busB2?busB2.wait:8;
   const wdB=walkTime(nearDest[0]?nearDest[0].dist:300);
-  const etaB=walkB+(busB1?busB1.wait:6)+leg1+xferWait+leg2+wdB;
-  plans.push({
+  const etaB=wB+(busB1?busB1.wait:6)+leg1+xferWait+leg2+wdB;
+  const planB={
     id:'B',label:'Plan B',color:'var(--planB)',pill:'pill-purple',pillText:'Fewer Stops',
     transits:2,totalMin:etaB,
+    copyText:`ETA via Bus ${busB1?busB1.no:'?'} → Bus ${busB2?busB2.no:'?'}: ~${etaB} min from Stop ${sB?sB.id:''} ${sB?sB.name:''}`,
     steps:[
-      {icon:'🚶',label:'Walk to bus stop',value:sB?`${sB.name} (${sB.road}) · ${Math.round(sB.dist)}m · ~${walkB} min`:'Nearby bus stop'},
-      {icon:'🚌',label:'Board bus (1st leg)',value:busB1
-        ?`<span class="bus-num">${busB1.no}</span> Next in <span class="live">${busB1.wait} min</span> · ~${leg1} min ride`
-        :'Service data unavailable'},
-      {icon:'🔄',label:'Transfer',value:busB2
-        ?`Change to <span class="bus-num">${busB2.no}</span> at interchange · ~${xferWait} min wait`
-        :'Transfer at interchange · est. 8 min wait'},
-      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${wdB} min`},
-    ],
-    copyText:`ETA via 2-bus route: ~${etaB} min from ${sB?sB.name:'stop'}`
-  });
+      {type:'walk',icon:'🚶',typeLabel:'Walk',
+        main:'Walk to Bus Stop',
+        sub:`<span class="stop-tag">${sB?sB.id:'—'}</span><span class="hi">${sB?sB.name:''}</span>${sB&&sB.road?' · '+sB.road:''}<br>${sB?Math.round(sB.dist)+'m':'—'} · ~${wB} min`},
+      {type:'bus',icon:'🚌',typeLabel:'Board Bus (1st Leg)',
+        main:`<span class="bus-badge" style="background:var(--planB);">Bus ${busB1?busB1.no:'?'}</span>`,
+        sub:`Board at: <span class="stop-tag">${sB?sB.id:'—'}</span><span class="hi">${sB?sB.name:''}</span><br>`+
+          (busB1?`Next arrival: <span class="live">${busB1.wait} min (${busB1.timeStr})</span><br>`:'Live data unavailable<br>')+
+          `Ride: ~${leg1} min`},
+      {type:'transfer',icon:'🔄',typeLabel:'Transfer',
+        main:`Transfer at Interchange`,
+        sub:`Alight &amp; transfer at: <span class="stop-tag">${midStop?midStop.id:'—'}</span><span class="hi">${midStop?midStop.name:'Interchange Stop'}</span><br>`+
+          `Board: <span class="bus-badge" style="background:var(--planB);font-size:.74rem;">Bus ${busB2?busB2.no:'?'}</span>`+
+          (busB2?` · Est. wait: <span class="live">${xferWait} min (${busB2.timeStr})</span>`:'Est. wait: ~8 min')},
+      {type:'bus',icon:'🚌',typeLabel:'Board Bus (2nd Leg)',
+        main:`<span class="bus-badge" style="background:var(--planB);">Bus ${busB2?busB2.no:'?'}</span>`,
+        sub:`Board at: <span class="stop-tag">${midStop?midStop.id:'—'}</span><span class="hi">${midStop?midStop.name:'Interchange'}</span><br>Ride: ~${leg2} min`},
+      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
+        main:`Alight near destination`,
+        sub:`Alight at: <span class="stop-tag">${nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[0]?nearDest[0].name:''}</span><br>`+
+          `Walk ${nearDest[0]?Math.round(nearDest[0].dist)+'m':'—'} (~${wdB} min) to <span class="hi">${destName}</span>`},
+    ]
+  };
 
   // ── Plan C: MRT or alt bus ──
   const mrtO=nearestMRT(userLat,userLng);
   const mrtD=nearestMRT(destLat,destLng);
-  const wMRTO=walkTime(mrtO.dist), wMRTD=walkTime(mrtD.dist);
+  const wMO=walkTime(mrtO.dist), wMD=walkTime(mrtD.dist);
   const mrtRide=Math.max(8,Math.round(haversine(mrtO.lat,mrtO.lng,mrtD.lat,mrtD.lng)/600));
-  const etaC_mrt=wMRTO+3+mrtRide+2+wMRTD;
+  const etaC_mrt=wMO+3+mrtRide+2+wMD;
   const useMRT=mrtO.dist<2000&&mrtD.dist<2000;
   const sC=stops[2]||stops[0], arrC=arrivals[2]||arrivals[0];
   const busC=getBus(arrC,0);
-  const walkC=walkTime(sC?sC.dist:350);
-  const wdC=walkTime(nearDest[1]?nearDest[1].dist:nearDest[0]?nearDest[0].dist:300);
-  const etaC_bus=walkC+(busC?busC.wait:7)+Math.max(5,Math.round(totalDist/350))+wdC;
-  plans.push({
+  const wC=walkTime(sC?sC.dist:350), wdC=walkTime(nearDest[1]?nearDest[1].dist:nearDest[0]?nearDest[0].dist:300);
+  const rC=rideTime(totalDist);
+  const etaC_bus=wC+(busC?busC.wait:7)+rC+wdC;
+  const planC={
     id:'C',label:'Plan C',color:'var(--planC)',pill:'pill-blue',pillText:useMRT?'Via MRT':'Alt Bus',
     transits:1,totalMin:useMRT?etaC_mrt:etaC_bus,
-    steps:useMRT?[
-      {icon:'🚶',label:'Walk to MRT',value:`${mrtO.name} · ${Math.round(mrtO.dist)}m · ~${wMRTO} min`},
-      {icon:'🚇',label:'Board MRT',value:`<span class="bus-num mrt">${mrtO.line}</span> Trains every 3–5 min · ~${mrtRide} min to ${mrtD.name}`},
-      {icon:'📍',label:'Alight & walk',value:`${mrtD.name} → walk ${Math.round(mrtD.dist)}m (~${wMRTD} min) to ${destName}`},
-    ]:[
-      {icon:'🚶',label:'Walk to bus stop',value:sC?`${sC.name} (${sC.road}) · ${Math.round(sC.dist)}m · ~${walkC} min`:'Nearby bus stop'},
-      {icon:'🚌',label:'Board bus',value:busC?`<span class="bus-num">${busC.no}</span> Next in <span class="live">${busC.wait} min</span>`:'Service data unavailable'},
-      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${wdC} min`},
-    ],
     copyText:useMRT
-      ?`ETA via MRT (${mrtO.name} → ${mrtD.name}): ~${useMRT?etaC_mrt:etaC_bus} min`
-      :`ETA via Alt Bus ${busC?busC.no:'?'}: ~${etaC_bus} min`
-  });
+      ?`ETA via MRT (${mrtO.name} → ${mrtD.name}): ~${etaC_mrt} min`
+      :`ETA via Alt Bus ${busC?busC.no:'?'}: ~${etaC_bus} min from Stop ${sC?sC.id:''}`,
+    steps:useMRT?[
+      {type:'walk',icon:'🚶',typeLabel:'Walk to MRT',
+        main:`Walk to ${mrtO.name} MRT`,
+        sub:`Distance: ~${Math.round(mrtO.dist)}m · ~${wMO} min<br>Station: <span class="hi">${mrtO.name} MRT Station</span>`},
+      {type:'mrt',icon:'🚇',typeLabel:'Board MRT',
+        main:`<span class="mrt-badge">${mrtO.line} Line</span>`,
+        sub:`From: <span class="hi">${mrtO.name} MRT</span><br>`+
+          `To: <span class="hi">${mrtD.name} MRT</span><br>`+
+          `Trains every 3–5 min · Ride: ~${mrtRide} min`},
+      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
+        main:`Exit at ${mrtD.name} MRT`,
+        sub:`Walk ~${Math.round(mrtD.dist)}m (~${wMD} min) to <span class="hi">${destName}</span>`},
+    ]:[
+      {type:'walk',icon:'🚶',typeLabel:'Walk',
+        main:'Walk to Bus Stop',
+        sub:`<span class="stop-tag">${sC?sC.id:'—'}</span><span class="hi">${sC?sC.name:''}</span>${sC&&sC.road?' · '+sC.road:''}<br>${sC?Math.round(sC.dist)+'m':'—'} · ~${wC} min`},
+      {type:'bus',icon:'🚌',typeLabel:'Board Bus',
+        main:`<span class="bus-badge" style="background:var(--planC);">Bus ${busC?busC.no:'?'}</span>`,
+        sub:`Board at: <span class="stop-tag">${sC?sC.id:'—'}</span><span class="hi">${sC?sC.name:''}</span><br>`+
+          (busC?`Next arrival: <span class="live">${busC.wait} min (${busC.timeStr})</span><br>`:'Live data unavailable<br>')+
+          `Ride: ~${rC} min`},
+      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
+        main:'Alight near destination',
+        sub:`Alight at: <span class="stop-tag">${nearDest[1]?nearDest[1].id:nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[1]?nearDest[1].name:nearDest[0]?nearDest[0].name:''}</span><br>`+
+          `Walk ~${wdC} min to <span class="hi">${destName}</span>`},
+    ]
+  };
 
   // ── Plan D: Grab / Taxi ──
   const fare=estimateFare(totalDist);
   const grabMin=Math.round((totalDist/1000)/30*60*1.3)+3;
-  plans.push({
+  const planD={
     id:'D',label:'Plan D',color:'var(--planD)',pill:'pill-orange',pillText:'Grab / Taxi',
-    transits:0,totalMin:grabMin,grab:true,fare,
-    distKm:(totalDist/1000).toFixed(1),
+    transits:0,totalMin:grabMin,grab:true,fare,distKm:(totalDist/1000).toFixed(1),
+    copyText:`ETA via Grab/Taxi: ~${grabMin} min · Est. S$${fare.low}–S$${fare.high}`,
     steps:[
-      {icon:'📍',label:'Pickup',value:'From your current GPS location'},
-      {icon:'🚗',label:'Drive',value:`~${grabMin} min · ${(totalDist/1000).toFixed(1)} km (incl. 1.3× traffic factor)`},
-      {icon:'🏁',label:'Drop-off',value:destName||'Destination'},
-    ],
-    copyText:`ETA via Grab/Taxi: ~${grabMin} min · Est. S$${fare.low}–S$${fare.high}`
-  });
+      {type:'walk',icon:'📍',typeLabel:'Pickup',main:'Your GPS Location',sub:'Driver picks you up at your current location'},
+      {type:'bus',icon:'🚗',typeLabel:'Drive',main:`${(totalDist/1000).toFixed(1)} km · ~${grabMin} min`,sub:`Includes 1.3× traffic factor · Via fastest route`},
+      {type:'dest',icon:'🏁',typeLabel:'Drop-off',main:destName,sub:'Arrive at your destination'},
+    ]
+  };
 
-  // Sort public plans by transits then duration
-  const pub=plans.slice(0,3).sort((a,b)=>a.transits-b.transits||a.totalMin-b.totalMin);
-  return [...pub, plans[3]];
+  // Sort public plans: fewest transits first, then shortest duration
+  const pub=[planA,planB,planC].sort((a,b)=>a.transits-b.transits||a.totalMin-b.totalMin);
+  return [...pub,planD];
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  RENDER PLANS
-// ══════════════════════════════════════════════
-function etaClock(addMin){
-  const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
-  now.setMinutes(now.getMinutes()+addMin);
-  return now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
-}
-
+// ═══════════════════════════════════════════════════════
 function renderPlans(plans){
   const grid=document.getElementById('plansGrid');
   grid.innerHTML='';
@@ -808,32 +727,41 @@ function renderPlans(plans){
     const card=document.createElement('div');
     card.className='plan-card'+(p.grab?' grab':'');
     card.style.animationDelay=(i*0.08)+'s';
+    card.style.borderColor=p.color.replace('var(','').replace(')','')!==p.color
+      ?'':`${p.color}44`;
+
+    const timelineHtml=p.steps.map((s,si)=>`
+      <div class="tl-step">
+        <div class="tl-left">
+          <div class="tl-circle ${s.type}">${s.icon}</div>
+          ${si<p.steps.length-1?'<div class="tl-line"></div>':''}
+        </div>
+        <div class="tl-body">
+          <div class="tl-type">${s.typeLabel}</div>
+          <div class="tl-main">${s.main}</div>
+          <div class="tl-sub">${s.sub}</div>
+        </div>
+      </div>`).join('');
+
     card.innerHTML=`
       <div class="card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:9px;">
           <div class="plan-badge" style="background:${p.color}22;color:${p.color};border:2px solid ${p.color}55;">${p.id}</div>
           <div>
             <div class="card-title">${p.label}</div>
-            <div class="card-sub">${p.transits===0?'No transit required':p.transits+' transit'+(p.transits>1?'s':'')}</div>
+            <div class="card-sub">${p.transits===0?'No transit · Door-to-door':p.transits+' transit'+(p.transits>1?'s':'')}</div>
           </div>
         </div>
         <span class="pill ${p.pill}">${p.pillText}</span>
       </div>
       <hr class="divider"/>
-      ${p.steps.map(s=>`
-        <div class="step">
-          <div class="step-icon">${s.icon}</div>
-          <div class="step-body">
-            <div class="step-label">${s.label}</div>
-            <div class="step-value${s.accent?' accent':''}">${s.value}</div>
-          </div>
-        </div>`).join('')}
+      <div class="timeline">${timelineHtml}</div>
       <hr class="divider"/>
       ${p.grab?`
         <div style="text-align:center;">
           <div class="grab-fare">S$${p.fare.low} – S$${p.fare.high}</div>
           <div class="grab-range">Estimated fare · ${p.distKm} km · PHV rate</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">Surge pricing may apply · Subject to availability</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:3px;">Surge pricing may apply · Subject to availability</div>
         </div>
         <a href="https://grab.onelink.me/2695613898/grabapp" target="_blank" style="text-decoration:none;">
           <button class="btn btn-grab" style="width:100%;justify-content:center;margin-top:4px;">📱 Book via Grab App</button>
@@ -848,36 +776,85 @@ function renderPlans(plans){
             <div class="stat-lbl">Transits</div>
           </div>
           <div class="stat">
-            <div class="stat-num" style="color:${p.color};font-size:.9rem;">${etaClock(p.totalMin)}</div>
+            <div class="stat-num" style="color:${p.color};font-size:.88rem;">${etaClock(p.totalMin)}</div>
             <div class="stat-lbl">ETA (SGT)</div>
           </div>
         </div>`}
-      <button class="btn-copy" onclick="copyETA('${p.copyText.replace(/'/g,"\\'")}')">📋 Copy ETA</button>
+      <button class="btn-copy" onclick="copyETA('${p.copyText.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">📋 Copy ETA</button>
     `;
     grid.appendChild(card);
   });
 }
 
-// ══════════════════════════════════════════════
-//  SKELETON
-// ══════════════════════════════════════════════
-function skeletonCards(n){
-  return Array(n).fill(`
-    <div class="skeleton-card">
-      <div class="skeleton" style="width:40%;height:18px;"></div>
-      <div class="skeleton"></div>
-      <div class="skeleton" style="width:80%;"></div>
-      <div class="skeleton" style="width:60%;"></div>
-      <div class="skeleton" style="width:50%;"></div>
-    </div>`).join('');
+// ═══════════════════════════════════════════════════════
+//  MANUAL REFRESH
+// ═══════════════════════════════════════════════════════
+async function manualRefresh(){
+  if(isRefreshing||!currentStops4.length) return;
+  setRefreshLoading(true);
+  const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
+  renderPlans(buildPlans(currentStops4,arr,currentNearDest,currentTotalDist));
+  updateLastUpdate();
+  setRefreshLoading(false);
+  refreshSecsLeft=REFRESH_SEC;
+  updateCountdownUI();
+}
+function setRefreshLoading(on){
+  isRefreshing=on;
+  const btn=document.getElementById('btnRefreshNow');
+  const icon=document.getElementById('refreshIcon');
+  btn.disabled=on;
+  icon.innerHTML=on?`<span class="spinner"></span>`:'↻';
+}
+function updateLastUpdate(){
+  document.getElementById('lastUpdate').textContent=
+    'Updated '+new Date().toLocaleTimeString('en-SG',
+      {timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
-// ── Auto GPS on load ──
-window.addEventListener('load',()=>{
-  getGPS();
-  // Start idle countdown display
-  startRefreshCycle();
-});
+// ═══════════════════════════════════════════════════════
+//  REFRESH CYCLE — 5 MIN
+// ═══════════════════════════════════════════════════════
+function startRefreshCycle(){
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshSecsLeft=REFRESH_SEC;
+  updateCountdownUI();
+  refreshTimer=setInterval(async()=>{
+    if(isRefreshing) return;
+    refreshSecsLeft=Math.max(0,refreshSecsLeft-1);
+    updateCountdownUI();
+    if(refreshSecsLeft<=0){
+      refreshSecsLeft=REFRESH_SEC;
+      if(currentStops4.length){
+        setRefreshLoading(true);
+        const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
+        renderPlans(buildPlans(currentStops4,arr,currentNearDest,currentTotalDist));
+        updateLastUpdate();
+        setRefreshLoading(false);
+      }
+    }
+  },1000);
+}
+function updateCountdownUI(){
+  const m=Math.floor(refreshSecsLeft/60);
+  const s=String(refreshSecsLeft%60).padStart(2,'0');
+  document.getElementById('countdownText').textContent=m+':'+s;
+  document.getElementById('refreshBar').style.width=(refreshSecsLeft/REFRESH_SEC*100)+'%';
+}
+
+// ═══════════════════════════════════════════════════════
+//  SKELETON
+// ═══════════════════════════════════════════════════════
+function skeletonCards(n){
+  return Array(n).fill(`<div class="skeleton-card">
+    <div class="skeleton" style="width:40%;height:18px;"></div>
+    <div class="skeleton"></div><div class="skeleton" style="width:80%;"></div>
+    <div class="skeleton" style="width:65%;"></div><div class="skeleton" style="width:50%;"></div>
+  </div>`).join('');
+}
+
+// ── Auto-detect GPS on load ──
+window.addEventListener('load',()=>{getGPS();startRefreshCycle();});
 </script>
 </body>
 </html>
