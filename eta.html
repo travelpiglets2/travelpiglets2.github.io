@@ -31,7 +31,7 @@
   .clock{font-size:.85rem;color:var(--accent);font-weight:600;letter-spacing:.5px;}
 
   /* ── Input Section ── */
-  .input-section{padding:20px;max-width:900px;margin:0 auto;}
+  .input-section{padding:20px 20px 10px;max-width:960px;margin:0 auto;}
   .gps-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
   .gps-dot{width:12px;height:12px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background .3s;}
   .gps-dot.active{background:var(--green);animation:pulse-gps 1.5s infinite;}
@@ -39,7 +39,7 @@
   .gps-label{font-size:.85rem;color:var(--muted);}
   .gps-coords{font-size:.8rem;color:var(--accent);font-weight:600;}
 
-  .dest-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .dest-row{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;}
   .dest-input{
     flex:1;min-width:200px;
     background:#0d1e2e;border:1px solid var(--border);border-radius:10px;
@@ -50,8 +50,8 @@
   .dest-input::placeholder{color:var(--muted);}
 
   .btn{
-    padding:11px 20px;border-radius:10px;border:none;
-    font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;
+    padding:11px 18px;border-radius:10px;border:none;
+    font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;
     display:flex;align-items:center;gap:7px;white-space:nowrap;
   }
   .btn-primary{background:var(--accent);color:#0a1520;}
@@ -60,6 +60,26 @@
   .btn-gps:hover{background:#1e3a56;}
   .btn-grab{background:var(--orange);color:#fff;}
   .btn-grab:hover{background:#e05a00;}
+
+  /* Pick-on-map toggle button */
+  .btn-pick{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
+  .btn-pick:hover{background:#1e3a56;color:var(--text);}
+  .btn-pick.active{
+    background:rgba(0,180,216,.15);color:var(--accent);
+    border:1px solid var(--accent);
+    box-shadow:0 0 10px rgba(0,180,216,.25);
+  }
+
+  /* Refresh button (mybus.html style) */
+  .btn-refresh-now{
+    padding:7px 16px;background:var(--accent);color:#0a1520;
+    font-weight:700;font-size:.82rem;border:none;border-radius:8px;
+    cursor:pointer;transition:background .2s;
+    display:flex;align-items:center;gap:6px;white-space:nowrap;
+  }
+  .btn-refresh-now:hover{background:var(--accent2);}
+  .btn-refresh-now:disabled{background:#1e3a4a;color:#90a4ae;cursor:not-allowed;}
+
   .btn-copy{
     background:transparent;border:1px solid var(--border);
     color:var(--muted);font-size:.75rem;padding:5px 11px;border-radius:6px;
@@ -67,28 +87,60 @@
   }
   .btn-copy:hover{border-color:var(--accent);color:var(--accent);}
 
+  /* Pick-mode banner */
+  #pickBanner{
+    display:none;
+    background:rgba(0,200,151,.1);border:1px solid rgba(0,200,151,.35);
+    border-radius:10px;padding:10px 16px;margin-top:12px;
+    font-size:.85rem;color:var(--green);font-weight:600;
+    animation:fadeIn .3s ease;
+    align-items:center;gap:10px;
+  }
+  #pickBanner.show{display:flex;}
+  #pickBanner .cancel-pick{
+    margin-left:auto;font-size:.75rem;color:var(--muted);
+    background:none;border:1px solid var(--border);border-radius:6px;
+    padding:3px 10px;cursor:pointer;
+  }
+  #pickBanner .cancel-pick:hover{color:var(--text);}
+
   .disclaimer{
     font-size:.74rem;color:var(--muted);
     background:#0d1e2e;border:1px solid var(--border);
     border-left:3px solid var(--yellow);
-    border-radius:8px;padding:10px 14px;margin-top:14px;line-height:1.6;
+    border-radius:8px;padding:10px 14px;margin-top:12px;line-height:1.6;
   }
 
   /* ── Refresh bar ── */
   .refresh-bar-wrap{
-    max-width:900px;margin:0 auto 4px;padding:0 20px;
-    display:flex;align-items:center;gap:10px;font-size:.75rem;color:var(--muted);
+    max-width:960px;margin:0 auto 4px;padding:6px 20px;
+    display:flex;align-items:center;gap:10px;
+    background:#10202f;border-bottom:1px solid var(--border);
   }
-  .refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:4px;overflow:hidden;}
-  .refresh-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width 1s linear;}
+  .countdown-label{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+  .refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:6px;overflow:hidden;}
+  .refresh-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#48cae4);border-radius:4px;transition:width 1s linear;}
+  #countdownText{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:40px;}
+  #lastUpdate{font-size:.75rem;color:var(--muted);white-space:nowrap;}
+
+  /* Spinner */
+  .spinner{
+    display:inline-block;width:13px;height:13px;
+    border:2px solid #48cae4;border-top-color:transparent;
+    border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
 
   /* ── Map ── */
-  .map-wrap{max-width:900px;margin:0 auto;padding:0 20px 16px;}
-  #map{height:280px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+  .map-wrap{max-width:960px;margin:0 auto;padding:12px 20px 10px;}
+  #map{height:300px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+  /* Crosshair cursor when pick mode active */
+  #map.pick-mode{cursor:crosshair !important;}
+  #map.pick-mode .leaflet-container{cursor:crosshair !important;}
 
   /* ── Plans Grid ── */
-  .plans-section{max-width:900px;margin:0 auto;padding:0 20px 30px;}
-  .plans-title{font-size:1rem;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.5px;}
+  .plans-section{max-width:960px;margin:0 auto;padding:0 20px 30px;}
+  .plans-title{font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.8px;text-transform:uppercase;}
   .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
 
   /* ── Plan Card ── */
@@ -124,10 +176,9 @@
   .step{display:flex;gap:10px;align-items:flex-start;}
   .step-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
   .step-body{flex:1;}
-  .step-label{font-size:.78rem;color:var(--muted);}
-  .step-value{font-size:.88rem;color:var(--text);font-weight:500;line-height:1.4;}
+  .step-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .step-value{font-size:.88rem;color:var(--text);font-weight:500;line-height:1.45;}
   .step-value.accent{color:var(--accent);}
-  .step-value.live{color:var(--green);font-weight:700;}
 
   .divider{border:none;border-top:1px solid var(--border);}
 
@@ -158,24 +209,19 @@
     color:var(--red);font-size:.88rem;
   }
 
+  .bus-num{
+    display:inline-block;background:var(--accent);color:#0a1520;
+    font-weight:800;font-size:.78rem;padding:1px 7px;border-radius:6px;margin-right:3px;
+  }
+  .bus-num.mrt{background:var(--green);color:#0a1520;}
+  .live{color:var(--green);font-weight:700;}
+
   @media(max-width:600px){
     .plans-grid{grid-template-columns:1fr;}
     .dest-row{flex-direction:column;}
     .btn{justify-content:center;}
+    .refresh-bar-wrap{flex-wrap:wrap;gap:8px;}
   }
-
-  .transit-badge{
-    display:inline-flex;align-items:center;gap:4px;
-    font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:12px;
-    background:rgba(0,180,216,.12);color:var(--accent);border:1px solid rgba(0,180,216,.25);
-  }
-  .bus-num{
-    display:inline-block;background:var(--accent);color:#0a1520;
-    font-weight:800;font-size:.78rem;padding:1px 7px;border-radius:6px;
-    margin-right:4px;
-  }
-  .bus-num.mrt{background:var(--green);color:#0a1520;}
-  .bus-num.grab-tag{background:var(--orange);color:#fff;}
 </style>
 </head>
 <body>
@@ -205,23 +251,37 @@
 
   <div class="dest-row">
     <input class="dest-input" id="destInput" type="text"
-      placeholder="Enter destination (e.g. Changi Airport, Orchard Road, VivoCity…)"
+      placeholder="Enter destination — or 🗺️ click map to pin it"
       onkeydown="if(event.key==='Enter')planJourney()"/>
-    <button class="btn btn-primary" onclick="planJourney()">🔍 Plan Journey</button>
+    <button class="btn btn-primary" id="planBtn" onclick="planJourney()">🔍 Plan Journey</button>
+    <button class="btn btn-pick" id="pickBtn" onclick="togglePickMode()" title="Click the map to set destination">🗺️ Pick on Map</button>
+  </div>
+
+  <!-- Pick-mode banner -->
+  <div id="pickBanner">
+    📍 <strong>Pick mode ON</strong> — Click anywhere on the map to set your destination
+    <button class="cancel-pick" onclick="togglePickMode()">✕ Cancel</button>
   </div>
 
   <div class="disclaimer">
     ⚠️ <strong>Note:</strong> Route suggestions are estimated based on nearest bus stops and live arrival data.
     Please verify with <strong>LTA MyTransport</strong> or <strong>Google Maps</strong> before travelling.
-    Bus arrival times refresh every 60 seconds. Grab fare is an estimate only.
+    Bus arrivals auto-refresh every <strong>5 minutes</strong>. Grab fare is an estimate only.
+    Run via <code>python -m http.server 8080</code> if APIs are blocked by CORS.
   </div>
 </div>
 
-<!-- ── Refresh bar ── -->
+<!-- ── Refresh Bar ── -->
 <div class="refresh-bar-wrap">
-  <span id="refreshLabel">Auto-refresh in 60s</span>
-  <div class="refresh-bar-track"><div class="refresh-bar-fill" id="refreshBar" style="width:100%"></div></div>
-  <span id="lastUpdate" style="white-space:nowrap;"></span>
+  <span class="countdown-label">Auto-refresh in</span>
+  <div class="refresh-bar-track">
+    <div class="refresh-bar-fill" id="refreshBar" style="width:100%"></div>
+  </div>
+  <span id="countdownText">5:00</span>
+  <button class="btn-refresh-now" id="btnRefreshNow" onclick="manualRefresh()">
+    <span id="refreshIcon">↻</span> Refresh Now
+  </button>
+  <span id="lastUpdate"></span>
 </div>
 
 <!-- ── Map ── -->
@@ -231,7 +291,7 @@
 
 <!-- ── Plans ── -->
 <div class="plans-section">
-  <div class="plans-title">SUGGESTED TRAVEL PLANS</div>
+  <div class="plans-title">✈️ Suggested Travel Plans</div>
   <div class="plans-grid" id="plansGrid">
     <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
     <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:55%;"></div></div>
@@ -244,29 +304,36 @@
 // ══════════════════════════════════════════════
 //  GLOBALS
 // ══════════════════════════════════════════════
-let userLat=null,userLng=null;
-let allStops={};    // { stopId:[lng,lat,name,road] }
+const REFRESH_SEC = 300; // 5 minutes
+let userLat=null, userLng=null;
+let allStops={};
 let nearbyStops=[];
-let destLat=null,destLng=null,destName='';
-let map,userMarker,destMarker,polyLine;
-let refreshTimer=null,refreshCountdown=60;
+let destLat=null, destLng=null, destName='';
+let map, userMarker, destMarker, routeLine;
+let refreshTimer=null, refreshSecsLeft=REFRESH_SEC;
 let arrivalCache={};
+let pickModeActive=false;
+let currentStops4=[], currentNearDest=[], currentTotalDist=0;
+let isRefreshing=false;
 
-// ── SGT Clock ──
+// ══════════════════════════════════════════════
+//  SGT CLOCK
+// ══════════════════════════════════════════════
 function updateClock(){
-  const now=new Date();
-  const sgt=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  const sgt=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
   const h=String(sgt.getHours()).padStart(2,'0');
   const m=String(sgt.getMinutes()).padStart(2,'0');
   const s=String(sgt.getSeconds()).padStart(2,'0');
   document.getElementById('clock').textContent=h+':'+m+':'+s+' SGT';
 }
-setInterval(updateClock,1000);updateClock();
+setInterval(updateClock,1000); updateClock();
 
-// ── Haversine ──
+// ══════════════════════════════════════════════
+//  HAVERSINE
+// ══════════════════════════════════════════════
 function haversine(lat1,lng1,lat2,lng2){
-  const R=6371000,rad=Math.PI/180;
-  const dLat=(lat2-lat1)*rad,dLng=(lng2-lng1)*rad;
+  const R=6371000, rad=Math.PI/180;
+  const dLat=(lat2-lat1)*rad, dLng=(lng2-lng1)*rad;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
@@ -279,21 +346,78 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© OpenStreetMap contributors',maxZoom:19
   }).addTo(map);
+
+  // Map click — pick destination
+  map.on('click',function(e){
+    if(!pickModeActive) return;
+    const {lat,lng}=e.latlng;
+    setDestMarker(lat,lng,'Reverse geocoding…');
+    // Reverse geocode
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      {headers:{'Accept-Language':'en'}})
+      .then(r=>r.json())
+      .then(data=>{
+        const name = data.display_name
+          ? data.display_name.split(',').slice(0,2).join(', ')
+          : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        destLat=lat; destLng=lng; destName=name;
+        document.getElementById('destInput').value=name;
+        if(destMarker) destMarker.bindPopup(`<b>📍 ${name}</b>`).openPopup();
+        disablePickMode();
+        planJourney();
+      })
+      .catch(()=>{
+        const name=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        destLat=lat; destLng=lng; destName=name;
+        document.getElementById('destInput').value=name;
+        disablePickMode();
+        planJourney();
+      });
+  });
 }
 initMap();
 
 // ── Custom icons ──
-const userIcon=L.divIcon({className:'',html:`<div style="width:16px;height:16px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 0 rgba(0,180,216,.4);animation:pulse-gps 1.5s infinite;"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
-const stopIcon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
-const destIcon=L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,iconSize:[18,18],iconAnchor:[9,9]});
+const userIcon=L.divIcon({className:'',
+  html:`<div style="width:16px;height:16px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 4px rgba(0,180,216,.25);"></div>`,
+  iconSize:[16,16],iconAnchor:[8,8]});
+const stopIcon=L.divIcon({className:'',
+  html:`<div style="width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,
+  iconSize:[11,11],iconAnchor:[5,5]});
+const destIcon=L.divIcon({className:'',
+  html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,
+  iconSize:[18,18],iconAnchor:[9,9]});
+
+// ══════════════════════════════════════════════
+//  PICK MODE
+// ══════════════════════════════════════════════
+function togglePickMode(){
+  if(pickModeActive) disablePickMode();
+  else enablePickMode();
+}
+function enablePickMode(){
+  pickModeActive=true;
+  document.getElementById('pickBtn').classList.add('active');
+  document.getElementById('pickBanner').classList.add('show');
+  document.getElementById('map').classList.add('pick-mode');
+}
+function disablePickMode(){
+  pickModeActive=false;
+  document.getElementById('pickBtn').classList.remove('active');
+  document.getElementById('pickBanner').classList.remove('show');
+  document.getElementById('map').classList.remove('pick-mode');
+}
+function setDestMarker(lat,lng,label){
+  if(destMarker) map.removeLayer(destMarker);
+  destMarker=L.marker([lat,lng],{icon:destIcon})
+    .addTo(map).bindPopup(`<b>📍 ${label}</b>`).openPopup();
+}
 
 // ══════════════════════════════════════════════
 //  GPS
 // ══════════════════════════════════════════════
 function getGPS(){
-  if(!navigator.geolocation){
-    alert('Geolocation not supported by your browser.');return;
-  }
+  if(!navigator.geolocation){ alert('Geolocation not supported.'); return; }
   document.getElementById('gpsCoords').textContent='Detecting…';
   navigator.geolocation.getCurrentPosition(pos=>{
     userLat=pos.coords.latitude;
@@ -302,13 +426,12 @@ function getGPS(){
       userLat.toFixed(5)+'°N, '+userLng.toFixed(5)+'°E';
     document.getElementById('gpsDot').classList.add('active');
     map.setView([userLat,userLng],15);
-    if(userMarker)map.removeLayer(userMarker);
+    if(userMarker) map.removeLayer(userMarker);
     userMarker=L.marker([userLat,userLng],{icon:userIcon})
       .addTo(map).bindPopup('<b>📍 You are here</b>').openPopup();
     loadStops();
   },err=>{
     document.getElementById('gpsCoords').textContent='GPS denied / unavailable';
-    alert('Could not get GPS location. Please enable location access.');
   },{enableHighAccuracy:true,timeout:10000});
 }
 
@@ -320,45 +443,41 @@ async function loadStops(){
     const r=await fetch('https://data.busrouter.sg/v1/stops.json');
     allStops=await r.json();
     findNearbyStops();
-  }catch(e){
-    console.warn('Failed to load stops',e);
-  }
+  }catch(e){ console.warn('Stops load failed',e); }
 }
-
 function findNearbyStops(){
-  if(!userLat||!Object.keys(allStops).length)return;
+  if(!userLat||!Object.keys(allStops).length) return;
   const distances=[];
-  for(const[id,data]of Object.entries(allStops)){
-    const [lng,lat,name,road]=data;
+  for(const[id,data] of Object.entries(allStops)){
+    const[lng,lat,name,road]=data;
     const d=haversine(userLat,userLng,lat,lng);
-    distances.push({id,lat,lng,name,road,dist:d});
+    distances.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name,road,dist:d});
   }
   distances.sort((a,b)=>a.dist-b.dist);
   nearbyStops=distances.slice(0,8);
-
-  // Add stop markers to map
+  // Add stop markers
   nearbyStops.slice(0,5).forEach(s=>{
-    L.marker([s.lat,s.lng],{icon:stopIcon})
-      .addTo(map)
-      .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop ${s.id} · ${Math.round(s.dist)}m away</small>`);
+    L.marker([s.lat,s.lng],{icon:stopIcon}).addTo(map)
+      .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop ${s.id} · ${Math.round(s.dist)}m</small>`);
   });
 }
 
 // ══════════════════════════════════════════════
-//  GEOCODE DESTINATION (Nominatim)
+//  GEOCODE (Nominatim)
 // ══════════════════════════════════════════════
 async function geocodeDest(query){
   const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=sg&format=json&limit=1`;
   const r=await fetch(url,{headers:{'Accept-Language':'en'}});
   const data=await r.json();
   if(data&&data.length>0){
-    return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon),name:data[0].display_name.split(',')[0]};
+    return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon),
+      name:data[0].display_name.split(',').slice(0,2).join(', ')};
   }
   return null;
 }
 
 // ══════════════════════════════════════════════
-//  FETCH BUS ARRIVALS
+//  BUS ARRIVALS
 // ══════════════════════════════════════════════
 async function fetchArrivals(stopId){
   try{
@@ -366,17 +485,22 @@ async function fetchArrivals(stopId){
     const d=await r.json();
     arrivalCache[stopId]=d;
     return d;
-  }catch(e){return null;}
+  }catch(e){ return arrivalCache[stopId]||null; }
 }
-
 function minsUntil(isoStr){
-  if(!isoStr)return null;
-  const diff=(new Date(isoStr)-new Date())/60000;
-  return Math.max(0,Math.round(diff));
+  if(!isoStr) return null;
+  return Math.max(0,Math.round((new Date(isoStr)-new Date())/60000));
+}
+function getBus(arrival,idx){
+  if(!arrival||!arrival.services||!arrival.services[idx]) return null;
+  const svc=arrival.services[idx];
+  const wait=minsUntil(svc.next&&svc.next.time?svc.next.time:svc.next);
+  if(wait===null) return null;
+  return{no:svc.no,wait,dir:svc.next_direction||''};
 }
 
 // ══════════════════════════════════════════════
-//  MRT STATIONS (major, for demo)
+//  MRT STATIONS
 // ══════════════════════════════════════════════
 const MRT_STATIONS=[
   {name:'Tampines MRT',lat:1.3540,lng:103.9454,line:'EWL'},
@@ -413,7 +537,6 @@ const MRT_STATIONS=[
   {name:'Promenade MRT',lat:1.2934,lng:103.8614,line:'CCL/DTL'},
   {name:'Bayfront MRT',lat:1.2822,lng:103.8596,line:'CCL/DTL'},
 ];
-
 function nearestMRT(lat,lng){
   let best=null,bestD=Infinity;
   for(const s of MRT_STATIONS){
@@ -424,32 +547,22 @@ function nearestMRT(lat,lng){
 }
 
 // ══════════════════════════════════════════════
-//  FARE ESTIMATE (Grab / Taxi)
+//  FARE ESTIMATE
 // ══════════════════════════════════════════════
 function estimateFare(distM){
-  const baseFare=3.90;
-  const perUnit=0.55;
-  const unitM=400;
-  const fare=baseFare+(distM/unitM)*perUnit;
-  const low=Math.max(baseFare,fare*0.85).toFixed(2);
-  const high=(fare*1.35).toFixed(2);
-  return{low,high};
+  const base=3.90, perUnit=0.55, unitM=400;
+  const fare=base+(distM/unitM)*perUnit;
+  return{low:Math.max(base,fare*0.85).toFixed(2),high:(fare*1.35).toFixed(2)};
 }
-
-// ══════════════════════════════════════════════
-//  WALKING TIME
-// ══════════════════════════════════════════════
-function walkTime(distM){return Math.ceil(distM/80);}// 80m/min
+function walkTime(distM){ return Math.ceil(distM/80); }
 
 // ══════════════════════════════════════════════
 //  COPY ETA
 // ══════════════════════════════════════════════
 function copyETA(text){
-  navigator.clipboard.writeText(text).then(()=>{
-    alert('📋 Copied: '+text);
-  }).catch(()=>{
-    prompt('Copy this:',text);
-  });
+  navigator.clipboard.writeText(text)
+    .then(()=>alert('📋 Copied: '+text))
+    .catch(()=>prompt('Copy this:',text));
 }
 
 // ══════════════════════════════════════════════
@@ -457,70 +570,126 @@ function copyETA(text){
 // ══════════════════════════════════════════════
 async function planJourney(){
   const dest=document.getElementById('destInput').value.trim();
-  if(!dest){alert('Please enter a destination.');return;}
-  if(!userLat){
-    alert('Please get your GPS location first.');return;
+  if(!dest){ alert('Please enter or pick a destination.'); return; }
+  if(!userLat){ alert('Please get your GPS location first.'); return; }
+
+  document.getElementById('plansGrid').innerHTML=skeletonCards(4);
+  setRefreshLoading(true);
+
+  // Geocode only if dest not already set by map click
+  if(!destLat || document.getElementById('destInput').value!==destName){
+    let geo=null;
+    try{ geo=await geocodeDest(dest); }catch(e){}
+    if(!geo){
+      document.getElementById('plansGrid').innerHTML=
+        `<div class="error-card" style="grid-column:1/-1;">❌ Could not find "<strong>${dest}</strong>" in Singapore.<br>Try a more specific name or use 🗺️ Pick on Map.</div>`;
+      setRefreshLoading(false);
+      return;
+    }
+    destLat=geo.lat; destLng=geo.lng; destName=geo.name;
+    setDestMarker(destLat,destLng,destName);
   }
 
-  const grid=document.getElementById('plansGrid');
-  grid.innerHTML=skeletonCards(4);
-
-  // 1) Geocode destination
-  let geo=null;
-  try{geo=await geocodeDest(dest);}catch(e){}
-  if(!geo){
-    grid.innerHTML=`<div class="error-card" style="grid-column:1/-1;">❌ Could not find "<strong>${dest}</strong>" in Singapore. Please try a more specific name.</div>`;
-    return;
-  }
-  destLat=geo.lat;destLng=geo.lng;destName=geo.name;
-
-  // Draw destination on map
-  if(destMarker)map.removeLayer(destMarker);
-  destMarker=L.marker([destLat,destLng],{icon:destIcon})
-    .addTo(map).bindPopup(`<b>🏁 ${destName}</b>`).openPopup();
-
-  // Adjust map view
-  const bounds=L.latLngBounds([[userLat,userLng],[destLat,destLng]]);
-  map.fitBounds(bounds,{padding:[40,40]});
-
-  // Find nearby stops to destination
+  // Destination stops
   const destStops=[];
-  for(const[id,data]of Object.entries(allStops)){
+  for(const[id,data] of Object.entries(allStops)){
     const[lng,lat,name,road]=data;
-    const d=haversine(destLat,destLng,lat,lng);
-    destStops.push({id,lat,lng,name,road,dist:d});
+    const d=haversine(destLat,destLng,parseFloat(lat),parseFloat(lng));
+    destStops.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name,road,dist:d});
   }
   destStops.sort((a,b)=>a.dist-b.dist);
   const nearDest=destStops.slice(0,3);
 
-  // Straight-line distance origin→dest
   const totalDist=haversine(userLat,userLng,destLat,destLng);
 
-  // Fetch arrivals for first 4 nearby origin stops
-  const stops4=nearbyStops.slice(0,4);
-  const arrivalPromises=stops4.map(s=>fetchArrivals(s.id));
-  const arrivalResults=await Promise.all(arrivalPromises);
+  // Fit map
+  const bounds=L.latLngBounds([[userLat,userLng],[destLat,destLng]]);
+  map.fitBounds(bounds,{padding:[50,50]});
 
-  // Draw polyline
-  if(polyLine)map.removeLayer(polyLine);
+  // Dashed route line
+  if(routeLine) map.removeLayer(routeLine);
   if(nearbyStops[0]){
-    polyLine=L.polyline([
+    routeLine=L.polyline([
       [userLat,userLng],
       [nearbyStops[0].lat,nearbyStops[0].lng],
       [destLat,destLng]
-    ],{color:'#00b4d8',weight:2,dashArray:'6,6',opacity:.7}).addTo(map);
+    ],{color:'#00b4d8',weight:2,dashArray:'7,7',opacity:.7}).addTo(map);
   }
 
-  // Build plans
+  // Fetch bus arrivals
+  const stops4=nearbyStops.slice(0,4);
+  const arrivalResults=await Promise.all(stops4.map(s=>fetchArrivals(s.id)));
+
+  // Cache for refresh
+  currentStops4=stops4;
+  currentNearDest=nearDest;
+  currentTotalDist=totalDist;
+
   const plans=buildPlans(stops4,arrivalResults,nearDest,totalDist);
   renderPlans(plans);
+  updateLastUpdate();
+  setRefreshLoading(false);
+  startRefreshCycle();
+}
 
-  // Update refresh label
+// ══════════════════════════════════════════════
+//  MANUAL REFRESH
+// ══════════════════════════════════════════════
+async function manualRefresh(){
+  if(isRefreshing||!currentStops4.length) return;
+  setRefreshLoading(true);
+  const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
+  const plans=buildPlans(currentStops4,arr,currentNearDest,currentTotalDist);
+  renderPlans(plans);
+  updateLastUpdate();
+  setRefreshLoading(false);
+  // Reset countdown
+  refreshSecsLeft=REFRESH_SEC;
+  updateCountdownUI();
+}
+
+function setRefreshLoading(on){
+  isRefreshing=on;
+  const btn=document.getElementById('btnRefreshNow');
+  const icon=document.getElementById('refreshIcon');
+  btn.disabled=on;
+  icon.innerHTML=on?`<span class="spinner"></span>`:'↻';
+}
+function updateLastUpdate(){
   document.getElementById('lastUpdate').textContent=
-    'Updated '+new Date().toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    'Updated '+new Date().toLocaleTimeString('en-SG',
+      {timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
 
-  // Start refresh cycle
-  startRefreshCycle(stops4,nearDest,totalDist);
+// ══════════════════════════════════════════════
+//  REFRESH CYCLE — 5 MIN COUNTDOWN
+// ══════════════════════════════════════════════
+function startRefreshCycle(){
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshSecsLeft=REFRESH_SEC;
+  updateCountdownUI();
+  refreshTimer=setInterval(async()=>{
+    if(isRefreshing) return;
+    refreshSecsLeft=Math.max(0,refreshSecsLeft-1);
+    updateCountdownUI();
+    if(refreshSecsLeft<=0){
+      refreshSecsLeft=REFRESH_SEC;
+      if(currentStops4.length){
+        setRefreshLoading(true);
+        const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
+        const plans=buildPlans(currentStops4,arr,currentNearDest,currentTotalDist);
+        renderPlans(plans);
+        updateLastUpdate();
+        setRefreshLoading(false);
+      }
+    }
+  },1000);
+}
+function updateCountdownUI(){
+  const m=Math.floor(refreshSecsLeft/60);
+  const s=String(refreshSecsLeft%60).padStart(2,'0');
+  document.getElementById('countdownText').textContent=m+':'+s;
+  document.getElementById('refreshBar').style.width=(refreshSecsLeft/REFRESH_SEC*100)+'%';
 }
 
 // ══════════════════════════════════════════════
@@ -529,127 +698,123 @@ async function planJourney(){
 function buildPlans(stops,arrivals,nearDest,totalDist){
   const plans=[];
 
-  // ── PLAN A: Nearest stop, soonest bus, direct ──
-  const sA=stops[0];
-  const arrA=arrivals[0];
+  // ── Plan A: soonest bus, 1 transit ──
+  const sA=stops[0], arrA=arrivals[0];
   const busA=getBus(arrA,0);
-  const walkA=walkTime(sA.dist);
-  const busRideMinA=Math.max(5,Math.round(totalDist/350));// ~350m/min bus
-  const walkDestA=walkTime(nearDest[0].dist);
-  const etaA=walkA+(busA?busA.wait:5)+busRideMinA+walkDestA;
+  const walkA=walkTime(sA?sA.dist:300);
+  const rideA=Math.max(5,Math.round(totalDist/350));
+  const wdA=walkTime(nearDest[0]?nearDest[0].dist:300);
+  const etaA=walkA+(busA?busA.wait:5)+rideA+wdA;
   plans.push({
     id:'A',label:'Plan A',color:'var(--planA)',pill:'pill-green',pillText:'Recommended',
     transits:1,totalMin:etaA,
     steps:[
-      {icon:'🚶',label:'Walk to bus stop',value:`${sA.name} (${sA.road}) · ${Math.round(sA.dist)}m · ~${walkA} min`},
-      {icon:'🚌',label:'Board bus',value:busA?`<span class="bus-num">${busA.no}</span> Next in <span class="live">${busA.wait} min</span> · towards ${busA.dir||'destination'}`:
-        `Live data unavailable — check SG BusRouter`,accent:!busA},
-      {icon:'📍',label:`Alight at nearest stop`,value:`${nearDest[0].name} · then walk ${Math.round(nearDest[0].dist)}m (~${walkDestA} min) to ${destName}`},
+      {icon:'🚶',label:'Walk to bus stop',value:sA?`${sA.name} (${sA.road}) · ${Math.round(sA.dist)}m · ~${walkA} min`:'Nearest bus stop'},
+      {icon:'🚌',label:'Board bus',value:busA
+        ?`<span class="bus-num">${busA.no}</span> Next in <span class="live">${busA.wait} min</span> · direct to destination`
+        :`Live data unavailable — please check SG BusRouter`},
+      {icon:'📍',label:'Alight & walk to destination',value:nearDest[0]?`${nearDest[0].name} · walk ${Math.round(nearDest[0].dist)}m (~${wdA} min) to ${destName}`:`Walk to ${destName}`},
     ],
-    copyText:`ETA via Bus ${busA?busA.no:'?'}: ~${etaA} min (departs in ${busA?busA.wait:'?'} min from ${sA.name})`
+    copyText:`ETA via Bus ${busA?busA.no:'?'}: ~${etaA} min (departs in ${busA?busA.wait:'?'} min from ${sA?sA.name:'stop'})`
   });
 
-  // ── PLAN B: 2nd nearest stop, 2 transits ──
-  const sB=stops[1]||stops[0];
-  const arrB=arrivals[1]||arrivals[0];
-  const busB1=getBus(arrB,0);
-  const busB2=getBus(arrB,1);
-  const walkB=walkTime(sB.dist);
+  // ── Plan B: 2nd stop, 2 transits ──
+  const sB=stops[1]||stops[0], arrB=arrivals[1]||arrivals[0];
+  const busB1=getBus(arrB,0), busB2=getBus(arrB,1);
+  const walkB=walkTime(sB?sB.dist:400);
   const leg1=Math.max(4,Math.round(totalDist/2/350));
   const leg2=Math.max(4,Math.round(totalDist/2/350));
-  const transferWait=busB2?busB2.wait:8;
-  const walkDestB=walkTime(nearDest[0].dist);
-  const etaB=walkB+(busB1?busB1.wait:6)+leg1+transferWait+leg2+walkDestB;
+  const xferWait=busB2?busB2.wait:8;
+  const wdB=walkTime(nearDest[0]?nearDest[0].dist:300);
+  const etaB=walkB+(busB1?busB1.wait:6)+leg1+xferWait+leg2+wdB;
   plans.push({
     id:'B',label:'Plan B',color:'var(--planB)',pill:'pill-purple',pillText:'Fewer Stops',
     transits:2,totalMin:etaB,
     steps:[
-      {icon:'🚶',label:'Walk to bus stop',value:`${sB.name} (${sB.road}) · ${Math.round(sB.dist)}m · ~${walkB} min`},
-      {icon:'🚌',label:'Board bus',value:busB1?`<span class="bus-num">${busB1.no}</span> Next in <span class="live">${busB1.wait} min</span>`:
-        `Service data unavailable`,accent:!busB1},
-      {icon:'🔄',label:'Transfer',value:busB2?`Change to <span class="bus-num">${busB2.no}</span> at intermediate stop · ~${transferWait} min wait`:
-        `Transfer at interchange · estimated 8 min wait`},
-      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${walkDestB} min`},
+      {icon:'🚶',label:'Walk to bus stop',value:sB?`${sB.name} (${sB.road}) · ${Math.round(sB.dist)}m · ~${walkB} min`:'Nearby bus stop'},
+      {icon:'🚌',label:'Board bus (1st leg)',value:busB1
+        ?`<span class="bus-num">${busB1.no}</span> Next in <span class="live">${busB1.wait} min</span> · ~${leg1} min ride`
+        :'Service data unavailable'},
+      {icon:'🔄',label:'Transfer',value:busB2
+        ?`Change to <span class="bus-num">${busB2.no}</span> at interchange · ~${xferWait} min wait`
+        :'Transfer at interchange · est. 8 min wait'},
+      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${wdB} min`},
     ],
-    copyText:`ETA via 2-bus route: ~${etaB} min from ${sB.name}`
+    copyText:`ETA via 2-bus route: ~${etaB} min from ${sB?sB.name:'stop'}`
   });
 
-  // ── PLAN C: MRT option ──
-  const mrtOrigin=nearestMRT(userLat,userLng);
-  const mrtDest=nearestMRT(destLat,destLng);
-  const walkToMRT=walkTime(mrtOrigin.dist);
-  const walkFromMRT=walkTime(mrtDest.dist);
-  const mrtRideMin=Math.max(8,Math.round(haversine(mrtOrigin.lat,mrtOrigin.lng,mrtDest.lat,mrtDest.lng)/600));
-  const etaC=walkToMRT+3+mrtRideMin+2+walkFromMRT;
-  const useMRT=mrtOrigin.dist<2000&&mrtDest.dist<2000;
-  const sC=stops[2]||stops[0];
-  const arrC=arrivals[2]||arrivals[0];
+  // ── Plan C: MRT or alt bus ──
+  const mrtO=nearestMRT(userLat,userLng);
+  const mrtD=nearestMRT(destLat,destLng);
+  const wMRTO=walkTime(mrtO.dist), wMRTD=walkTime(mrtD.dist);
+  const mrtRide=Math.max(8,Math.round(haversine(mrtO.lat,mrtO.lng,mrtD.lat,mrtD.lng)/600));
+  const etaC_mrt=wMRTO+3+mrtRide+2+wMRTD;
+  const useMRT=mrtO.dist<2000&&mrtD.dist<2000;
+  const sC=stops[2]||stops[0], arrC=arrivals[2]||arrivals[0];
   const busC=getBus(arrC,0);
-  const walkC=walkTime(sC.dist);
-  const walkDestC=walkTime(nearDest[1]?nearDest[1].dist:nearDest[0].dist);
-  const etaCalt=walkC+(busC?busC.wait:7)+Math.max(5,Math.round(totalDist/350))+walkDestC;
+  const walkC=walkTime(sC?sC.dist:350);
+  const wdC=walkTime(nearDest[1]?nearDest[1].dist:nearDest[0]?nearDest[0].dist:300);
+  const etaC_bus=walkC+(busC?busC.wait:7)+Math.max(5,Math.round(totalDist/350))+wdC;
   plans.push({
     id:'C',label:'Plan C',color:'var(--planC)',pill:'pill-blue',pillText:useMRT?'Via MRT':'Alt Bus',
-    transits:useMRT?1:1,totalMin:useMRT?etaC:etaCalt,
-    steps: useMRT?[
-      {icon:'🚶',label:'Walk to MRT',value:`${mrtOrigin.name} · ${Math.round(mrtOrigin.dist)}m · ~${walkToMRT} min`},
-      {icon:'🚇',label:'Board MRT',value:`<span class="bus-num mrt">${mrtOrigin.line}</span> Train every 3-5 min · ride ~${mrtRideMin} min to ${mrtDest.name}`},
-      {icon:'📍',label:'Alight & walk',value:`${mrtDest.name} → walk ${Math.round(mrtDest.dist)}m (~${walkFromMRT} min) to ${destName}`},
+    transits:1,totalMin:useMRT?etaC_mrt:etaC_bus,
+    steps:useMRT?[
+      {icon:'🚶',label:'Walk to MRT',value:`${mrtO.name} · ${Math.round(mrtO.dist)}m · ~${wMRTO} min`},
+      {icon:'🚇',label:'Board MRT',value:`<span class="bus-num mrt">${mrtO.line}</span> Trains every 3–5 min · ~${mrtRide} min to ${mrtD.name}`},
+      {icon:'📍',label:'Alight & walk',value:`${mrtD.name} → walk ${Math.round(mrtD.dist)}m (~${wMRTD} min) to ${destName}`},
     ]:[
-      {icon:'🚶',label:'Walk to bus stop',value:`${sC.name} (${sC.road}) · ${Math.round(sC.dist)}m · ~${walkC} min`},
-      {icon:'🚌',label:'Board bus',value:busC?`<span class="bus-num">${busC.no}</span> Next in <span class="live">${busC.wait} min</span>`:
-        `Service data unavailable`},
-      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${walkDestC} min`},
+      {icon:'🚶',label:'Walk to bus stop',value:sC?`${sC.name} (${sC.road}) · ${Math.round(sC.dist)}m · ~${walkC} min`:'Nearby bus stop'},
+      {icon:'🚌',label:'Board bus',value:busC?`<span class="bus-num">${busC.no}</span> Next in <span class="live">${busC.wait} min</span>`:'Service data unavailable'},
+      {icon:'📍',label:'Alight & walk',value:`Near ${destName} · walk ~${wdC} min`},
     ],
-    copyText:useMRT?`ETA via MRT (${mrtOrigin.name} → ${mrtDest.name}): ~${etaC} min`:`ETA via Bus ${busC?busC.no:'?'}: ~${etaCalt} min`
+    copyText:useMRT
+      ?`ETA via MRT (${mrtO.name} → ${mrtD.name}): ~${useMRT?etaC_mrt:etaC_bus} min`
+      :`ETA via Alt Bus ${busC?busC.no:'?'}: ~${etaC_bus} min`
   });
 
-  // ── PLAN D: Grab / Taxi ──
+  // ── Plan D: Grab / Taxi ──
   const fare=estimateFare(totalDist);
-  const grabMin=Math.round((totalDist/1000)/30*60*1.3)+3;// dist/speed*60*traffic+pickup
+  const grabMin=Math.round((totalDist/1000)/30*60*1.3)+3;
   plans.push({
     id:'D',label:'Plan D',color:'var(--planD)',pill:'pill-orange',pillText:'Grab / Taxi',
-    transits:0,totalMin:grabMin,grab:true,
-    fare,distKm:(totalDist/1000).toFixed(1),
+    transits:0,totalMin:grabMin,grab:true,fare,
+    distKm:(totalDist/1000).toFixed(1),
     steps:[
-      {icon:'📍',label:'Pickup',value:`From your current GPS location`},
-      {icon:'🚗',label:'Drive to destination',value:`~${grabMin} min · ${(totalDist/1000).toFixed(1)} km (incl. traffic factor 1.3×)`},
-      {icon:'🏁',label:'Drop-off',value:destName},
+      {icon:'📍',label:'Pickup',value:'From your current GPS location'},
+      {icon:'🚗',label:'Drive',value:`~${grabMin} min · ${(totalDist/1000).toFixed(1)} km (incl. 1.3× traffic factor)`},
+      {icon:'🏁',label:'Drop-off',value:destName||'Destination'},
     ],
     copyText:`ETA via Grab/Taxi: ~${grabMin} min · Est. S$${fare.low}–S$${fare.high}`
   });
 
-  // Sort public plans by transits then duration (Plan D always last)
+  // Sort public plans by transits then duration
   const pub=plans.slice(0,3).sort((a,b)=>a.transits-b.transits||a.totalMin-b.totalMin);
-  return[...pub,plans[3]];
-}
-
-function getBus(arrival,idx){
-  if(!arrival||!arrival.services||!arrival.services[idx])return null;
-  const svc=arrival.services[idx];
-  const wait=minsUntil(svc.next);
-  if(wait===null)return null;
-  return{no:svc.no,wait,dir:svc.next_direction||''};
+  return [...pub, plans[3]];
 }
 
 // ══════════════════════════════════════════════
 //  RENDER PLANS
 // ══════════════════════════════════════════════
+function etaClock(addMin){
+  const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  now.setMinutes(now.getMinutes()+addMin);
+  return now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
 function renderPlans(plans){
   const grid=document.getElementById('plansGrid');
   grid.innerHTML='';
   plans.forEach((p,i)=>{
-    const delay=i*0.1;
     const card=document.createElement('div');
     card.className='plan-card'+(p.grab?' grab':'');
-    card.style.animationDelay=delay+'s';
+    card.style.animationDelay=(i*0.08)+'s';
     card.innerHTML=`
       <div class="card-header">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div class="plan-badge" style="background:${p.color}22;color:${p.color};border:2px solid ${p.color}44;">${p.id}</div>
+          <div class="plan-badge" style="background:${p.color}22;color:${p.color};border:2px solid ${p.color}55;">${p.id}</div>
           <div>
             <div class="card-title">${p.label}</div>
-            <div class="card-sub">${p.transits===0?'No transit required':p.transits+' transit'+( p.transits>1?'s':'')}</div>
+            <div class="card-sub">${p.transits===0?'No transit required':p.transits+' transit'+(p.transits>1?'s':'')}</div>
           </div>
         </div>
         <span class="pill ${p.pill}">${p.pillText}</span>
@@ -662,8 +827,7 @@ function renderPlans(plans){
             <div class="step-label">${s.label}</div>
             <div class="step-value${s.accent?' accent':''}">${s.value}</div>
           </div>
-        </div>
-      `).join('')}
+        </div>`).join('')}
       <hr class="divider"/>
       ${p.grab?`
         <div style="text-align:center;">
@@ -672,9 +836,8 @@ function renderPlans(plans){
           <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">Surge pricing may apply · Subject to availability</div>
         </div>
         <a href="https://grab.onelink.me/2695613898/grabapp" target="_blank" style="text-decoration:none;">
-          <button class="btn btn-grab" style="width:100%;justify-content:center;">📱 Book via Grab App</button>
-        </a>
-      `:`
+          <button class="btn btn-grab" style="width:100%;justify-content:center;margin-top:4px;">📱 Book via Grab App</button>
+        </a>`:`
         <div class="stat-row">
           <div class="stat">
             <div class="stat-num" style="color:${p.color};">${p.totalMin}</div>
@@ -685,51 +848,18 @@ function renderPlans(plans){
             <div class="stat-lbl">Transits</div>
           </div>
           <div class="stat">
-            <div class="stat-num" style="color:${p.color};font-size:.9rem;">
-              ${eta_clock(p.totalMin)}
-            </div>
+            <div class="stat-num" style="color:${p.color};font-size:.9rem;">${etaClock(p.totalMin)}</div>
             <div class="stat-lbl">ETA (SGT)</div>
           </div>
-        </div>
-      `}
+        </div>`}
       <button class="btn-copy" onclick="copyETA('${p.copyText.replace(/'/g,"\\'")}')">📋 Copy ETA</button>
     `;
     grid.appendChild(card);
   });
 }
 
-function eta_clock(addMin){
-  const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
-  now.setMinutes(now.getMinutes()+addMin);
-  return now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
-}
-
 // ══════════════════════════════════════════════
-//  REFRESH CYCLE
-// ══════════════════════════════════════════════
-function startRefreshCycle(stops,nearDest,totalDist){
-  if(refreshTimer)clearInterval(refreshTimer);
-  refreshCountdown=60;
-  const bar=document.getElementById('refreshBar');
-  const lbl=document.getElementById('refreshLabel');
-  refreshTimer=setInterval(async()=>{
-    refreshCountdown--;
-    bar.style.width=(refreshCountdown/60*100)+'%';
-    lbl.textContent='Auto-refresh in '+refreshCountdown+'s';
-    if(refreshCountdown<=0){
-      refreshCountdown=60;
-      bar.style.width='100%';
-      const arr=await Promise.all(stops.map(s=>fetchArrivals(s.id)));
-      const plans=buildPlans(stops,arr,nearDest,totalDist);
-      renderPlans(plans);
-      document.getElementById('lastUpdate').textContent=
-        'Updated '+new Date().toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    }
-  },1000);
-}
-
-// ══════════════════════════════════════════════
-//  SKELETON CARDS
+//  SKELETON
 // ══════════════════════════════════════════════
 function skeletonCards(n){
   return Array(n).fill(`
@@ -742,8 +872,12 @@ function skeletonCards(n){
     </div>`).join('');
 }
 
-// Auto-detect GPS on load
-window.addEventListener('load',()=>{getGPS();});
+// ── Auto GPS on load ──
+window.addEventListener('load',()=>{
+  getGPS();
+  // Start idle countdown display
+  startRefreshCycle();
+});
 </script>
 </body>
 </html>
