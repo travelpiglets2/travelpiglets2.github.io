@@ -10,8 +10,7 @@
 :root{
   --bg:#0f1923;--card:#162535;--accent:#00b4d8;--accent2:#0088a8;
   --text:#e0eaf5;--muted:#6b8baa;--border:#1e3550;
-  --green:#00c897;--orange:#f97316;--yellow:#f59e0b;--red:#ef4444;
-  --purple:#8b5cf6;
+  --green:#00c897;--orange:#f97316;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
   --planA:#00b4d8;--planB:#8b5cf6;--planC:#10b981;--planD:#f97316;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -19,208 +18,230 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 /* ── Header ── */
 .header{
-  background:linear-gradient(135deg,#0a1520 0%,#162535 100%);
+  background:linear-gradient(135deg,#0a1520,#162535);
   border-bottom:1px solid var(--border);
-  padding:16px 20px 12px;position:sticky;top:0;z-index:1000;
+  padding:14px 20px;position:sticky;top:0;z-index:1000;
 }
 .header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .header-title{display:flex;align-items:center;gap:10px;}
-.header-title h1{font-size:1.3rem;font-weight:700;color:var(--accent);}
-.header-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
+.header-title h1{font-size:1.25rem;font-weight:700;color:var(--accent);}
+.header-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
 .clock{font-size:.85rem;color:var(--accent);font-weight:600;letter-spacing:.5px;}
 
-/* ── Input Section ── */
-.input-section{padding:16px 20px 10px;max-width:980px;margin:0 auto;}
-.gps-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+/* ── Input ── */
+.input-section{padding:14px 20px 8px;max-width:1100px;margin:0 auto;}
+.gps-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
 .gps-dot{width:11px;height:11px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background .3s;}
 .gps-dot.active{background:var(--green);animation:pulse-gps 1.5s infinite;}
 @keyframes pulse-gps{0%,100%{box-shadow:0 0 0 0 rgba(0,200,151,.4);}50%{box-shadow:0 0 0 7px rgba(0,200,151,0);}}
-.gps-label{font-size:.83rem;color:var(--muted);}
-.gps-coords{font-size:.8rem;color:var(--accent);font-weight:600;}
+.gps-label{font-size:.82rem;color:var(--muted);}
+.gps-coords{font-size:.78rem;color:var(--accent);font-weight:600;}
 .dest-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;}
 .dest-input{
   flex:1;min-width:200px;
   background:#0d1e2e;border:1px solid var(--border);border-radius:10px;
-  color:var(--text);font-size:.92rem;padding:10px 14px;outline:none;transition:border .2s;
+  color:var(--text);font-size:.9rem;padding:10px 14px;outline:none;transition:border .2s;
 }
 .dest-input:focus{border-color:var(--accent);}
 .dest-input::placeholder{color:var(--muted);}
 
 /* Buttons */
-.btn{padding:10px 16px;border-radius:10px;border:none;font-size:.86rem;font-weight:600;cursor:pointer;
-  transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn{padding:10px 15px;border-radius:10px;border:none;font-size:.84rem;font-weight:600;
+  cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
 .btn-primary{background:var(--accent);color:#0a1520;}
-.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-primary:hover{background:var(--accent2);}
 .btn-gps{background:#1a3048;color:var(--accent);border:1px solid var(--border);}
 .btn-gps:hover{background:#1e3a56;}
-.btn-grab{background:var(--orange);color:#fff;}
-.btn-grab:hover{background:#e05a00;}
 .btn-pick{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
 .btn-pick:hover{background:#1e3a56;color:var(--text);}
-.btn-pick.active{background:rgba(0,180,216,.15);color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 10px rgba(0,180,216,.25);}
+.btn-pick.active{background:rgba(0,180,216,.15);color:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(0,180,216,.25);}
+.btn-grab{background:var(--orange);color:#fff;width:100%;justify-content:center;}
+.btn-grab:hover{background:#e05a00;}
+.btn-gmaps{background:#1a5276;color:#5dade2;border:1px solid #1f618d;width:100%;justify-content:center;}
+.btn-gmaps:hover{background:#1f618d;color:#fff;}
 .btn-refresh-now{
-  padding:7px 15px;background:var(--accent);color:#0a1520;
-  font-weight:700;font-size:.82rem;border:none;border-radius:8px;
-  cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;
+  padding:7px 14px;background:var(--accent);color:#0a1520;
+  font-weight:700;font-size:.8rem;border:none;border-radius:8px;
+  cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
 }
 .btn-refresh-now:hover{background:var(--accent2);}
 .btn-refresh-now:disabled{background:#1e3a4a;color:#90a4ae;cursor:not-allowed;}
 .btn-copy{
   background:transparent;border:1px solid var(--border);
-  color:var(--muted);font-size:.74rem;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .2s;
-  align-self:flex-end;margin-top:2px;
+  color:var(--muted);font-size:.72rem;padding:4px 10px;border-radius:6px;
+  cursor:pointer;transition:all .2s;
 }
 .btn-copy:hover{border-color:var(--accent);color:var(--accent);}
 
-/* Pick-mode banner */
+/* Pick banner */
 #pickBanner{
   display:none;background:rgba(0,200,151,.1);border:1px solid rgba(0,200,151,.35);
-  border-radius:10px;padding:9px 14px;margin-top:10px;
-  font-size:.84rem;color:var(--green);font-weight:600;
-  align-items:center;gap:10px;
+  border-radius:10px;padding:9px 14px;margin-top:8px;
+  font-size:.83rem;color:var(--green);font-weight:600;align-items:center;gap:10px;
 }
 #pickBanner.show{display:flex;}
-.cancel-pick{margin-left:auto;font-size:.74rem;color:var(--muted);background:none;
+.cancel-pick{margin-left:auto;font-size:.72rem;color:var(--muted);background:none;
   border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;}
 .cancel-pick:hover{color:var(--text);}
+
 .disclaimer{
-  font-size:.73rem;color:var(--muted);background:#0d1e2e;border:1px solid var(--border);
-  border-left:3px solid var(--yellow);border-radius:8px;padding:9px 13px;margin-top:10px;line-height:1.6;
+  font-size:.72rem;color:var(--muted);background:#0d1e2e;border:1px solid var(--border);
+  border-left:3px solid var(--yellow);border-radius:8px;padding:8px 13px;margin-top:8px;line-height:1.6;
 }
 
 /* ── Refresh bar ── */
 .refresh-bar-wrap{
-  max-width:980px;margin:0 auto 0;padding:6px 20px;
+  max-width:1100px;margin:0 auto;padding:5px 20px;
   display:flex;align-items:center;gap:10px;
   background:#10202f;border-bottom:1px solid var(--border);
 }
-.countdown-label{font-size:.78rem;color:var(--muted);white-space:nowrap;}
-.refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:6px;overflow:hidden;}
+.countdown-label{font-size:.76rem;color:var(--muted);white-space:nowrap;}
+.refresh-bar-track{flex:1;background:#1a3048;border-radius:4px;height:5px;overflow:hidden;}
 .refresh-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#48cae4);border-radius:4px;transition:width 1s linear;}
-#countdownText{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:36px;}
-#lastUpdate{font-size:.74rem;color:var(--muted);white-space:nowrap;}
-.spinner{display:inline-block;width:12px;height:12px;border:2px solid #48cae4;border-top-color:transparent;
-  border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+#countdownText{font-size:.8rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:34px;}
+#lastUpdate{font-size:.72rem;color:var(--muted);white-space:nowrap;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #48cae4;
+  border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── Map ── */
-.map-wrap{max-width:980px;margin:0 auto;padding:12px 20px 8px;}
-#map{height:290px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+/* ── Dual Map Layout ── */
+.maps-wrap{max-width:1100px;margin:0 auto;padding:10px 20px 8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.map-panel{display:flex;flex-direction:column;gap:6px;}
+.map-label{font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+#map{height:280px;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
 #map.pick-mode{cursor:crosshair !important;}
 #map.pick-mode .leaflet-container{cursor:crosshair !important;}
+.gmap-panel{height:280px;border-radius:12px;border:1px solid var(--border);overflow:hidden;background:#0d1e2e;
+  display:flex;align-items:center;justify-content:center;position:relative;}
+.gmap-panel iframe{width:100%;height:100%;border:none;border-radius:12px;}
+.gmap-placeholder{text-align:center;color:var(--muted);font-size:.84rem;padding:20px;}
+.gmap-placeholder .icon{font-size:2.5rem;margin-bottom:8px;}
+.gmap-mode-btns{display:flex;gap:6px;}
+.mode-btn{
+  flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--border);
+  background:#0d1e2e;color:var(--muted);font-size:.76rem;font-weight:600;cursor:pointer;
+  transition:all .2s;text-align:center;
+}
+.mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mode-btn.active{background:rgba(0,180,216,.18);color:var(--accent);border-color:var(--accent);}
 
 /* ── Plans Grid ── */
-.plans-section{max-width:980px;margin:0 auto;padding:0 20px 30px;}
-.plans-title{font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:14px;
+.plans-section{max-width:1100px;margin:0 auto;padding:0 20px 16px;}
+.section-title{font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:12px;
   letter-spacing:.8px;text-transform:uppercase;}
-.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
 
 /* ── Plan Card ── */
 .plan-card{
-  background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:16px;display:flex;flex-direction:column;gap:10px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:15px;display:flex;flex-direction:column;gap:10px;
   animation:fadeIn .4s ease both;transition:transform .2s,box-shadow .2s;
 }
-.plan-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,180,216,.1);}
-@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.plan-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,180,216,.1);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .plan-card.grab{border-color:rgba(249,115,22,.3);}
-.plan-card.grab:hover{box-shadow:0 8px 28px rgba(249,115,22,.12);}
-
+.plan-card.grab:hover{box-shadow:0 6px 24px rgba(249,115,22,.12);}
 .card-header{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.plan-badge{
-  width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.82rem;font-weight:800;flex-shrink:0;
-}
-.pill{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+.plan-badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;}
+.card-title{font-size:.9rem;font-weight:700;color:var(--text);}
+.card-sub{font-size:.74rem;color:var(--muted);}
+.pill{font-size:.64rem;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
 .pill-green{background:rgba(0,200,151,.15);color:var(--green);border:1px solid rgba(0,200,151,.3);}
 .pill-blue{background:rgba(0,180,216,.15);color:var(--accent);border:1px solid rgba(0,180,216,.3);}
 .pill-purple{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
 .pill-orange{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);}
-.card-title{font-size:.92rem;font-weight:700;color:var(--text);}
-.card-sub{font-size:.76rem;color:var(--muted);}
 .divider{border:none;border-top:1px solid var(--border);}
 
-/* ── Timeline Stepper ── */
-.timeline{display:flex;flex-direction:column;gap:0;}
-.tl-step{display:flex;gap:10px;position:relative;}
-.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;}
-.tl-circle{
-  width:26px;height:26px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.82rem;flex-shrink:0;z-index:1;border:2px solid transparent;
-}
-.tl-circle.walk{background:rgba(107,139,170,.15);border-color:rgba(107,139,170,.4);color:var(--muted);}
-.tl-circle.bus{background:rgba(0,180,216,.15);border-color:rgba(0,180,216,.4);color:var(--accent);}
-.tl-circle.mrt{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:var(--green);}
-.tl-circle.transfer{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.4);color:var(--purple);}
-.tl-circle.alight{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--red);}
-.tl-circle.dest{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.5);color:var(--green);}
-.tl-line{width:2px;flex:1;background:var(--border);margin:2px 0;min-height:10px;}
-.tl-body{flex:1;padding:2px 0 12px;}
-.tl-type{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px;}
-.tl-main{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px;}
-.tl-sub{font-size:.76rem;color:var(--muted);line-height:1.45;}
-.tl-sub .hi{color:var(--accent);font-weight:600;}
-.tl-sub .live{color:var(--green);font-weight:700;}
-.tl-sub .stop-tag{
-  display:inline-block;font-family:monospace;font-size:.7rem;
-  background:#0d1e2e;border:1px solid var(--border);
-  border-radius:4px;padding:1px 5px;color:var(--accent);margin-right:4px;
-}
-.bus-badge{
-  display:inline-flex;align-items:center;
-  font-size:.82rem;font-weight:800;padding:2px 9px;border-radius:7px;
-  color:#0a1520;margin-bottom:4px;
-}
-.mrt-badge{
-  display:inline-flex;align-items:center;
-  font-size:.78rem;font-weight:800;padding:2px 9px;border-radius:7px;
-  background:var(--green);color:#0a1520;margin-bottom:4px;
-}
+/* Info rows inside cards */
+.info-row{display:flex;align-items:flex-start;gap:8px;font-size:.82rem;}
+.info-icon{font-size:.95rem;flex-shrink:0;margin-top:1px;}
+.info-body{}
+.info-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.info-val{font-size:.84rem;color:var(--text);font-weight:500;line-height:1.4;}
+.info-val .hi{color:var(--accent);font-weight:600;}
+.info-val .live{color:var(--green);font-weight:700;}
+.stop-tag{display:inline-block;font-family:monospace;font-size:.68rem;background:#0d1e2e;
+  border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--accent);margin-right:3px;}
 
-/* ── Stats row ── */
-.stat-row{display:flex;gap:10px;flex-wrap:wrap;}
+/* Bus arrival mini list */
+.bus-arrivals-mini{display:flex;flex-direction:column;gap:5px;margin-top:4px;}
+.bus-arr-row{display:flex;align-items:center;gap:8px;padding:5px 8px;
+  background:#0d1e2e;border-radius:7px;border:1px solid var(--border);}
+.bus-num-badge{font-size:.75rem;font-weight:800;padding:2px 8px;border-radius:6px;
+  color:#0a1520;background:var(--accent);white-space:nowrap;flex-shrink:0;}
+.arr-time{font-size:.8rem;flex:1;}
+.arr-soon{color:var(--red);font-weight:700;}
+.arr-mid{color:var(--yellow);font-weight:700;}
+.arr-late{color:var(--green);font-weight:600;}
+.arr-clock{font-size:.72rem;color:var(--muted);margin-left:auto;white-space:nowrap;}
+
+/* Stat row */
+.stat-row{display:flex;gap:10px;}
 .stat{text-align:center;flex:1;}
-.stat-num{font-size:1.2rem;font-weight:800;}
-.stat-lbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.grab-fare{font-size:1.4rem;font-weight:800;color:var(--orange);}
-.grab-range{font-size:.77rem;color:var(--muted);}
+.stat-num{font-size:1.15rem;font-weight:800;}
+.stat-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.grab-fare{font-size:1.35rem;font-weight:800;color:var(--orange);}
+.grab-range{font-size:.75rem;color:var(--muted);}
+.mrt-badge{display:inline-flex;align-items:center;font-size:.75rem;font-weight:800;
+  padding:2px 8px;border-radius:6px;background:var(--green);color:#0a1520;margin-right:4px;}
+
+/* ── Live Arrivals Section ── */
+.arrivals-section{max-width:1100px;margin:0 auto;padding:0 20px 28px;}
+.stops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.stop-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeIn .4s ease both;}
+.stop-card-head{display:flex;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--border);}
+.stop-id-badge{font-family:monospace;font-size:.72rem;font-weight:700;padding:3px 8px;
+  border-radius:6px;background:rgba(0,180,216,.15);color:var(--accent);border:1px solid rgba(0,180,216,.3);flex-shrink:0;}
+.stop-name{font-size:.88rem;font-weight:700;color:var(--text);}
+.stop-road{font-size:.74rem;color:var(--muted);}
+.stop-dist-pill{margin-left:auto;font-size:.7rem;padding:2px 7px;border-radius:12px;
+  background:#0d1e2e;border:1px solid var(--border);color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.stop-buses{padding:8px 0;}
+.bus-row{display:flex;align-items:center;gap:8px;padding:7px 15px;border-bottom:1px solid var(--border);}
+.bus-row:last-child{border-bottom:none;}
+.br-num{font-size:.78rem;font-weight:800;padding:2px 7px;border-radius:6px;color:#0a1520;flex-shrink:0;}
+.br-slots{display:flex;gap:8px;flex:1;flex-wrap:wrap;}
+.br-slot{display:flex;align-items:center;gap:4px;}
+.br-slot-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;}
+.br-slot-time{font-size:.78rem;font-weight:600;}
+.cs{color:var(--red);}
+.cm{color:var(--yellow);}
+.cl{color:var(--green);}
+.no-buses{padding:14px 15px;font-size:.8rem;color:var(--muted);text-align:center;}
 
 /* ── Skeleton ── */
-.skeleton{
-  background:linear-gradient(90deg,#162535 25%,#1e3550 50%,#162535 75%);
-  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:13px;
-}
+.skeleton{background:linear-gradient(90deg,#162535 25%,#1e3550 50%,#162535 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:13px;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-.skeleton-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;}
-.error-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:16px;text-align:center;color:var(--red);font-size:.86rem;}
+.skeleton-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:12px;}
+.error-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:15px;text-align:center;color:var(--red);font-size:.84rem;}
 
-@media(max-width:600px){
+@media(max-width:760px){
+  .maps-wrap{grid-template-columns:1fr;}
   .plans-grid{grid-template-columns:1fr;}
+  .stops-grid{grid-template-columns:1fr;}
   .dest-row{flex-direction:column;}
-  .btn{justify-content:center;}
   .refresh-bar-wrap{flex-wrap:wrap;gap:7px;}
 }
 </style>
 </head>
 <body>
 
-<!-- ── Header ── -->
+<!-- Header -->
 <div class="header">
   <div class="header-row">
     <div class="header-title">
       <span>🗺️</span>
       <div>
-        <h1>ETA Journey Planner</h1>
-        <div class="header-sub">Singapore · Real-time Transit Planning</div>
+        <h1>ETA Journey Planner · Singapore</h1>
+        <div class="header-sub">Real-time Transit Planning · Powered by Google Maps &amp; SG BusRouter</div>
       </div>
     </div>
     <div class="clock" id="clock">--:-- SGT</div>
   </div>
 </div>
 
-<!-- ── Input Section ── -->
+<!-- Input -->
 <div class="input-section">
   <div class="gps-row">
     <div class="gps-dot" id="gpsDot"></div>
@@ -230,24 +251,23 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
   <div class="dest-row">
     <input class="dest-input" id="destInput" type="text"
-      placeholder="Enter destination — or 🗺️ click map to pin it"
+      placeholder="Enter destination (e.g. Changi Airport, VivoCity, Orchard MRT)…"
       onkeydown="if(event.key==='Enter')planJourney()"/>
-    <button class="btn btn-primary" id="planBtn" onclick="planJourney()">🔍 Plan Journey</button>
-    <button class="btn btn-pick" id="pickBtn" onclick="togglePickMode()" title="Click the map to set destination">🗺️ Pick on Map</button>
+    <button class="btn btn-primary" onclick="planJourney()">🔍 Plan Journey</button>
+    <button class="btn btn-pick" id="pickBtn" onclick="togglePickMode()">🗺️ Pick on Map</button>
   </div>
   <div id="pickBanner">
     📍 <strong>Pick mode ON</strong> — Click anywhere on the map to set your destination
     <button class="cancel-pick" onclick="togglePickMode()">✕ Cancel</button>
   </div>
   <div class="disclaimer">
-    ⚠️ <strong>Note:</strong> Route suggestions are estimated based on nearest bus stops and live arrival data.
-    Please verify with <strong>LTA MyTransport</strong> or <strong>Google Maps</strong> before travelling.
-    Bus arrivals auto-refresh every <strong>5 minutes</strong>. Grab fare is an estimate only.
-    Run via <code>python -m http.server 8080</code> if APIs are blocked by CORS.
+    ⚠️ Route planning uses <strong>Google Maps</strong> for accurate transit directions. Live bus arrivals from <strong>SG BusRouter</strong>.
+    Grab fare is an estimate only. Auto-refresh every <strong>5 minutes</strong>.
+    If APIs are CORS-blocked, run: <code>python -m http.server 8080</code>
   </div>
 </div>
 
-<!-- ── Refresh Bar ── -->
+<!-- Refresh bar -->
 <div class="refresh-bar-wrap">
   <span class="countdown-label">Auto-refresh in</span>
   <div class="refresh-bar-track">
@@ -260,41 +280,73 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <span id="lastUpdate"></span>
 </div>
 
-<!-- ── Map ── -->
-<div class="map-wrap">
-  <div id="map"></div>
+<!-- Dual Maps -->
+<div class="maps-wrap">
+  <!-- LEFT: Leaflet -->
+  <div class="map-panel">
+    <div class="map-label">📍 Your Location &amp; Nearby Bus Stops</div>
+    <div id="map"></div>
+  </div>
+  <!-- RIGHT: Google Maps -->
+  <div class="map-panel">
+    <div class="map-label">🗺️ Google Maps Directions</div>
+    <div class="gmap-panel" id="gmapPanel">
+      <div class="gmap-placeholder">
+        <div class="icon">🗺️</div>
+        <div>Set your destination to see<br>Google Maps directions here</div>
+      </div>
+    </div>
+    <div class="gmap-mode-btns">
+      <button class="mode-btn active" id="modeTransit" onclick="setMapMode('transit')">🚌 Transit</button>
+      <button class="mode-btn" id="modeDriving" onclick="setMapMode('driving')">🚗 Driving</button>
+      <button class="mode-btn" id="modeWalking" onclick="setMapMode('walking')">🚶 Walking</button>
+    </div>
+  </div>
 </div>
 
-<!-- ── Plans ── -->
+<!-- Plans -->
 <div class="plans-section">
-  <div class="plans-title">✈️ Suggested Travel Plans</div>
+  <div class="section-title">✈️ Suggested Travel Plans</div>
   <div class="plans-grid" id="plansGrid">
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
-    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div><div class="skeleton" style="width:65%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+  </div>
+</div>
+
+<!-- Live Arrivals -->
+<div class="arrivals-section">
+  <div class="section-title">🚌 Live Bus Arrivals at Nearby Stops</div>
+  <div class="stops-grid" id="stopsGrid">
+    <div class="skeleton-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
+    <div class="skeleton-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  GLOBALS
-// ═══════════════════════════════════════════════════════
-const REFRESH_SEC = 300;
-let userLat=null, userLng=null;
+// ═══════════════════════════════════════════════
+const REFRESH_SEC=300;
+const GMAP_EMBED_KEY='AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
+const COLOR_PALETTE=['#4fc3f7','#4caf50','#ffd166','#ff6b6b','#ce93d8','#f39c12','#48cae4','#ff8a65','#a5d6a7','#80cbc4'];
+let userLat=null,userLng=null;
 let allStops={};
 let nearbyStops=[];
-let destLat=null, destLng=null, destName='';
-let map, userMarker, destMarker, routeLine;
+let destLat=null,destLng=null,destName='';
+let map,userMarker,destMarker,routeLine;
 let stopMarkers=[];
-let refreshTimer=null, refreshSecsLeft=REFRESH_SEC;
+let refreshTimer=null,refreshSecsLeft=REFRESH_SEC;
 let isRefreshing=false;
 let pickModeActive=false;
-let currentStops4=[], currentNearDest=[], currentTotalDist=0;
+let currentStops3=[];
+let currentGmapMode='transit';
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  SGT CLOCK
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function updateClock(){
   const s=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
   document.getElementById('clock').textContent=
@@ -302,61 +354,68 @@ function updateClock(){
     String(s.getMinutes()).padStart(2,'0')+':'+
     String(s.getSeconds()).padStart(2,'0')+' SGT';
 }
-setInterval(updateClock,1000); updateClock();
+setInterval(updateClock,1000);updateClock();
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  HAVERSINE
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,rad=Math.PI/180;
-  const dLat=(lat2-lat1)*rad, dLng=(lng2-lng1)*rad;
+  const dLat=(lat2-lat1)*rad,dLng=(lng2-lng1)*rad;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function walkTime(m){return Math.ceil(m/80);}
+function estimateFare(m){
+  const f=3.90+(m/400)*0.55;
+  return{low:Math.max(3.90,f*0.85).toFixed(2),high:(f*1.35).toFixed(2)};
+}
+function etaClock(addMin){
+  const n=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  n.setMinutes(n.getMinutes()+addMin);
+  return n.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  MAP INIT
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function initMap(){
   map=L.map('map',{zoomControl:true}).setView([1.3521,103.8198],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© OpenStreetMap contributors',maxZoom:19
   }).addTo(map);
   map.on('click',function(e){
-    if(!pickModeActive) return;
-    const {lat,lng}=e.latlng;
+    if(!pickModeActive)return;
+    const{lat,lng}=e.latlng;
     setDestMarker(lat,lng,'Locating…');
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
       {headers:{'Accept-Language':'en'}})
       .then(r=>r.json())
       .then(d=>{
-        const name=d.display_name
-          ?d.display_name.split(',').slice(0,2).join(', ')
-          :`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        destLat=lat; destLng=lng; destName=name;
+        const name=d.display_name?d.display_name.split(',').slice(0,2).join(', '):`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        destLat=lat;destLng=lng;destName=name;
         document.getElementById('destInput').value=name;
-        if(destMarker) destMarker.bindPopup(`<b>📍 ${name}</b>`).openPopup();
-        disablePickMode(); planJourney();
+        if(destMarker)destMarker.bindPopup(`<b>📍 ${name}</b>`).openPopup();
+        disablePickMode();planJourney();
       })
       .catch(()=>{
         const name=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        destLat=lat; destLng=lng; destName=name;
+        destLat=lat;destLng=lng;destName=name;
         document.getElementById('destInput').value=name;
-        disablePickMode(); planJourney();
+        disablePickMode();planJourney();
       });
   });
 }
 initMap();
 
-// ── Icons ──
 const userIcon=L.divIcon({className:'',html:`<div style="width:15px;height:15px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 4px rgba(0,180,216,.25);"></div>`,iconSize:[15,15],iconAnchor:[7,7]});
 const stopIcon=L.divIcon({className:'',html:`<div style="width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,iconSize:[10,10],iconAnchor:[5,5]});
 const destIcon=L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,iconSize:[18,18],iconAnchor:[9,9]});
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  PICK MODE
-// ═══════════════════════════════════════════════════════
-function togglePickMode(){ pickModeActive ? disablePickMode() : enablePickMode(); }
+// ═══════════════════════════════════════════════
+function togglePickMode(){pickModeActive?disablePickMode():enablePickMode();}
 function enablePickMode(){
   pickModeActive=true;
   document.getElementById('pickBtn').classList.add('active');
@@ -370,24 +429,48 @@ function disablePickMode(){
   document.getElementById('map').classList.remove('pick-mode');
 }
 function setDestMarker(lat,lng,label){
-  if(destMarker) map.removeLayer(destMarker);
+  if(destMarker)map.removeLayer(destMarker);
   destMarker=L.marker([lat,lng],{icon:destIcon}).addTo(map)
     .bindPopup(`<b>📍 ${label}</b>`).openPopup();
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  GOOGLE MAPS PANEL
+// ═══════════════════════════════════════════════
+function updateGoogleMap(){
+  if(!userLat||!destLat)return;
+  const panel=document.getElementById('gmapPanel');
+  const origin=`${userLat},${userLng}`;
+  const dest=`${destLat},${destLng}`;
+  // Use embed v1 directions
+  const src=`https://www.google.com/maps/embed/v1/directions?key=${GMAP_EMBED_KEY}&origin=${origin}&destination=${dest}&mode=${currentGmapMode}&language=en`;
+  panel.innerHTML=`<iframe src="${src}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+function setMapMode(mode){
+  currentGmapMode=mode;
+  ['Transit','Driving','Walking'].forEach(m=>{
+    document.getElementById('mode'+m).classList.toggle('active',m.toLowerCase()===mode);
+  });
+  updateGoogleMap();
+}
+function gmapsUrl(mode){
+  if(!userLat||!destLat)return'https://maps.google.com';
+  return`https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}&travelmode=${mode}`;
+}
+
+// ═══════════════════════════════════════════════
 //  GPS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function getGPS(){
   if(!navigator.geolocation){alert('Geolocation not supported.');return;}
   document.getElementById('gpsCoords').textContent='Detecting…';
   navigator.geolocation.getCurrentPosition(pos=>{
-    userLat=pos.coords.latitude; userLng=pos.coords.longitude;
+    userLat=pos.coords.latitude;userLng=pos.coords.longitude;
     document.getElementById('gpsCoords').textContent=
       userLat.toFixed(5)+'°N, '+userLng.toFixed(5)+'°E';
     document.getElementById('gpsDot').classList.add('active');
     map.setView([userLat,userLng],15);
-    if(userMarker) map.removeLayer(userMarker);
+    if(userMarker)map.removeLayer(userMarker);
     userMarker=L.marker([userLat,userLng],{icon:userIcon}).addTo(map)
       .bindPopup('<b>📍 You are here</b>').openPopup();
     loadStops();
@@ -396,9 +479,9 @@ function getGPS(){
   },{enableHighAccuracy:true,timeout:10000});
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  LOAD BUS STOPS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 async function loadStops(){
   try{
     const r=await fetch('https://data.busrouter.sg/v1/stops.json');
@@ -407,41 +490,29 @@ async function loadStops(){
   }catch(e){console.warn('Stops load failed',e);}
 }
 function findNearbyStops(){
-  if(!userLat||!Object.keys(allStops).length) return;
+  if(!userLat||!Object.keys(allStops).length)return;
   const dist=[];
-  for(const[id,d] of Object.entries(allStops)){
+  for(const[id,d]of Object.entries(allStops)){
     const[lng,lat,name,road]=d;
-    dist.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',dist:haversine(userLat,userLng,parseFloat(lat),parseFloat(lng))});
+    dist.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',
+      dist:haversine(userLat,userLng,parseFloat(lat),parseFloat(lng))});
   }
   dist.sort((a,b)=>a.dist-b.dist);
   nearbyStops=dist.slice(0,10);
-  stopMarkers.forEach(m=>map.removeLayer(m));
-  stopMarkers=[];
-  nearbyStops.slice(0,5).forEach(s=>{
+  stopMarkers.forEach(m=>map.removeLayer(m));stopMarkers=[];
+  nearbyStops.slice(0,5).forEach((s,i)=>{
     const m=L.marker([s.lat,s.lng],{icon:stopIcon}).addTo(map)
       .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop <b>${s.id}</b> · ${Math.round(s.dist)}m</small>`);
     stopMarkers.push(m);
   });
 }
 
-// ── Find stop nearest to midpoint ──
-function midpointStop(lat1,lng1,lat2,lng2){
-  const midLat=(lat1+lat2)/2, midLng=(lng1+lng2)/2;
-  let best=null, bestD=Infinity;
-  for(const[id,d] of Object.entries(allStops)){
-    const[lng,lat,name,road]=d;
-    const dist=haversine(midLat,midLng,parseFloat(lat),parseFloat(lng));
-    if(dist<bestD){bestD=dist;best={id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',dist:bestD};}
-  }
-  return best;
-}
-
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  GEOCODE
-// ═══════════════════════════════════════════════════════
-async function geocodeDest(query){
+// ═══════════════════════════════════════════════
+async function geocodeDest(q){
   const r=await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=sg&format=json&limit=1`,
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=sg&format=json&limit=1`,
     {headers:{'Accept-Language':'en'}});
   const d=await r.json();
   if(d&&d.length>0)
@@ -450,9 +521,9 @@ async function geocodeDest(query){
   return null;
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  BUS ARRIVALS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 async function fetchArrivals(stopId){
   try{
     const r=await fetch(`https://arrivelah2.busrouter.sg/?id=${stopId}`);
@@ -460,44 +531,73 @@ async function fetchArrivals(stopId){
   }catch(e){return null;}
 }
 function fmtTime(isoStr){
-  if(!isoStr) return '--:--';
+  if(!isoStr)return'--:--';
   return new Date(isoStr).toLocaleTimeString('en-SG',
     {hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Singapore'});
 }
 function minsUntil(isoStr){
-  if(!isoStr) return null;
+  if(!isoStr)return null;
   return Math.max(0,Math.round((new Date(isoStr)-new Date())/60000));
 }
-// Returns {no, wait, timeStr, dir} or null
-function getBus(arrival,idx){
-  if(!arrival||!arrival.services||!arrival.services[idx]) return null;
-  const svc=arrival.services[idx];
+function getBusInfo(svc){
   const timeIso=svc.next&&svc.next.time?svc.next.time:svc.next;
-  const wait=minsUntil(timeIso);
-  if(wait===null) return null;
-  return{no:svc.no, wait, timeStr:fmtTime(timeIso), dir:svc.next_direction||''};
+  return{
+    no:svc.no,
+    next:minsUntil(timeIso),nextStr:fmtTime(timeIso),
+    next2:minsUntil(svc.next2&&svc.next2.time?svc.next2.time:svc.next2),
+    next2Str:fmtTime(svc.next2&&svc.next2.time?svc.next2.time:svc.next2),
+    next3:minsUntil(svc.next3&&svc.next3.time?svc.next3.time:svc.next3),
+    next3Str:fmtTime(svc.next3&&svc.next3.time?svc.next3.time:svc.next3),
+  };
+}
+function countdownClass(m){
+  if(m===null)return'cl';
+  if(m<=3)return'cs';
+  if(m<=10)return'cm';
+  return'cl';
+}
+function countdownLabel(m){
+  if(m===null)return'-';
+  if(m<=1)return'Arr';
+  return m+' min';
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  MRT STATIONS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 const MRT_STATIONS=[
-  {name:'Tampines',lat:1.3540,lng:103.9454,line:'EWL'},{name:'Bedok',lat:1.3240,lng:103.9297,line:'EWL'},
-  {name:'Tanah Merah',lat:1.3271,lng:103.9465,line:'EWL'},{name:'Simei',lat:1.3432,lng:103.9533,line:'EWL'},
-  {name:'Pasir Ris',lat:1.3730,lng:103.9493,line:'EWL'},{name:'Expo',lat:1.3353,lng:103.9614,line:'EWL/CCL'},
-  {name:'Changi Airport',lat:1.3574,lng:103.9882,line:'EWL'},{name:'Paya Lebar',lat:1.3180,lng:103.8931,line:'EWL/CCL'},
-  {name:'Aljunied',lat:1.3163,lng:103.8828,line:'EWL'},{name:'Kembangan',lat:1.3210,lng:103.9127,line:'EWL'},
-  {name:'Eunos',lat:1.3196,lng:103.9022,line:'EWL'},{name:'Kovan',lat:1.3601,lng:103.8856,line:'NEL'},
-  {name:'Hougang',lat:1.3712,lng:103.8927,line:'NEL'},{name:'Buangkok',lat:1.3824,lng:103.8929,line:'NEL'},
-  {name:'Sengkang',lat:1.3915,lng:103.8954,line:'NEL'},{name:'Punggol',lat:1.4053,lng:103.9022,line:'NEL'},
-  {name:'Orchard',lat:1.3040,lng:103.8318,line:'NSL'},{name:'City Hall',lat:1.2931,lng:103.8520,line:'NSL/EWL'},
-  {name:'Raffles Place',lat:1.2837,lng:103.8515,line:'NSL/EWL'},{name:'Marina Bay',lat:1.2763,lng:103.8546,line:'NSL/CEL'},
-  {name:'Ang Mo Kio',lat:1.3700,lng:103.8494,line:'NSL'},{name:'Bishan',lat:1.3514,lng:103.8485,line:'NSL/CCL'},
-  {name:'Jurong East',lat:1.3330,lng:103.7423,line:'NSL/EWL'},{name:'Woodlands',lat:1.4370,lng:103.7866,line:'NSL'},
-  {name:'Boon Lay',lat:1.3388,lng:103.7056,line:'EWL'},{name:'Dhoby Ghaut',lat:1.2989,lng:103.8456,line:'NSL/NEL/CCL'},
-  {name:'HarbourFront',lat:1.2653,lng:103.8202,line:'NEL/CCL'},{name:'Outram Park',lat:1.2802,lng:103.8394,line:'EWL/NEL'},
-  {name:'Chinatown',lat:1.2847,lng:103.8444,line:'NEL/DTL'},{name:'Little India',lat:1.3066,lng:103.8494,line:'NEL/DTL'},
-  {name:'Bugis',lat:1.3008,lng:103.8555,line:'EWL/DTL'},{name:'Promenade',lat:1.2934,lng:103.8614,line:'CCL/DTL'},
+  {name:'Tampines',lat:1.3540,lng:103.9454,line:'EWL'},
+  {name:'Bedok',lat:1.3240,lng:103.9297,line:'EWL'},
+  {name:'Tanah Merah',lat:1.3271,lng:103.9465,line:'EWL'},
+  {name:'Simei',lat:1.3432,lng:103.9533,line:'EWL'},
+  {name:'Pasir Ris',lat:1.3730,lng:103.9493,line:'EWL'},
+  {name:'Expo',lat:1.3353,lng:103.9614,line:'EWL/CCL'},
+  {name:'Changi Airport',lat:1.3574,lng:103.9882,line:'EWL'},
+  {name:'Paya Lebar',lat:1.3180,lng:103.8931,line:'EWL/CCL'},
+  {name:'Aljunied',lat:1.3163,lng:103.8828,line:'EWL'},
+  {name:'Kembangan',lat:1.3210,lng:103.9127,line:'EWL'},
+  {name:'Eunos',lat:1.3196,lng:103.9022,line:'EWL'},
+  {name:'Kovan',lat:1.3601,lng:103.8856,line:'NEL'},
+  {name:'Hougang',lat:1.3712,lng:103.8927,line:'NEL'},
+  {name:'Buangkok',lat:1.3824,lng:103.8929,line:'NEL'},
+  {name:'Sengkang',lat:1.3915,lng:103.8954,line:'NEL'},
+  {name:'Punggol',lat:1.4053,lng:103.9022,line:'NEL'},
+  {name:'Orchard',lat:1.3040,lng:103.8318,line:'NSL'},
+  {name:'City Hall',lat:1.2931,lng:103.8520,line:'NSL/EWL'},
+  {name:'Raffles Place',lat:1.2837,lng:103.8515,line:'NSL/EWL'},
+  {name:'Marina Bay',lat:1.2763,lng:103.8546,line:'NSL/CEL'},
+  {name:'Ang Mo Kio',lat:1.3700,lng:103.8494,line:'NSL'},
+  {name:'Bishan',lat:1.3514,lng:103.8485,line:'NSL/CCL'},
+  {name:'Jurong East',lat:1.3330,lng:103.7423,line:'NSL/EWL'},
+  {name:'Woodlands',lat:1.4370,lng:103.7866,line:'NSL'},
+  {name:'Boon Lay',lat:1.3388,lng:103.7056,line:'EWL'},
+  {name:'Dhoby Ghaut',lat:1.2989,lng:103.8456,line:'NSL/NEL/CCL'},
+  {name:'HarbourFront',lat:1.2653,lng:103.8202,line:'NEL/CCL'},
+  {name:'Outram Park',lat:1.2802,lng:103.8394,line:'EWL/NEL'},
+  {name:'Chinatown',lat:1.2847,lng:103.8444,line:'NEL/DTL'},
+  {name:'Little India',lat:1.3066,lng:103.8494,line:'NEL/DTL'},
+  {name:'Bugis',lat:1.3008,lng:103.8555,line:'EWL/DTL'},
+  {name:'Promenade',lat:1.2934,lng:103.8614,line:'CCL/DTL'},
   {name:'Bayfront',lat:1.2822,lng:103.8596,line:'CCL/DTL'},
 ];
 function nearestMRT(lat,lng){
@@ -509,35 +609,16 @@ function nearestMRT(lat,lng){
   return best;
 }
 
-// ═══════════════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════════════
-function walkTime(m){return Math.ceil(m/80);}
-function rideTime(m){return Math.max(4,Math.round(m/350));}
-function estimateFare(m){
-  const f=3.90+(m/400)*0.55;
-  return{low:Math.max(3.90,f*0.85).toFixed(2),high:(f*1.35).toFixed(2)};
-}
-function etaClock(addMin){
-  const n=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
-  n.setMinutes(n.getMinutes()+addMin);
-  return n.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
-}
-function copyETA(txt){
-  navigator.clipboard.writeText(txt)
-    .then(()=>alert('📋 Copied: '+txt))
-    .catch(()=>prompt('Copy this:',txt));
-}
-
-// ═══════════════════════════════════════════════════════
-//  PLAN JOURNEY — MAIN
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  PLAN JOURNEY
+// ═══════════════════════════════════════════════
 async function planJourney(){
   const dest=document.getElementById('destInput').value.trim();
   if(!dest){alert('Please enter or pick a destination.');return;}
   if(!userLat){alert('Please get your GPS location first.');return;}
 
   document.getElementById('plansGrid').innerHTML=skeletonCards(4);
+  document.getElementById('stopsGrid').innerHTML=skeletonCards(3);
   setRefreshLoading(true);
 
   // Geocode if needed
@@ -547,253 +628,364 @@ async function planJourney(){
     if(!geo){
       document.getElementById('plansGrid').innerHTML=
         `<div class="error-card" style="grid-column:1/-1;">❌ Could not find "<strong>${dest}</strong>" in Singapore.<br>Try a more specific name or use 🗺️ Pick on Map.</div>`;
+      document.getElementById('stopsGrid').innerHTML='';
       setRefreshLoading(false);return;
     }
-    destLat=geo.lat; destLng=geo.lng; destName=geo.name;
+    destLat=geo.lat;destLng=geo.lng;destName=geo.name;
     setDestMarker(destLat,destLng,destName);
     document.getElementById('destInput').value=destName;
   }
 
-  // Collect dest-side stops
-  const dStops=[];
-  for(const[id,d] of Object.entries(allStops)){
-    const[lng,lat,name,road]=d;
-    dStops.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:name||'',road:road||'',
-      dist:haversine(destLat,destLng,parseFloat(lat),parseFloat(lng))});
-  }
-  dStops.sort((a,b)=>a.dist-b.dist);
-  const nearDest=dStops.slice(0,3);
-
-  const totalDist=haversine(userLat,userLng,destLat,destLng);
-
-  // Fit map
+  // Fit Leaflet map
   map.fitBounds(L.latLngBounds([[userLat,userLng],[destLat,destLng]]),{padding:[50,50]});
-  if(routeLine) map.removeLayer(routeLine);
+  if(routeLine)map.removeLayer(routeLine);
   if(nearbyStops[0])
     routeLine=L.polyline([[userLat,userLng],[nearbyStops[0].lat,nearbyStops[0].lng],[destLat,destLng]],
       {color:'#00b4d8',weight:2,dashArray:'7,7',opacity:.7}).addTo(map);
 
-  const stops4=nearbyStops.slice(0,4);
-  const arrivalResults=await Promise.all(stops4.map(s=>fetchArrivals(s.id)));
+  // Update Google Maps embed
+  updateGoogleMap();
 
-  currentStops4=stops4; currentNearDest=nearDest; currentTotalDist=totalDist;
+  // Fetch arrivals for 3 nearest stops
+  const stops3=nearbyStops.slice(0,3);
+  currentStops3=stops3;
+  const arrivalResults=await Promise.all(stops3.map(s=>fetchArrivals(s.id)));
 
-  renderPlans(buildPlans(stops4,arrivalResults,nearDest,totalDist));
+  const totalDist=haversine(userLat,userLng,destLat,destLng);
+
+  renderPlans(stops3,arrivalResults,totalDist);
+  renderLiveArrivals(stops3,arrivalResults);
   updateLastUpdate();
   setRefreshLoading(false);
   startRefreshCycle();
 }
 
-// ═══════════════════════════════════════════════════════
-//  BUILD PLANS
-// ═══════════════════════════════════════════════════════
-function buildPlans(stops,arrivals,nearDest,totalDist){
-  // ── Plan A: 1 transit, nearest stop, soonest bus ──
-  const sA=stops[0], arrA=arrivals[0];
-  const busA=getBus(arrA,0);
-  const wA=walkTime(sA?sA.dist:300), rA=rideTime(totalDist), wdA=walkTime(nearDest[0]?nearDest[0].dist:300);
-  const etaA=wA+(busA?busA.wait:5)+rA+wdA;
-  const planA={
-    id:'A',label:'Plan A',color:'var(--planA)',pill:'pill-green',pillText:'Recommended',
-    transits:1,totalMin:etaA,
-    copyText:`ETA via Bus ${busA?busA.no:'?'}: ~${etaA} min, departs ${busA?busA.timeStr:'?'} from Stop ${sA?sA.id:''} ${sA?sA.name:''}`,
-    steps:[
-      {type:'walk',icon:'🚶',typeLabel:'Walk',
-        main:`Walk to Bus Stop`,
-        sub:`<span class="stop-tag">${sA?sA.id:'—'}</span><span class="hi">${sA?sA.name:''}</span>${sA&&sA.road?' · '+sA.road:''}<br>${sA?Math.round(sA.dist)+'m':'—'} · ~${wA} min`},
-      {type:'bus',icon:'🚌',typeLabel:'Board Bus',
-        main:`<span class="bus-badge" style="background:var(--planA);">Bus ${busA?busA.no:'?'}</span>`,
-        sub:`Board at: <span class="stop-tag">${sA?sA.id:'—'}</span><span class="hi">${sA?sA.name:''}</span><br>`+
-          (busA?`Next arrival: <span class="live">${busA.wait} min (${busA.timeStr})</span><br>`:'Live data unavailable<br>')+
-          (busA&&busA.dir?`Direction: ${busA.dir}<br>`:'')+
-          `Estimated ride: ~${rA} min`},
-      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
-        main:`Alight near destination`,
-        sub:`Alight at: <span class="stop-tag">${nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[0]?nearDest[0].name:''}</span><br>`+
-          `Walk ${nearDest[0]?Math.round(nearDest[0].dist)+'m':'—'} (~${wdA} min) to <span class="hi">${destName}</span>`},
-    ]
-  };
-
-  // ── Plan B: 2 transits, 2nd stop, midpoint transfer ──
-  const sB=stops[1]||stops[0], arrB=arrivals[1]||arrivals[0];
-  const busB1=getBus(arrB,0), busB2=getBus(arrB,1);
-  const midStop=midpointStop(userLat,userLng,destLat,destLng);
-  const wB=walkTime(sB?sB.dist:400);
-  const leg1=Math.max(4,Math.round(totalDist/2/350));
-  const leg2=Math.max(4,Math.round(totalDist/2/350));
-  const xferWait=busB2?busB2.wait:8;
-  const wdB=walkTime(nearDest[0]?nearDest[0].dist:300);
-  const etaB=wB+(busB1?busB1.wait:6)+leg1+xferWait+leg2+wdB;
-  const planB={
-    id:'B',label:'Plan B',color:'var(--planB)',pill:'pill-purple',pillText:'Fewer Stops',
-    transits:2,totalMin:etaB,
-    copyText:`ETA via Bus ${busB1?busB1.no:'?'} → Bus ${busB2?busB2.no:'?'}: ~${etaB} min from Stop ${sB?sB.id:''} ${sB?sB.name:''}`,
-    steps:[
-      {type:'walk',icon:'🚶',typeLabel:'Walk',
-        main:'Walk to Bus Stop',
-        sub:`<span class="stop-tag">${sB?sB.id:'—'}</span><span class="hi">${sB?sB.name:''}</span>${sB&&sB.road?' · '+sB.road:''}<br>${sB?Math.round(sB.dist)+'m':'—'} · ~${wB} min`},
-      {type:'bus',icon:'🚌',typeLabel:'Board Bus (1st Leg)',
-        main:`<span class="bus-badge" style="background:var(--planB);">Bus ${busB1?busB1.no:'?'}</span>`,
-        sub:`Board at: <span class="stop-tag">${sB?sB.id:'—'}</span><span class="hi">${sB?sB.name:''}</span><br>`+
-          (busB1?`Next arrival: <span class="live">${busB1.wait} min (${busB1.timeStr})</span><br>`:'Live data unavailable<br>')+
-          `Ride: ~${leg1} min`},
-      {type:'transfer',icon:'🔄',typeLabel:'Transfer',
-        main:`Transfer at Interchange`,
-        sub:`Alight &amp; transfer at: <span class="stop-tag">${midStop?midStop.id:'—'}</span><span class="hi">${midStop?midStop.name:'Interchange Stop'}</span><br>`+
-          `Board: <span class="bus-badge" style="background:var(--planB);font-size:.74rem;">Bus ${busB2?busB2.no:'?'}</span>`+
-          (busB2?` · Est. wait: <span class="live">${xferWait} min (${busB2.timeStr})</span>`:'Est. wait: ~8 min')},
-      {type:'bus',icon:'🚌',typeLabel:'Board Bus (2nd Leg)',
-        main:`<span class="bus-badge" style="background:var(--planB);">Bus ${busB2?busB2.no:'?'}</span>`,
-        sub:`Board at: <span class="stop-tag">${midStop?midStop.id:'—'}</span><span class="hi">${midStop?midStop.name:'Interchange'}</span><br>Ride: ~${leg2} min`},
-      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
-        main:`Alight near destination`,
-        sub:`Alight at: <span class="stop-tag">${nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[0]?nearDest[0].name:''}</span><br>`+
-          `Walk ${nearDest[0]?Math.round(nearDest[0].dist)+'m':'—'} (~${wdB} min) to <span class="hi">${destName}</span>`},
-    ]
-  };
-
-  // ── Plan C: MRT or alt bus ──
-  const mrtO=nearestMRT(userLat,userLng);
-  const mrtD=nearestMRT(destLat,destLng);
-  const wMO=walkTime(mrtO.dist), wMD=walkTime(mrtD.dist);
-  const mrtRide=Math.max(8,Math.round(haversine(mrtO.lat,mrtO.lng,mrtD.lat,mrtD.lng)/600));
-  const etaC_mrt=wMO+3+mrtRide+2+wMD;
-  const useMRT=mrtO.dist<2000&&mrtD.dist<2000;
-  const sC=stops[2]||stops[0], arrC=arrivals[2]||arrivals[0];
-  const busC=getBus(arrC,0);
-  const wC=walkTime(sC?sC.dist:350), wdC=walkTime(nearDest[1]?nearDest[1].dist:nearDest[0]?nearDest[0].dist:300);
-  const rC=rideTime(totalDist);
-  const etaC_bus=wC+(busC?busC.wait:7)+rC+wdC;
-  const planC={
-    id:'C',label:'Plan C',color:'var(--planC)',pill:'pill-blue',pillText:useMRT?'Via MRT':'Alt Bus',
-    transits:1,totalMin:useMRT?etaC_mrt:etaC_bus,
-    copyText:useMRT
-      ?`ETA via MRT (${mrtO.name} → ${mrtD.name}): ~${etaC_mrt} min`
-      :`ETA via Alt Bus ${busC?busC.no:'?'}: ~${etaC_bus} min from Stop ${sC?sC.id:''}`,
-    steps:useMRT?[
-      {type:'walk',icon:'🚶',typeLabel:'Walk to MRT',
-        main:`Walk to ${mrtO.name} MRT`,
-        sub:`Distance: ~${Math.round(mrtO.dist)}m · ~${wMO} min<br>Station: <span class="hi">${mrtO.name} MRT Station</span>`},
-      {type:'mrt',icon:'🚇',typeLabel:'Board MRT',
-        main:`<span class="mrt-badge">${mrtO.line} Line</span>`,
-        sub:`From: <span class="hi">${mrtO.name} MRT</span><br>`+
-          `To: <span class="hi">${mrtD.name} MRT</span><br>`+
-          `Trains every 3–5 min · Ride: ~${mrtRide} min`},
-      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
-        main:`Exit at ${mrtD.name} MRT`,
-        sub:`Walk ~${Math.round(mrtD.dist)}m (~${wMD} min) to <span class="hi">${destName}</span>`},
-    ]:[
-      {type:'walk',icon:'🚶',typeLabel:'Walk',
-        main:'Walk to Bus Stop',
-        sub:`<span class="stop-tag">${sC?sC.id:'—'}</span><span class="hi">${sC?sC.name:''}</span>${sC&&sC.road?' · '+sC.road:''}<br>${sC?Math.round(sC.dist)+'m':'—'} · ~${wC} min`},
-      {type:'bus',icon:'🚌',typeLabel:'Board Bus',
-        main:`<span class="bus-badge" style="background:var(--planC);">Bus ${busC?busC.no:'?'}</span>`,
-        sub:`Board at: <span class="stop-tag">${sC?sC.id:'—'}</span><span class="hi">${sC?sC.name:''}</span><br>`+
-          (busC?`Next arrival: <span class="live">${busC.wait} min (${busC.timeStr})</span><br>`:'Live data unavailable<br>')+
-          `Ride: ~${rC} min`},
-      {type:'alight',icon:'🚏',typeLabel:'Alight & Walk',
-        main:'Alight near destination',
-        sub:`Alight at: <span class="stop-tag">${nearDest[1]?nearDest[1].id:nearDest[0]?nearDest[0].id:'—'}</span><span class="hi">${nearDest[1]?nearDest[1].name:nearDest[0]?nearDest[0].name:''}</span><br>`+
-          `Walk ~${wdC} min to <span class="hi">${destName}</span>`},
-    ]
-  };
-
-  // ── Plan D: Grab / Taxi ──
-  const fare=estimateFare(totalDist);
-  const grabMin=Math.round((totalDist/1000)/30*60*1.3)+3;
-  const planD={
-    id:'D',label:'Plan D',color:'var(--planD)',pill:'pill-orange',pillText:'Grab / Taxi',
-    transits:0,totalMin:grabMin,grab:true,fare,distKm:(totalDist/1000).toFixed(1),
-    copyText:`ETA via Grab/Taxi: ~${grabMin} min · Est. S$${fare.low}–S$${fare.high}`,
-    steps:[
-      {type:'walk',icon:'📍',typeLabel:'Pickup',main:'Your GPS Location',sub:'Driver picks you up at your current location'},
-      {type:'bus',icon:'🚗',typeLabel:'Drive',main:`${(totalDist/1000).toFixed(1)} km · ~${grabMin} min`,sub:`Includes 1.3× traffic factor · Via fastest route`},
-      {type:'dest',icon:'🏁',typeLabel:'Drop-off',main:destName,sub:'Arrive at your destination'},
-    ]
-  };
-
-  // Sort public plans: fewest transits first, then shortest duration
-  const pub=[planA,planB,planC].sort((a,b)=>a.transits-b.transits||a.totalMin-b.totalMin);
-  return [...pub,planD];
-}
-
-// ═══════════════════════════════════════════════════════
-//  RENDER PLANS
-// ═══════════════════════════════════════════════════════
-function renderPlans(plans){
+// ═══════════════════════════════════════════════
+//  RENDER PLAN CARDS
+// ═══════════════════════════════════════════════
+function renderPlans(stops,arrivals,totalDist){
   const grid=document.getElementById('plansGrid');
   grid.innerHTML='';
-  plans.forEach((p,i)=>{
-    const card=document.createElement('div');
-    card.className='plan-card'+(p.grab?' grab':'');
-    card.style.animationDelay=(i*0.08)+'s';
-    card.style.borderColor=p.color.replace('var(','').replace(')','')!==p.color
-      ?'':`${p.color}44`;
 
-    const timelineHtml=p.steps.map((s,si)=>`
-      <div class="tl-step">
-        <div class="tl-left">
-          <div class="tl-circle ${s.type}">${s.icon}</div>
-          ${si<p.steps.length-1?'<div class="tl-line"></div>':''}
+  const sA=stops[0],arrA=arrivals[0];
+  const sB=stops[1]||stops[0],arrB=arrivals[1]||arrivals[0];
+  const mrtO=nearestMRT(userLat,userLng);
+  const mrtD=nearestMRT(destLat,destLng);
+  const useMRT=mrtO.dist<2000&&mrtD.dist<2000;
+  const mrtRide=Math.max(8,Math.round(haversine(mrtO.lat,mrtO.lng,mrtD.lat,mrtD.lng)/600));
+  const wMO=walkTime(mrtO.dist),wMD=walkTime(mrtD.dist);
+  const etaMRT=wMO+3+mrtRide+2+wMD;
+  const fare=estimateFare(totalDist);
+  const grabMin=Math.round((totalDist/1000)/30*60*1.3)+3;
+
+  // Get soonest buses for Plan A stop
+  const busesA=arrA&&arrA.services?arrA.services.slice(0,3).map(getBusInfo):[];
+  const busesB=arrB&&arrB.services?arrB.services.slice(0,3).map(getBusInfo):[];
+  const soonA=busesA[0];
+  const soonB=busesB[0];
+  const etaA=soonA?walkTime(sA?sA.dist:300)+soonA.next+Math.max(5,Math.round(totalDist/350)):null;
+  const etaB=soonB?walkTime(sB?sB.dist:400)+soonB.next+Math.max(5,Math.round(totalDist/350)):null;
+
+  // ── PLAN A ──
+  const cardA=makeCard({
+    id:'A',color:'var(--planA)',pill:'pill-green',pillText:'Recommended',
+    title:'Public Transit',sub:'Nearest stop · Soonest bus',
+    copyText:soonA?`ETA via Bus ${soonA.no}: ~${etaA} min, departs in ${soonA.next} min (${soonA.nextStr}) from Stop ${sA?sA.id:''} ${sA?sA.name:''}`:`Open Google Maps for transit route`,
+    etaMin:etaA,
+    body:`
+      <div class="info-row">
+        <div class="info-icon">🚏</div>
+        <div class="info-body">
+          <div class="info-label">Board at</div>
+          <div class="info-val">
+            <span class="stop-tag">${sA?sA.id:'—'}</span>
+            <span class="hi">${sA?sA.name:'—'}</span><br>
+            <span style="color:var(--muted);font-size:.75rem;">${sA?sA.road:''} · ${sA?Math.round(sA.dist)+'m (~'+walkTime(sA.dist)+' min walk)':''}</span>
+          </div>
         </div>
-        <div class="tl-body">
-          <div class="tl-type">${s.typeLabel}</div>
-          <div class="tl-main">${s.main}</div>
-          <div class="tl-sub">${s.sub}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🚌</div>
+        <div class="info-body">
+          <div class="info-label">Next buses</div>
+          <div class="bus-arrivals-mini">
+            ${busesA.length?busesA.map((b,i)=>`
+              <div class="bus-arr-row">
+                <span class="bus-num-badge" style="background:${COLOR_PALETTE[i%COLOR_PALETTE.length]};">${b.no}</span>
+                <span class="arr-time ${countdownClass(b.next)}">${countdownLabel(b.next)}</span>
+                <span class="arr-clock">${b.nextStr}</span>
+              </div>`).join(''):'<div style="color:var(--muted);font-size:.8rem;">No live data</div>'}
+          </div>
         </div>
-      </div>`).join('');
+      </div>
+      <div class="info-row">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-body">
+          <div class="info-val" style="font-size:.78rem;color:var(--muted);">
+            Google Maps will show exact stops, transit line &amp; alight point
+          </div>
+        </div>
+      </div>
+      <a href="${gmapsUrl('transit')}" target="_blank" style="text-decoration:none;">
+        <button class="btn btn-gmaps">🗺️ Open Google Maps (Transit)</button>
+      </a>`,
+  });
+  grid.appendChild(cardA);
+
+  // ── PLAN B ──
+  const cardB=makeCard({
+    id:'B',color:'var(--planB)',pill:'pill-purple',pillText:'Alt Transit',
+    title:'Walk + Transit',sub:'2nd nearest stop · May need transfer',
+    copyText:soonB?`ETA via Bus ${soonB.no}: ~${etaB} min from Stop ${sB?sB.id:''} ${sB?sB.name:''}`:`Open Google Maps for transit route`,
+    etaMin:etaB,
+    body:`
+      <div class="info-row">
+        <div class="info-icon">🚏</div>
+        <div class="info-body">
+          <div class="info-label">Board at (2nd nearest)</div>
+          <div class="info-val">
+            <span class="stop-tag">${sB?sB.id:'—'}</span>
+            <span class="hi">${sB?sB.name:'—'}</span><br>
+            <span style="color:var(--muted);font-size:.75rem;">${sB?sB.road:''} · ${sB?Math.round(sB.dist)+'m (~'+walkTime(sB.dist)+' min walk)':''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🚌</div>
+        <div class="info-body">
+          <div class="info-label">Next buses</div>
+          <div class="bus-arrivals-mini">
+            ${busesB.length?busesB.map((b,i)=>`
+              <div class="bus-arr-row">
+                <span class="bus-num-badge" style="background:${COLOR_PALETTE[i%COLOR_PALETTE.length]};">${b.no}</span>
+                <span class="arr-time ${countdownClass(b.next)}">${countdownLabel(b.next)}</span>
+                <span class="arr-clock">${b.nextStr}</span>
+              </div>`).join(''):'<div style="color:var(--muted);font-size:.8rem;">No live data</div>'}
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🔄</div>
+        <div class="info-body">
+          <div class="info-val" style="font-size:.78rem;color:var(--muted);">
+            May require 1–2 bus changes. Google Maps will show full step-by-step with transfer stops &amp; boarding points.
+          </div>
+        </div>
+      </div>
+      <a href="${gmapsUrl('transit')}" target="_blank" style="text-decoration:none;">
+        <button class="btn btn-gmaps">🗺️ Open Google Maps (Transit)</button>
+      </a>`,
+  });
+  grid.appendChild(cardB);
+
+  // ── PLAN C ──
+  const cardC=makeCard({
+    id:'C',color:'var(--planC)',pill:'pill-blue',pillText:useMRT?'Via MRT':'Alt Bus',
+    title:useMRT?'MRT / Rail Route':'Alt Bus Route',
+    sub:useMRT?`${mrtO.name} → ${mrtD.name}`:'3rd nearest stop option',
+    copyText:useMRT?`ETA via MRT (${mrtO.name} → ${mrtD.name}): ~${etaMRT} min`:`Open Google Maps for transit route`,
+    etaMin:useMRT?etaMRT:null,
+    body: useMRT?`
+      <div class="info-row">
+        <div class="info-icon">🚶</div>
+        <div class="info-body">
+          <div class="info-label">Walk to Origin MRT</div>
+          <div class="info-val">
+            <span class="hi">${mrtO.name} MRT</span><br>
+            <span style="color:var(--muted);font-size:.75rem;">~${Math.round(mrtO.dist)}m · ~${wMO} min walk</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🚇</div>
+        <div class="info-body">
+          <div class="info-label">Board MRT</div>
+          <div class="info-val">
+            <span class="mrt-badge">${mrtO.line}</span> Line<br>
+            <span class="hi">${mrtO.name}</span> → <span class="hi">${mrtD.name}</span><br>
+            <span style="color:var(--muted);font-size:.75rem;">Trains every 3–5 min · Ride ~${mrtRide} min</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🚶</div>
+        <div class="info-body">
+          <div class="info-label">Walk from Dest MRT</div>
+          <div class="info-val">
+            <span class="hi">${mrtD.name} MRT</span> → ${destName}<br>
+            <span style="color:var(--muted);font-size:.75rem;">~${Math.round(mrtD.dist)}m · ~${wMD} min walk</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-body">
+          <div class="info-val" style="font-size:.78rem;color:var(--muted);">
+            Select MRT/Train option in Google Maps for specific platform &amp; exit info
+          </div>
+        </div>
+      </div>
+      <a href="${gmapsUrl('transit')}" target="_blank" style="text-decoration:none;">
+        <button class="btn btn-gmaps">🗺️ Open Google Maps (MRT)</button>
+      </a>`:`
+      <div class="info-row">
+        <div class="info-icon">🚏</div>
+        <div class="info-body">
+          <div class="info-label">Nearest bus stop</div>
+          <div class="info-val">
+            <span class="stop-tag">${stops[2]?stops[2].id:sA?sA.id:'—'}</span>
+            <span class="hi">${stops[2]?stops[2].name:sA?sA.name:'—'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-body">
+          <div class="info-val" style="font-size:.78rem;color:var(--muted);">
+            MRT stations are more than 2km away. Use bus transit as alternative.
+          </div>
+        </div>
+      </div>
+      <a href="${gmapsUrl('transit')}" target="_blank" style="text-decoration:none;">
+        <button class="btn btn-gmaps">🗺️ Open Google Maps (Transit)</button>
+      </a>`,
+  });
+  grid.appendChild(cardC);
+
+  // ── PLAN D: Grab ──
+  const cardD=makeCard({
+    id:'D',color:'var(--planD)',pill:'pill-orange',pillText:'Grab / Taxi',
+    title:'Private Hire / Taxi',sub:'No transit · Door-to-door',
+    copyText:`ETA via Grab/Taxi: ~${grabMin} min · Est. S$${fare.low}–S$${fare.high}`,
+    etaMin:grabMin,grab:true,
+    body:`
+      <div class="info-row">
+        <div class="info-icon">📍</div>
+        <div class="info-body">
+          <div class="info-label">Pickup</div>
+          <div class="info-val">Your current GPS location</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🏁</div>
+        <div class="info-body">
+          <div class="info-label">Drop-off</div>
+          <div class="info-val"><span class="hi">${destName}</span></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">💰</div>
+        <div class="info-body">
+          <div class="info-label">Estimated Fare</div>
+          <div class="grab-fare">S$${fare.low} – S$${fare.high}</div>
+          <div class="grab-range">${(totalDist/1000).toFixed(1)} km · Base S$3.90 + S$0.55/400m PHV rate</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Surge pricing may apply · Subject to availability</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="https://grab.onelink.me/2695613898/grabapp" target="_blank" style="text-decoration:none;flex:1;">
+          <button class="btn btn-grab" style="font-size:.8rem;">📱 Book via Grab</button>
+        </a>
+        <a href="${gmapsUrl('driving')}" target="_blank" style="text-decoration:none;flex:1;">
+          <button class="btn btn-gmaps" style="font-size:.8rem;">🗺️ Google Maps</button>
+        </a>
+      </div>`,
+  });
+  grid.appendChild(cardD);
+}
+
+function makeCard({id,color,pill,pillText,title,sub,copyText,etaMin,grab,body}){
+  const card=document.createElement('div');
+  card.className='plan-card'+(grab?' grab':'');
+  card.style.borderColor=`${color.replace('var(','').replace(')','')}`==='var(--planD)'?'rgba(249,115,22,.3)':'';
+  const safeText=copyText.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  card.innerHTML=`
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="plan-badge" style="background:${color}22;color:${color};border:2px solid ${color}55;">${id}</div>
+        <div>
+          <div class="card-title">${title}</div>
+          <div class="card-sub">${sub}</div>
+        </div>
+      </div>
+      <span class="pill ${pill}">${pillText}</span>
+    </div>
+    <hr class="divider"/>
+    ${body}
+    <hr class="divider"/>
+    ${!grab&&etaMin?`
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num" style="color:${color};">~${etaMin}</div>
+        <div class="stat-lbl">Est. Min</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:${color};font-size:.9rem;">${etaClock(etaMin)}</div>
+        <div class="stat-lbl">ETA (SGT)</div>
+      </div>
+    </div>`:''}
+    <button class="btn-copy" onclick="copyETA('${safeText}')">📋 Copy ETA</button>
+  `;
+  return card;
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER LIVE ARRIVALS
+// ═══════════════════════════════════════════════
+function renderLiveArrivals(stops,arrivals){
+  const grid=document.getElementById('stopsGrid');
+  grid.innerHTML='';
+  stops.forEach((stop,idx)=>{
+    const arr=arrivals[idx];
+    const services=arr&&arr.services?arr.services:[];
+    const card=document.createElement('div');
+    card.className='stop-card';
+    card.style.animationDelay=(idx*0.1)+'s';
+    const busRows=services.length?services.slice(0,6).map((svc,i)=>{
+      const b=getBusInfo(svc);
+      const slots=[
+        {label:'Next',min:b.next,str:b.nextStr},
+        {label:'2nd',min:b.next2,str:b.next2Str},
+        {label:'3rd',min:b.next3,str:b.next3Str},
+      ].filter(s=>s.min!==null);
+      return`<div class="bus-row">
+        <span class="br-num" style="background:${COLOR_PALETTE[i%COLOR_PALETTE.length]};">${b.no}</span>
+        <div class="br-slots">
+          ${slots.map(s=>`<div class="br-slot">
+            <span class="br-slot-label">${s.label}</span>
+            <span class="br-slot-time ${countdownClass(s.min)}">${countdownLabel(s.min)}</span>
+            <span style="font-size:.68rem;color:var(--muted);margin-left:2px;">(${s.str})</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join(''):
+      `<div class="no-buses">No bus arrival data for this stop</div>`;
 
     card.innerHTML=`
-      <div class="card-header">
-        <div style="display:flex;align-items:center;gap:9px;">
-          <div class="plan-badge" style="background:${p.color}22;color:${p.color};border:2px solid ${p.color}55;">${p.id}</div>
-          <div>
-            <div class="card-title">${p.label}</div>
-            <div class="card-sub">${p.transits===0?'No transit · Door-to-door':p.transits+' transit'+(p.transits>1?'s':'')}</div>
-          </div>
+      <div class="stop-card-head">
+        <span class="stop-id-badge">${stop.id}</span>
+        <div>
+          <div class="stop-name">${stop.name}</div>
+          <div class="stop-road">${stop.road}</div>
         </div>
-        <span class="pill ${p.pill}">${p.pillText}</span>
+        <span class="stop-dist-pill">~${Math.round(stop.dist)}m</span>
       </div>
-      <hr class="divider"/>
-      <div class="timeline">${timelineHtml}</div>
-      <hr class="divider"/>
-      ${p.grab?`
-        <div style="text-align:center;">
-          <div class="grab-fare">S$${p.fare.low} – S$${p.fare.high}</div>
-          <div class="grab-range">Estimated fare · ${p.distKm} km · PHV rate</div>
-          <div style="font-size:.7rem;color:var(--muted);margin-top:3px;">Surge pricing may apply · Subject to availability</div>
-        </div>
-        <a href="https://grab.onelink.me/2695613898/grabapp" target="_blank" style="text-decoration:none;">
-          <button class="btn btn-grab" style="width:100%;justify-content:center;margin-top:4px;">📱 Book via Grab App</button>
-        </a>`:`
-        <div class="stat-row">
-          <div class="stat">
-            <div class="stat-num" style="color:${p.color};">${p.totalMin}</div>
-            <div class="stat-lbl">Est. Min</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" style="color:${p.color};">${p.transits}</div>
-            <div class="stat-lbl">Transits</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" style="color:${p.color};font-size:.88rem;">${etaClock(p.totalMin)}</div>
-            <div class="stat-lbl">ETA (SGT)</div>
-          </div>
-        </div>`}
-      <button class="btn-copy" onclick="copyETA('${p.copyText.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">📋 Copy ETA</button>
+      <div class="stop-buses">${busRows}</div>
     `;
     grid.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════════════════════
-//  MANUAL REFRESH
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  REFRESH
+// ═══════════════════════════════════════════════
 async function manualRefresh(){
-  if(isRefreshing||!currentStops4.length) return;
+  if(isRefreshing||!currentStops3.length)return;
   setRefreshLoading(true);
-  const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
-  renderPlans(buildPlans(currentStops4,arr,currentNearDest,currentTotalDist));
+  const arr=await Promise.all(currentStops3.map(s=>fetchArrivals(s.id)));
+  const totalDist=userLat&&destLat?haversine(userLat,userLng,destLat,destLng):0;
+  renderPlans(currentStops3,arr,totalDist);
+  renderLiveArrivals(currentStops3,arr);
   updateLastUpdate();
   setRefreshLoading(false);
   refreshSecsLeft=REFRESH_SEC;
@@ -811,24 +1003,22 @@ function updateLastUpdate(){
     'Updated '+new Date().toLocaleTimeString('en-SG',
       {timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
-
-// ═══════════════════════════════════════════════════════
-//  REFRESH CYCLE — 5 MIN
-// ═══════════════════════════════════════════════════════
 function startRefreshCycle(){
-  if(refreshTimer) clearInterval(refreshTimer);
+  if(refreshTimer)clearInterval(refreshTimer);
   refreshSecsLeft=REFRESH_SEC;
   updateCountdownUI();
   refreshTimer=setInterval(async()=>{
-    if(isRefreshing) return;
+    if(isRefreshing)return;
     refreshSecsLeft=Math.max(0,refreshSecsLeft-1);
     updateCountdownUI();
     if(refreshSecsLeft<=0){
       refreshSecsLeft=REFRESH_SEC;
-      if(currentStops4.length){
+      if(currentStops3.length){
         setRefreshLoading(true);
-        const arr=await Promise.all(currentStops4.map(s=>fetchArrivals(s.id)));
-        renderPlans(buildPlans(currentStops4,arr,currentNearDest,currentTotalDist));
+        const arr=await Promise.all(currentStops3.map(s=>fetchArrivals(s.id)));
+        const totalDist=userLat&&destLat?haversine(userLat,userLng,destLat,destLng):0;
+        renderPlans(currentStops3,arr,totalDist);
+        renderLiveArrivals(currentStops3,arr);
         updateLastUpdate();
         setRefreshLoading(false);
       }
@@ -842,18 +1032,20 @@ function updateCountdownUI(){
   document.getElementById('refreshBar').style.width=(refreshSecsLeft/REFRESH_SEC*100)+'%';
 }
 
-// ═══════════════════════════════════════════════════════
-//  SKELETON
-// ═══════════════════════════════════════════════════════
+function copyETA(txt){
+  navigator.clipboard.writeText(txt)
+    .then(()=>alert('📋 Copied: '+txt))
+    .catch(()=>prompt('Copy this:',txt));
+}
+
 function skeletonCards(n){
   return Array(n).fill(`<div class="skeleton-card">
     <div class="skeleton" style="width:40%;height:18px;"></div>
-    <div class="skeleton"></div><div class="skeleton" style="width:80%;"></div>
-    <div class="skeleton" style="width:65%;"></div><div class="skeleton" style="width:50%;"></div>
+    <div class="skeleton"></div><div class="skeleton" style="width:75%;"></div>
+    <div class="skeleton" style="width:55%;"></div>
   </div>`).join('');
 }
 
-// ── Auto-detect GPS on load ──
 window.addEventListener('load',()=>{getGPS();startRefreshCycle();});
 </script>
 </body>
