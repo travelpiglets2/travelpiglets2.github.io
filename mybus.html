@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bus Stop Live Arrivals</title>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1923; color: #e0e6ed; min-height: 100vh; }
+    header { background: linear-gradient(135deg,#1a2a3a,#0d1f2d); padding: 16px 24px; border-bottom: 2px solid #00b4d8; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    header h1 { font-size: 1.4rem; color: #00b4d8; letter-spacing: 1px; }
+    header .subtitle { font-size: 0.82rem; color: #90a4ae; margin-top: 3px; }
+    .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .stop-input-wrap { display: flex; align-items: center; gap: 8px; }
+    #stop-input { padding: 7px 12px; background: #0f1923; border: 1.5px solid #00b4d8; border-radius: 8px; color: #e0e6ed; font-size: 0.9rem; font-family: inherit; width: 130px; outline: none; transition: border-color 0.2s,box-shadow 0.2s; }
+    #stop-input:focus { border-color: #48cae4; box-shadow: 0 0 0 3px #00b4d822; }
+    #stop-input::placeholder { color: #456; }
+    .btn-go { padding: 7px 16px; background: #00b4d8; color: #0f1923; font-weight: 700; font-size: 0.85rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .btn-go:hover { background: #48cae4; }
+    #last-updated { font-size: 0.78rem; color: #90a4ae; text-align: right; }
+    #last-updated strong { color: #e0e6ed; }
+    .refresh-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: #162535; padding: 10px 20px; border-bottom: 1px solid #1e3a4a; }
+    .countdown-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 180px; }
+    .countdown-label { font-size: 0.78rem; color: #90a4ae; white-space: nowrap; }
+    .progress-track { flex: 1; height: 6px; background: #1e3a4a; border-radius: 3px; overflow: hidden; min-width: 80px; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg,#00b4d8,#48cae4); border-radius: 3px; transition: width 1s linear; }
+    #countdown-text { font-size: 0.82rem; font-weight: 700; color: #00b4d8; white-space: nowrap; }
+    .btn-refresh { padding: 7px 18px; background: #00b4d8; color: #0f1923; font-weight: 700; font-size: 0.82rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-refresh:hover { background: #48cae4; }
+    .btn-refresh:disabled { background: #1e3a4a; color: #90a4ae; cursor: not-allowed; }
+    #status-banner { display: none; padding: 10px 20px; font-size: 0.82rem; font-weight: 600; text-align: center; }
+    #status-banner.loading { background: #0d2b3a; color: #48cae4; display: block; }
+    #status-banner.error   { background: #3b0a0a; color: #ff6b6b; display: block; }
+    #status-banner.success { display: none; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #48cae4; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .main-container { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
+    #map { width: 100%; height: 420px; border-radius: 12px; border: 1.5px solid #1e3a4a; margin-bottom: 24px; z-index: 0; }
+    .bus-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+    .bus-card { background: #162535; border-radius: 14px; border: 1.5px solid #1e3a4a; overflow: hidden; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .bus-card-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #1e3a4a; }
+    .bus-badge { font-size: 1.4rem; font-weight: 800; width: 58px; height: 58px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .bus-card-header .meta h2 { font-size: 1rem; font-weight: 700; }
+    .bus-card-header .meta p  { font-size: 0.78rem; color: #90a4ae; margin-top: 2px; }
+    .arrivals-list { padding: 10px 0; }
+    .arrival-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 18px; border-bottom: 1px solid #1a2f40; gap: 8px; }
+    .arrival-row:last-child { border-bottom: none; }
+    .arrival-label { font-size: 0.72rem; color: #90a4ae; width: 60px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .arrival-time  { font-size: 0.9rem; font-weight: 600; color: #e0e6ed; flex: 1; }
+    .arrival-countdown { font-size: 1rem; font-weight: 700; min-width: 54px; text-align: right; }
+    .arriving-soon { color: #ff6b6b; }
+    .arriving-mid  { color: #ffd166; }
+    .arriving-late { color: #06d6a0; }
+    .tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; min-width: 110px; }
+    .tag { font-size: 0.68rem; padding: 2px 7px; border-radius: 20px; font-weight: 600; letter-spacing: 0.3px; }
+    .tag-load-SEA { background: #1b4332; color: #52b788; }
+    .tag-load-SDA { background: #3d2b00; color: #ffd166; }
+    .tag-load-LSD { background: #3b0a0a; color: #ff6b6b; }
+    .tag-dd       { background: #0d2b4a; color: #4fc3f7; }
+    .tag-sd       { background: #2a1a4a; color: #ce93d8; }
+    .tag-wab      { background: #1a3a2a; color: #80cbc4; }
+    .tag-live     { background: #1e3a0a; color: #a5d6a7; }
+    .tag-estimated{ background: #2a2a2a; color: #90a4ae; }
+    .no-arrival { padding: 20px 18px; font-size: 0.85rem; color: #90a4ae; text-align: center; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding: 14px 18px; background: #162535; border-radius: 12px; border: 1.5px solid #1e3a4a; font-size: 0.75rem; color: #90a4ae; align-items: center; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot  { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .legend-divider { width: 1px; height: 14px; background: #1e3a4a; margin: 0 4px; }
+    @media (max-width:600px) { .arrival-row { flex-wrap: wrap; } .tags { min-width: unset; } }
+  
+/* ── GPS Nearest Stop Button ── */
+.btn-gps {
+  background: linear-gradient(135deg, #0077a8, #00b4d8);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-gps:hover  { background: linear-gradient(135deg,#005f85,#0095b5); }
+.btn-gps:active { transform: scale(0.97); }
+
+/* ── Modal Backdrop ── */
+#gps-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9998;
+}
+#gps-backdrop.active { display: block; }
+
+/* ── Modal Box ── */
+#gps-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background: #162535;
+  border: 1px solid #1e3a4a;
+  border-radius: 12px;
+  padding: 24px 28px;
+  min-width: 320px;
+  max-width: 420px;
+  width: 90%;
+  color: #e0e6ed;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+#gps-modal.active { display: block; }
+#gps-modal h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  color: #00b4d8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#gps-modal .modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none; border: none;
+  color: #7a9bb5; font-size: 22px;
+  cursor: pointer; line-height: 1;
+}
+#gps-modal .modal-close:hover { color: #e0e6ed; }
+
+/* ── Stop Cards inside Modal ── */
+.gps-stop-card {
+  background: #1a2e40;
+  border: 1px solid #1e3a4a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.gps-stop-info { flex: 1; }
+.gps-stop-info .stop-id   { font-size: 11px; color: #00b4d8; font-weight: 700; margin-bottom: 2px; }
+.gps-stop-info .stop-name { font-size: 13px; font-weight: 600; color: #e0e6ed; }
+.gps-stop-info .stop-road { font-size: 11px; color: #7a9bb5; }
+.gps-stop-info .stop-dist { font-size: 11px; color: #a0c4d8; margin-top: 3px; }
+.gps-stop-go {
+  background: #00b4d8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.gps-stop-go:hover { background: #0095b5; }
+
+/* ── Status message inside modal ── */
+#gps-status-msg {
+  font-size: 13px;
+  color: #7a9bb5;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ── My-Location dot on map ── */
+#my-location-dot {
+  width: 16px; height: 16px;
+  background: #00b4d8;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(0,180,216,0.3);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<header>
+<div>
+<h1 id="header-title">🚌 Bus Stop 97039</h1>
+<div class="subtitle" id="header-subtitle">Singapore · Real-time Bus Arrivals</div>
+</div>
+<div class="header-right">
+<div class="stop-input-wrap">
+<input id="stop-input" maxlength="6" onkeydown="if(event.key==='Enter') goToStop()" placeholder="Bus Stop ID" type="text" value="97039"/>
+<button class="btn-go" onclick="goToStop()">Go →</button><button class="btn-gps" id="gps-btn" title="Detect my location">📍 Nearest Stop</button>
+</div>
+<div id="last-updated">Last updated: <strong id="update-time">–</strong></div>
+</div>
+</header>
+<div class="refresh-bar">
+<div class="countdown-wrap">
+<span class="countdown-label">Next refresh in</span>
+<div class="progress-track">
+<div class="progress-bar" id="progress-bar" style="width:100%"></div>
+</div>
+<span id="countdown-text">60s</span>
+</div>
+<button class="btn-refresh" id="btn-refresh" onclick="manualRefresh()">
+<span id="btn-icon">↻</span> Refresh Now
+  </button>
+</div>
+<div id="status-banner"></div>
+<div class="main-container">
+<div id="map"></div>
+<div class="bus-grid" id="bus-grid">
+<div class="no-arrival">Loading bus arrivals…</div>
+</div>
+<div class="legend">
+<span style="font-weight:700;color:#e0e6ed;margin-right:4px;">Legend:</span>
+<span class="legend-item"><span class="legend-dot" style="background:#e74c3c"></span>Bus Stop</span>
+<span id="bus-legend-items"></span>
+<span class="legend-divider"></span>
+<span class="legend-item">DD = Double Deck</span>
+<span class="legend-item">SD = Single Deck</span>
+<span class="legend-item">WAB = Wheelchair Accessible</span>
+<span class="legend-item">SEA = Seats Available</span>
+<span class="legend-item">SDA = Standing Available</span>
+<span class="legend-item">LSD = Limited Standing</span>
+</div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────
+var REFRESH_SEC   = 60;
+var STOPS_API     = "https://data.busrouter.sg/v1/stops.json";
+var ARRIVALS_API  = "https://arrivelah2.busrouter.sg/?id=";
+var PRIORITY_ORDER = ["2", "5", "24"];  // buses shown first, in this order
+var COLOR_PALETTE = [
+  "#4fc3f7","#4caf50","#ffd166","#ff6b6b","#ce93d8",
+  "#f39c12","#48cae4","#ff8a65","#a5d6a7","#80cbc4",
+  "#ffb3c6","#b0bec5"
+];
+
+var currentStopId   = "97039";
+var colorAssignment = {};
+var colorIndex      = 0;
+var stopsData       = {};
+var currentStopInfo = null;  // { lat, lng, name, road }
+
+function resetColors() { colorAssignment = {}; colorIndex = 0; }
+
+function getBusColor(busNo) {
+  if (!colorAssignment[busNo]) {
+    colorAssignment[busNo] = COLOR_PALETTE[colorIndex % COLOR_PALETTE.length];
+    colorIndex++;
+  }
+  return colorAssignment[busNo];
+}
+
+// ── SORT SERVICES BY PRIORITY ─────────────────────────────────────────────
+// Priority: bus 2, 5, 24 first (in that order), then the rest
+function sortServices(services) {
+  var prioritised = [];
+  var rest        = [];
+  PRIORITY_ORDER.forEach(function(busNo) {
+    services.forEach(function(svc) {
+      if (svc.no === busNo) prioritised.push(svc);
+    });
+  });
+  services.forEach(function(svc) {
+    if (PRIORITY_ORDER.indexOf(svc.no) === -1) rest.push(svc);
+  });
+  return prioritised.concat(rest);
+}
+
+// ── MAP SETUP ────────────────────────────────────────────────────────────
+// Zoom 16 = ~500m-1km radius, centred on bus stop
+var map = L.map("map").setView([1.3521, 103.8198], 16);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors", maxZoom: 19
+}).addTo(map);
+
+var stopMarkerInstance = null;
+var busMarkersGroup    = L.layerGroup().addTo(map);
+
+// ── ICON FACTORY ─────────────────────────────────────────────────────────
+function makeIcon(color, size, label) {
+  var fs = Math.max(8, Math.round(size * 0.34));
+  return L.divIcon({
+    className: "",
+    html: "<div style='"
+        + "width:" + size + "px;height:" + size + "px;border-radius:50%;"
+        + "background:" + color + ";border:3px solid #fff;"
+        + "box-shadow:0 0 10px " + color + "bb;"
+        + "display:flex;align-items:center;justify-content:center;"
+        + "font-size:" + fs + "px;font-weight:800;color:#fff;"
+        + "font-family:Segoe UI,sans-serif;white-space:nowrap;overflow:hidden;"
+        + "'>" + (label || "") + "</div>",
+    iconSize:   [size, size],
+    iconAnchor: [size / 2, size / 2]
+  });
+}
+
+// ── STOP MARKER ──────────────────────────────────────────────────────────
+function updateStopMarker() {
+  if (stopMarkerInstance) { map.removeLayer(stopMarkerInstance); stopMarkerInstance = null; }
+  if (!currentStopInfo) return;
+  stopMarkerInstance = L.marker(
+    [currentStopInfo.lat, currentStopInfo.lng],
+    { icon: makeIcon("#e74c3c", 38, "STOP"), zIndexOffset: 1000 }
+  )
+  .addTo(map)
+  .bindPopup(
+    "<div style='min-width:160px'>"
+    + "<strong style='font-size:1rem'>Bus Stop " + currentStopId + "</strong><br/>"
+    + "<b style='color:#222'>" + currentStopInfo.name + "</b><br/>"
+    + "<span style='color:#555;font-size:0.85rem'>" + currentStopInfo.road + "</span>"
+    + "</div>"
+  );
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+function fmtTime(iso) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleTimeString("en-SG", {
+    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Singapore"
+  });
+}
+function minutesUntil(iso) { return Math.round((new Date(iso) - Date.now()) / 60000); }
+function countdownClass(min) {
+  if (min <= 3)  return "arriving-soon";
+  if (min <= 10) return "arriving-mid";
+  return "arriving-late";
+}
+function loadLabel(c) {
+  return { SEA: "Seats Available", SDA: "Standing Available", LSD: "Limited Standing" }[c] || c;
+}
+function typeLabel(c) { return { DD: "Double Deck", SD: "Single Deck" }[c] || c; }
+function nowSGT() {
+  return new Date().toLocaleTimeString("en-SG", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false, timeZone: "Asia/Singapore"
+  }) + " SGT";
+}
+
+// ── RENDER MAP ───────────────────────────────────────────────────────────
+function renderMap(services) {
+  busMarkersGroup.clearLayers();
+  resetColors();
+  updateStopMarker();
+
+  services.forEach(function(svc) {
+    var color = getBusColor(svc.no);
+    ["next", "next2", "next3"].forEach(function(key) {
+      var b = svc[key];
+      if (b && b.lat && b.lng && b.lat !== 0 && b.lng !== 0 && b.monitored === 1) {
+        var min = minutesUntil(b.time);
+        L.marker([b.lat, b.lng], { icon: makeIcon(color, 36, svc.no) })
+          .bindPopup(
+            "<strong>Bus " + svc.no + "</strong> (" + svc.operator + ")<br/>"
+            + "Arrival: <strong>" + fmtTime(b.time) + "</strong> (~" + min + " min)<br/>"
+            + "Type: " + typeLabel(b.type) + " &nbsp;|&nbsp; " + loadLabel(b.load) + "<br/>"
+            + (b.feature === "WAB" ? "Wheelchair Accessible" : "")
+          )
+          .addTo(busMarkersGroup);
+      }
+    });
+  });
+
+  // Always centre on the bus stop at zoom 16 (~500m-1km radius)
+  if (currentStopInfo) {
+    map.setView([currentStopInfo.lat, currentStopInfo.lng], 16);
+  }
+  setTimeout(function() { map.invalidateSize(); }, 150);
+  updateBusLegend(services);
+}
+
+// ── RENDER CARDS ─────────────────────────────────────────────────────────
+function renderCards(services) {
+  var grid = document.getElementById("bus-grid");
+  grid.innerHTML = "";
+
+  if (!services || services.length === 0) {
+    grid.innerHTML = "<div class='no-arrival'>No bus arrival data for Stop " + currentStopId + ".</div>";
+    return;
+  }
+
+  var SLOTS = [
+    { key: "next",  label: "Next" },
+    { key: "next2", label: "2nd"  },
+    { key: "next3", label: "3rd"  }
+  ];
+
+  services.forEach(function(svc) {
+    var busColor = getBusColor(svc.no);
+    var rowsHtml = "";
+
+    SLOTS.forEach(function(slot) {
+      var b = svc[slot.key];
+      if (!b || !b.time) return;
+      var min    = minutesUntil(b.time);
+      var cClass = countdownClass(min);
+      var liveTag = b.monitored === 1
+        ? "<span class='tag tag-live'>&bull; Live</span>"
+        : "<span class='tag tag-estimated'>Est.</span>";
+      var typeClass = b.type === "DD" ? "tag-dd" : "tag-sd";
+
+      rowsHtml +=
+        "<div class='arrival-row'>"
+        + "<span class='arrival-label'>" + slot.label + "</span>"
+        + "<span class='arrival-time'>"  + fmtTime(b.time) + "</span>"
+        + "<span class='arrival-countdown " + cClass + "'>" + min + " min</span>"
+        + "<div class='tags'>"
+        +   liveTag
+        +   "<span class='tag tag-load-" + b.load + "' title='" + loadLabel(b.load) + "'>" + b.load + "</span>"
+        +   "<span class='tag " + typeClass + "'>" + b.type + "</span>"
+        +   (b.feature === "WAB" ? "<span class='tag tag-wab'>WAB</span>" : "")
+        + "</div>"
+        + "</div>";
+    });
+
+    if (!rowsHtml) rowsHtml = "<div class='no-arrival'>No upcoming arrivals</div>";
+
+    var card = document.createElement("div");
+    card.className = "bus-card";
+    card.style.borderColor = busColor + "66";
+    card.innerHTML =
+      "<div class='bus-card-header'>"
+      + "<div class='bus-badge' style='background:" + busColor + "22;color:" + busColor + ";border:2px solid " + busColor + ";'>" + svc.no + "</div>"
+      + "<div class='meta'><h2>Bus " + svc.no + "</h2><p>Operator: " + svc.operator + "</p></div>"
+      + "</div>"
+      + "<div class='arrivals-list'>" + rowsHtml + "</div>";
+    grid.appendChild(card);
+  });
+}
+
+// ── DYNAMIC BUS LEGEND ───────────────────────────────────────────────────
+function updateBusLegend(services) {
+  var el = document.getElementById("bus-legend-items");
+  if (!el) return;
+  el.innerHTML = services.map(function(svc) {
+    var c = getBusColor(svc.no);
+    return "<span class='legend-item' style='margin-right:4px;'>"
+      + "<span class='legend-dot' style='background:" + c + ";border:1.5px solid " + c + "99'></span>"
+      + "Bus " + svc.no + " (" + svc.operator + ")"
+      + "</span>";
+  }).join("");
+}
+
+// ── STATUS / LOADING ─────────────────────────────────────────────────────
+function setStatus(type, msg) {
+  var b = document.getElementById("status-banner");
+  b.className = type;
+  b.innerHTML = msg;
+}
+function setLoading(on) {
+  var btn  = document.getElementById("btn-refresh");
+  var icon = document.getElementById("btn-icon");
+  btn.disabled   = on;
+  icon.innerHTML = on ? "<span class='spinner'></span>" : "&#x21BB;";
+}
+
+// ── FETCH STOPS DATA ─────────────────────────────────────────────────────
+// stops.json format: { "stopId": [longitude, latitude, "Stop Name", "Road Name"] }
+// IMPORTANT: index 0 = longitude, index 1 = latitude
+async function fetchStopsData() {
+  setStatus("loading", "<span class='spinner'></span> Loading bus stop database&hellip;");
+  try {
+    var resp = await fetch(STOPS_API, { cache: "force-cache" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    stopsData = await resp.json();
+    setStatus("success", "");
+    return true;
+  } catch(err) {
+    console.error("fetchStopsData:", err);
+    setStatus("error",
+      "&#x26A0; Could not load bus stop database &mdash; CORS may be blocking. "
+      + "Run: <code>python -m http.server 8080</code> then open "
+      + "<code>http://localhost:8080/bus_stop_97039.html</code>");
+    return false;
+  }
+}
+
+function loadCurrentStop() {
+  var info = stopsData[currentStopId];
+  if (!info) {
+    currentStopInfo = null;
+    setStatus("error",
+      "&#x26A0; Bus Stop ID <strong>" + currentStopId + "</strong> not found. Please check the stop ID.");
+    document.getElementById("bus-grid").innerHTML =
+      "<div class='no-arrival'>Stop " + currentStopId + " not found in database.</div>";
+    return false;
+  }
+  // stops.json: [longitude, latitude, "Stop Name", "Road Name"]
+  currentStopInfo = {
+    lat:  parseFloat(info[1]),   // index 1 = latitude
+    lng:  parseFloat(info[0]),   // index 0 = longitude
+    name: info[2] || "Unknown Stop",
+    road: info[3] || "Unknown Road"
+  };
+  return true;
+}
+
+function updateHeaderInfo() {
+  if (currentStopInfo) {
+    document.getElementById("header-title").textContent =
+      "Bus Stop " + currentStopId + "  -  " + currentStopInfo.name;
+    document.getElementById("header-subtitle").textContent =
+      currentStopInfo.road + "  |  " + currentStopInfo.name + "  |  Real-time Bus Arrivals";
+    document.title = "Bus Stop " + currentStopId + " - " + currentStopInfo.name;
+  } else {
+    document.getElementById("header-title").textContent = "Bus Stop " + currentStopId;
+    document.getElementById("header-subtitle").textContent = "Singapore - Real-time Bus Arrivals";
+    document.title = "Bus Stop " + currentStopId + " - Live Arrivals";
+  }
+}
+
+// ── FETCH ARRIVALS ───────────────────────────────────────────────────────
+async function fetchData() {
+  setLoading(true);
+  setStatus("loading",
+    "<span class='spinner'></span> Fetching live arrivals for Bus Stop " + currentStopId + "&hellip;");
+  try {
+    var resp = await fetch(ARRIVALS_API + currentStopId, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    var json = await resp.json();
+    var sorted = sortServices(json.services || []);
+    renderMap(sorted);
+    renderCards(sorted);
+    document.getElementById("update-time").textContent = nowSGT();
+    updateHeaderInfo();
+    setStatus("success", "");
+  } catch(err) {
+    console.error("fetchData:", err);
+    var isCors = err.message && err.message.toLowerCase().includes("failed to fetch");
+    if (isCors) {
+      setStatus("error",
+        "&#x26A0; Live data blocked by CORS. Run: "
+        + "<code>python -m http.server 8080</code> then open "
+        + "<code>http://localhost:8080/bus_stop_97039.html</code>");
+    } else {
+      setStatus("error", "&#x26A0; Error: " + err.message + ". Retrying in " + REFRESH_SEC + "s.");
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── COUNTDOWN TIMER ──────────────────────────────────────────────────────
+var secondsLeft = REFRESH_SEC;
+var refreshTimer, countdownTimer;
+
+function startCountdown() {
+  clearInterval(countdownTimer);
+  secondsLeft = REFRESH_SEC;
+  updateCountdownUI();
+  countdownTimer = setInterval(function() {
+    secondsLeft = Math.max(0, secondsLeft - 1);
+    updateCountdownUI();
+  }, 1000);
+}
+function updateCountdownUI() {
+  document.getElementById("countdown-text").textContent = secondsLeft + "s";
+  document.getElementById("progress-bar").style.width = ((secondsLeft / REFRESH_SEC) * 100) + "%";
+}
+function startAutoRefresh() {
+  clearInterval(refreshTimer);
+  startCountdown();
+  refreshTimer = setInterval(function() { fetchData(); startCountdown(); }, REFRESH_SEC * 1000);
+}
+function manualRefresh() {
+  clearInterval(refreshTimer);
+  clearInterval(countdownTimer);
+  fetchData();
+  startAutoRefresh();
+}
+
+// ── GO TO STOP ───────────────────────────────────────────────────────────
+function goToStop() {
+  var input = document.getElementById("stop-input").value.trim();
+  if (!input) { alert("Please enter a Bus Stop ID."); return; }
+  currentStopId = input;
+  resetColors();
+  document.getElementById("bus-grid").innerHTML =
+    "<div class='no-arrival'>Loading Bus Stop " + currentStopId + "&hellip;</div>";
+  if (Object.keys(stopsData).length > 0) {
+    var ok = loadCurrentStop();
+    if (!ok) return;
+    updateHeaderInfo();
+  }
+  manualRefresh();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+fetchStopsData().then(function(ok) {
+  if (ok) {
+    loadCurrentStop();
+    updateHeaderInfo();
+  }
+  fetchData();
+  startAutoRefresh();
+});
+</script>
+
+<!-- GPS Nearest Stop Modal -->
+<div id="gps-backdrop"></div>
+<div aria-labelledby="gps-modal-title" aria-modal="true" id="gps-modal" role="dialog">
+<button aria-label="Close" class="modal-close" id="gps-modal-close">×</button>
+<h3 id="gps-modal-title">📍 Nearest Bus Stops</h3>
+<div id="gps-status-msg">Detecting your location…</div>
+<div id="gps-stop-list"></div>
+</div>
+<script>
+// ── GPS Nearest Stop Feature ──────────────────────────────────────────────
+
+(function () {
+  var myLocationMarker = null;
+
+  // Haversine distance in metres
+  function haversine(lat1, lon1, lat2, lon2) {
+    var R = 6371000;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function openModal()  {
+    document.getElementById("gps-backdrop").classList.add("active");
+    document.getElementById("gps-modal").classList.add("active");
+  }
+  function closeModal() {
+    document.getElementById("gps-backdrop").classList.remove("active");
+    document.getElementById("gps-modal").classList.remove("active");
+  }
+
+  function showStatus(msg) {
+    document.getElementById("gps-status-msg").textContent = msg;
+    document.getElementById("gps-stop-list").innerHTML = "";
+  }
+
+  function renderStops(stops) {
+    document.getElementById("gps-status-msg").style.display = "none";
+    var list = document.getElementById("gps-stop-list");
+    list.innerHTML = "";
+    stops.forEach(function(s) {
+      var distLabel = s.dist < 1000
+        ? "~" + Math.round(s.dist) + " m away"
+        : "~" + (s.dist / 1000).toFixed(2) + " km away";
+      var card = document.createElement("div");
+      card.className = "gps-stop-card";
+      card.innerHTML =
+        '<div class="gps-stop-info">' +
+          '<div class="stop-id">Stop ' + s.id + '</div>' +
+          '<div class="stop-name">' + (s.name || "—") + '</div>' +
+          '<div class="stop-road">' + (s.road || "") + '</div>' +
+          '<div class="stop-dist">&#x1F4CD; ' + distLabel + '</div>' +
+        '</div>' +
+        '<button class="gps-stop-go" data-stopid="' + s.id + '">Go &#x2192;</button>';
+      list.appendChild(card);
+    });
+
+    // Attach Go button events
+    list.querySelectorAll(".gps-stop-go").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var sid = this.getAttribute("data-stopid");
+        closeModal();
+        var inp = document.getElementById("stop-input") ||
+                  document.querySelector('input[type="text"]') ||
+                  document.querySelector('input[placeholder*="stop" i]') ||
+                  document.querySelector('input');
+        if (inp) { inp.value = sid; }
+        if (typeof goToStop === "function") { goToStop(sid); }
+        else {
+          var goB = document.getElementById("go-btn") || document.querySelector(".btn-go");
+          if (goB) goB.click();
+        }
+      });
+    });
+  }
+
+  function findNearest(userLat, userLng) {
+    // stopsData should be a global variable in the original HTML
+    // Format: { "stopId": [lng, lat, "Name", "Road"] }
+    if (typeof stopsData === "undefined" || stopsData === null) {
+      showStatus("Bus stop data not available yet. Please try again.");
+      return;
+    }
+    var results = [];
+    Object.keys(stopsData).forEach(function(stopId) {
+      var s = stopsData[stopId];
+      // s[0] = lng, s[1] = lat
+      if (s && s.length >= 2) {
+        var d = haversine(userLat, userLng, parseFloat(s[1]), parseFloat(s[0]));
+        results.push({ id: stopId, dist: d, name: s[2] || "", road: s[3] || "" });
+      }
+    });
+    results.sort(function(a, b) { return a.dist - b.dist; });
+    renderStops(results.slice(0, 5));
+  }
+
+  function placeMyLocationDot(lat, lng) {
+    if (typeof map === "undefined") return;          // map = Leaflet global
+    if (myLocationMarker) { map.removeLayer(myLocationMarker); }
+    var dotIcon = L.divIcon({ html: '<div id="my-location-dot"></div>', className: "", iconSize: [16, 16], iconAnchor: [8, 8] });
+    myLocationMarker = L.marker([lat, lng], { icon: dotIcon, zIndexOffset: 1000 }).addTo(map);
+    myLocationMarker.bindPopup("&#x1F4CD; You are here").openPopup();
+  }
+
+  document.getElementById("gps-btn").addEventListener("click", function() {
+    openModal();
+    document.getElementById("gps-status-msg").style.display = "";
+    document.getElementById("gps-stop-list").innerHTML = "";
+    showStatus("Detecting your location…");
+
+    if (!navigator.geolocation) {
+      showStatus("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+        placeMyLocationDot(lat, lng);
+        showStatus("Finding nearest stops…");
+        findNearest(lat, lng);
+      },
+      function(err) {
+        var msgs = {
+          1: "Location access was denied. Please allow location permission and try again.",
+          2: "Your position could not be determined. Please try again.",
+          3: "Location request timed out. Please try again."
+        };
+        showStatus(msgs[err.code] || "An unknown error occurred.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  });
+
+  document.getElementById("gps-modal-close").addEventListener("click", closeModal);
+  document.getElementById("gps-backdrop").addEventListener("click", closeModal);
+})();
+</script></body>
+</html>
