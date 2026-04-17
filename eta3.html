@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ETA Journey Planner · Singapore</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --bg:#0f1923;--card:#162535;--accent:#00b4d8;--accent2:#0088a8;
+  --text:#e0eaf5;--muted:#6b8baa;--border:#1e3550;
+  --green:#00c897;--orange:#f97316;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+  --planA:#00b4d8;--planB:#8b5cf6;--planC:#10b981;--planD:#f97316;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#0a1520,#162535);border-bottom:1px solid var(--border);padding:13px 20px;position:sticky;top:0;z-index:1000;}
+.header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.header-left h1{font-size:1.2rem;font-weight:700;color:var(--accent);}
+.header-sub{font-size:.72rem;color:var(--muted);margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.clock{font-size:.84rem;color:var(--accent);font-weight:600;letter-spacing:.5px;}
+.key-status{display:flex;align-items:center;gap:6px;font-size:.74rem;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:#0d1e2e;cursor:pointer;transition:border .2s;}
+.key-status:hover{border-color:var(--accent);}
+.key-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.key-dot.on{background:var(--green);}
+.key-dot.off{background:var(--red);}
+.btn-gear{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:5px 10px;cursor:pointer;font-size:1rem;transition:all .2s;}
+.btn-gear:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── Modal ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:480px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .22s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+.modal-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;}
+.modal-x:hover{color:var(--text);}
+.modal-h{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.modal-lbl{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.modal-inp{width:100%;background:#0d1e2e;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;padding:9px 40px 9px 12px;outline:none;transition:border .2s;font-family:monospace;}
+.modal-inp:focus{border-color:var(--accent);}
+.eye-wrap{position:relative;margin-bottom:8px;}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;}
+.modal-hint{font-size:.71rem;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+.modal-hint a{color:var(--accent);}
+.modal-alert{padding:9px 12px;border-radius:8px;font-size:.78rem;font-weight:600;margin-bottom:10px;}
+.modal-alert.ok{background:rgba(0,200,151,.12);border:1px solid rgba(0,200,151,.3);color:var(--green);}
+.modal-alert.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+.modal-alert.info{background:rgba(0,180,216,.1);border:1px solid rgba(0,180,216,.3);color:var(--accent);}
+.modal-div{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.steps-list{font-size:.75rem;color:var(--muted);line-height:1.8;padding-left:14px;}
+.steps-list li{margin-bottom:3px;}
+
+/* ── Buttons ── */
+.btn{padding:10px 15px;border-radius:10px;border:none;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#0a1520;}
+.btn-primary:hover{background:var(--accent2);}
+.btn-success{background:var(--green);color:#0a1520;}
+.btn-success:hover{background:#00a07a;}
+.btn-secondary{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
+.btn-secondary:hover{background:#1e3a56;color:var(--text);}
+.btn-pick{background:#1a3048;color:var(--muted);border:1px solid var(--border);}
+.btn-pick:hover{background:#1e3a56;color:var(--text);}
+.btn-pick.active{background:rgba(0,180,216,.15);color:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(0,180,216,.25);}
+.btn-grab{background:var(--orange);color:#fff;width:100%;justify-content:center;}
+.btn-grab:hover{background:#e05a00;}
+.btn-gmaps{background:#1a3a5c;color:#5dade2;border:1px solid #1f618d;justify-content:center;}
+.btn-gmaps:hover{background:#1f618d;color:#fff;}
+.btn-full{width:100%;justify-content:center;}
+.btn-refresh{padding:7px 13px;background:var(--accent);color:#0a1520;font-weight:700;font-size:.78rem;border:none;border-radius:8px;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-refresh:hover{background:var(--accent2);}
+.btn-refresh:disabled{background:#1e3a4a;color:#90a4ae;cursor:not-allowed;}
+.btn-copy{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.7rem;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-copy:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── Input ── */
+.input-sec{padding:13px 20px 8px;max-width:1140px;margin:0 auto;}
+.gps-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.gps-dot{width:11px;height:11px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.gps-dot.on{background:var(--green);animation:pgps 1.5s infinite;}
+@keyframes pgps{0%,100%{box-shadow:0 0 0 0 rgba(0,200,151,.4);}50%{box-shadow:0 0 0 7px rgba(0,200,151,0);}}
+.gps-lbl{font-size:.8rem;color:var(--muted);}
+.gps-val{font-size:.78rem;color:var(--accent);font-weight:600;}
+.dest-row{display:flex;gap:8px;flex-wrap:wrap;}
+.dest-inp{flex:1;min-width:200px;background:#0d1e2e;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem;padding:10px 14px;outline:none;transition:border .2s;}
+.dest-inp:focus{border-color:var(--accent);}
+.dest-inp::placeholder{color:var(--muted);}
+#pickBanner{display:none;background:rgba(0,200,151,.1);border:1px solid rgba(0,200,151,.35);border-radius:10px;padding:9px 13px;margin-top:8px;font-size:.82rem;color:var(--green);font-weight:600;align-items:center;gap:10px;}
+#pickBanner.show{display:flex;}
+.cancel-pick{margin-left:auto;font-size:.72rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;}
+.cancel-pick:hover{color:var(--text);}
+.disclaimer{font-size:.71rem;color:var(--muted);background:#0d1e2e;border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:8px;padding:8px 13px;margin-top:8px;line-height:1.6;}
+.disclaimer a{color:var(--accent);}
+
+/* ── Refresh Bar ── */
+.rbar{max-width:1140px;margin:0 auto;padding:5px 20px;display:flex;align-items:center;gap:10px;background:#10202f;border-bottom:1px solid var(--border);}
+.rbar-lbl{font-size:.74rem;color:var(--muted);white-space:nowrap;}
+.rbar-track{flex:1;background:#1a3048;border-radius:4px;height:5px;overflow:hidden;}
+.rbar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#48cae4);border-radius:4px;transition:width 1s linear;}
+#cdText{font-size:.78rem;font-weight:700;color:var(--accent);white-space:nowrap;min-width:34px;}
+#lastUpd{font-size:.71rem;color:var(--muted);white-space:nowrap;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid #48cae4;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ── Dual Maps ── */
+.maps-wrap{max-width:1140px;margin:0 auto;padding:10px 20px 8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.map-panel{display:flex;flex-direction:column;gap:6px;}
+.map-lbl{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+#map{height:280px;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+#map.pick-mode,#map.pick-mode .leaflet-container{cursor:crosshair !important;}
+.gmap-box{height:280px;border-radius:12px;border:1px solid var(--border);overflow:hidden;background:#0d1e2e;display:flex;align-items:center;justify-content:center;}
+.gmap-box iframe{width:100%;height:100%;border:none;border-radius:12px;}
+.gmap-ph{text-align:center;color:var(--muted);font-size:.82rem;padding:20px;}
+.gmap-ph .ico{font-size:2.4rem;margin-bottom:8px;}
+.mode-btns{display:flex;gap:6px;}
+.mode-btn{flex:1;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:#0d1e2e;color:var(--muted);font-size:.73rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+.mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mode-btn.active{background:rgba(0,180,216,.18);color:var(--accent);border-color:var(--accent);}
+
+/* ── Plans ── */
+.plans-sec{max-width:1140px;margin:0 auto;padding:0 20px 14px;}
+.sec-title{font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.8px;text-transform:uppercase;}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:14px;}
+
+/* ── Plan Card ── */
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:10px;animation:fadeIn .4s ease both;transition:transform .2s,box-shadow .2s;}
+.plan-card:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,180,216,.1);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.plan-card.grab{border-color:rgba(249,115,22,.3);}
+.plan-card.grab:hover{box-shadow:0 6px 22px rgba(249,115,22,.1);}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.plan-badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;}
+.card-title{font-size:.88rem;font-weight:700;color:var(--text);}
+.card-sub{font-size:.72rem;color:var(--muted);}
+.pills{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+.pill{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.pill-green{background:rgba(0,200,151,.14);color:var(--green);border:1px solid rgba(0,200,151,.28);}
+.pill-blue{background:rgba(0,180,216,.14);color:var(--accent);border:1px solid rgba(0,180,216,.28);}
+.pill-purple{background:rgba(139,92,246,.14);color:#c4b5fd;border:1px solid rgba(139,92,246,.28);}
+.pill-orange{background:rgba(249,115,22,.14);color:var(--orange);border:1px solid rgba(249,115,22,.28);}
+.pill-gray{background:rgba(107,139,170,.1);color:var(--muted);border:1px solid rgba(107,139,170,.22);}
+.pill-goog{background:rgba(66,133,244,.14);color:#74b3f5;border:1px solid rgba(66,133,244,.28);}
+.divider{border:none;border-top:1px solid var(--border);}
+
+/* ── Timeline ── */
+.timeline{display:flex;flex-direction:column;}
+.tl-step{display:flex;gap:10px;}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:26px;flex-shrink:0;}
+.tl-circ{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0;border:2px solid transparent;}
+.tl-circ.walk{background:rgba(107,139,170,.14);border-color:rgba(107,139,170,.35);color:var(--muted);}
+.tl-circ.bus{background:rgba(0,180,216,.14);border-color:rgba(0,180,216,.35);color:var(--accent);}
+.tl-circ.mrt{background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.35);color:var(--green);}
+.tl-circ.transfer{background:rgba(139,92,246,.14);border-color:rgba(139,92,246,.35);color:var(--purple);}
+.tl-conn{width:2px;flex:1;background:var(--border);margin:2px 0;min-height:8px;}
+.tl-body{flex:1;padding:1px 0 12px;}
+.tl-type{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:2px;}
+.tl-main{font-size:.85rem;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px;}
+.tl-sub{font-size:.73rem;color:var(--muted);line-height:1.5;}
+.tl-sub .hi{color:var(--accent);font-weight:600;}
+.tl-sub .live{color:var(--green);font-weight:700;}
+.route-badge{display:inline-flex;align-items:center;font-size:.8rem;font-weight:800;padding:2px 9px;border-radius:7px;color:#fff;margin-bottom:3px;}
+
+/* ── Stat row ── */
+.stat-row{display:flex;gap:10px;}
+.stat{text-align:center;flex:1;}
+.stat-num{font-size:1.12rem;font-weight:800;}
+.stat-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.grab-fare{font-size:1.3rem;font-weight:800;color:var(--orange);}
+.grab-sub{font-size:.73rem;color:var(--muted);}
+
+/* ── Fallback ── */
+.fallback-box{background:rgba(0,180,216,.06);border:1px solid rgba(0,180,216,.18);border-radius:10px;padding:12px;text-align:center;}
+.fallback-box p{font-size:.78rem;color:var(--muted);margin-bottom:9px;line-height:1.5;}
+.arr-mini{display:flex;flex-direction:column;gap:5px;margin-top:4px;}
+.arr-row{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#0d1e2e;border-radius:7px;border:1px solid var(--border);}
+.arr-badge{font-size:.73rem;font-weight:800;padding:2px 7px;border-radius:6px;color:#0a1520;flex-shrink:0;}
+.arr-soon{color:var(--red);font-weight:700;}
+.arr-mid{color:var(--yellow);font-weight:700;}
+.arr-late{color:var(--green);font-weight:600;}
+.arr-clk{font-size:.68rem;color:var(--muted);margin-left:auto;white-space:nowrap;}
+
+/* ── Live Arrivals ── */
+.arr-sec{max-width:1140px;margin:0 auto;padding:0 20px 28px;}
+.stops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.stop-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;animation:fadeIn .4s ease both;}
+.stop-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--border);}
+.stop-id{font-family:monospace;font-size:.7rem;font-weight:700;padding:3px 7px;border-radius:5px;background:rgba(0,180,216,.12);color:var(--accent);border:1px solid rgba(0,180,216,.24);flex-shrink:0;}
+.stop-name{font-size:.85rem;font-weight:700;color:var(--text);}
+.stop-road{font-size:.7rem;color:var(--muted);}
+.stop-dist{margin-left:auto;font-size:.67rem;padding:2px 6px;border-radius:11px;background:#0d1e2e;border:1px solid var(--border);color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.stop-buses{padding:5px 0;}
+.bus-row{display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border);}
+.bus-row:last-child{border-bottom:none;}
+.br-num{font-size:.75rem;font-weight:800;padding:2px 7px;border-radius:5px;color:#0a1520;flex-shrink:0;}
+.br-slots{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
+.br-slot{display:flex;align-items:center;gap:3px;}
+.br-slot-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+.br-slot-t{font-size:.75rem;font-weight:600;}
+.cs{color:var(--red);}
+.cm{color:var(--yellow);}
+.cl{color:var(--green);}
+.no-bus{padding:11px 14px;font-size:.76rem;color:var(--muted);text-align:center;}
+
+/* ── Error / Skeleton ── */
+.skeleton{background:linear-gradient(90deg,#162535 25%,#1e3550 50%,#162535 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:8px;height:13px;}
+@keyframes shim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:11px;}
+.err-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.28);border-radius:14px;padding:14px;text-align:center;color:var(--red);font-size:.82rem;}
+
+@media(max-width:760px){
+  .maps-wrap,.plans-grid,.stops-grid{grid-template-columns:1fr;}
+  .dest-row{flex-direction:column;}
+  .rbar{flex-wrap:wrap;gap:7px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <div class="header-left">
+      <span>🗺️</span>
+      <div>
+        <h1>ETA Journey Planner · Singapore</h1>
+        <div class="header-sub">Powered by <strong style="color:var(--accent)">Google Routes API</strong> · SG BusRouter Live Arrivals</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock">--:-- SGT</div>
+      <div class="key-status" id="keyStatus" onclick="openModal()">
+        <div class="key-dot off" id="keyDot"></div>
+        <span id="keyLbl">Setup API Key</span>
+      </div>
+      <button class="btn-gear" onclick="openModal()" title="Google Routes API Settings">🔑</button>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-bg" id="keyModal">
+  <div class="modal-box">
+    <button class="modal-x" onclick="closeModal()">×</button>
+    <div class="modal-h">🔑 Google Routes API Setup</div>
+
+    <div id="modalAlert" style="display:none;" class="modal-alert info"></div>
+
+    <div style="margin-bottom:12px;">
+      <div class="modal-lbl">How to get a free API key</div>
+      <ol class="steps-list">
+        <li>Go to <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Create project</li>
+        <li>Enable <strong>Routes API</strong> in "APIs &amp; Services"</li>
+        <li>Create credentials → API Key → copy it here</li>
+        <li><strong>Free tier:</strong> 10,000 calls/month (Essentials SKU) — personal use is free</li>
+      </ol>
+      <div class="modal-hint" style="margin-top:6px;">
+        💡 <a href="https://console.cloud.google.com/apis/library/routes.googleapis.com" target="_blank">Enable Routes API →</a>
+        &nbsp;|&nbsp;
+        <a href="https://mapsplatform.google.com/pricing/" target="_blank">View Pricing →</a>
+      </div>
+    </div>
+
+    <div class="modal-lbl">Your API Key</div>
+    <div class="eye-wrap">
+      <input class="modal-inp" id="apiKeyInp" type="password" placeholder="AIzaSy…"/>
+      <button class="eye-btn" onclick="toggleKey()">👁</button>
+    </div>
+    <button class="btn btn-success btn-full" onclick="saveKey()">💾 Save API Key</button>
+
+    <div class="modal-div"></div>
+    <div class="modal-hint">
+      ℹ️ Key is stored in your browser (localStorage) only — never sent anywhere except Google APIs.
+      Without a key, the app falls back to <strong>Google Maps deep-links</strong> + live bus arrivals.
+    </div>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div class="input-sec">
+  <div class="gps-row">
+    <div class="gps-dot" id="gpsDot"></div>
+    <span class="gps-lbl">Your location:</span>
+    <span class="gps-val" id="gpsVal">Not detected yet</span>
+    <button class="btn btn-secondary" onclick="getGPS()">📍 Get My Location</button>
+  </div>
+  <div class="dest-row">
+    <input class="dest-inp" id="destInp" type="text"
+      placeholder="Enter destination — or 🗺️ click map to pin…"
+      onkeydown="if(event.key==='Enter')planJourney()"/>
+    <button class="btn btn-primary" onclick="planJourney()">🔍 Plan Journey</button>
+    <button class="btn btn-pick" id="pickBtn" onclick="togglePick()">🗺️ Pick on Map</button>
+  </div>
+  <div id="pickBanner">
+    📍 <strong>Pick mode ON</strong> — Click anywhere on the map to set your destination
+    <button class="cancel-pick" onclick="togglePick()">✕ Cancel</button>
+  </div>
+  <div class="disclaimer">
+    ⚠️ Route plans use <strong>Google Routes API</strong> (free tier: 10,000 calls/month — personal use is free).
+    Live bus arrivals from <strong>SG BusRouter</strong>. Auto-refresh every <strong>5 minutes</strong>.
+    If CORS is blocked locally, run: <code>python -m http.server 8080</code>
+  </div>
+</div>
+
+<!-- REFRESH BAR -->
+<div class="rbar">
+  <span class="rbar-lbl">Auto-refresh in</span>
+  <div class="rbar-track"><div class="rbar-fill" id="rbarFill" style="width:100%"></div></div>
+  <span id="cdText">5:00</span>
+  <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">
+    <span id="refreshIco">↻</span> Refresh Now
+  </button>
+  <span id="lastUpd"></span>
+</div>
+
+<!-- DUAL MAPS -->
+<div class="maps-wrap">
+  <div class="map-panel">
+    <div class="map-lbl">📍 Your Location &amp; Nearby Bus Stops</div>
+    <div id="map"></div>
+  </div>
+  <div class="map-panel">
+    <div class="map-lbl">🗺️ Google Maps Directions</div>
+    <div class="gmap-box" id="gmapBox">
+      <div class="gmap-ph"><div class="ico">🗺️</div>Set your destination to see Google Maps directions</div>
+    </div>
+    <div class="mode-btns">
+      <button class="mode-btn active" id="modeTransit" onclick="setGmapMode('transit')">🚌 Transit</button>
+      <button class="mode-btn" id="modeDriving" onclick="setGmapMode('driving')">🚗 Driving</button>
+      <button class="mode-btn" id="modeWalking" onclick="setGmapMode('walking')">🚶 Walking</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLANS -->
+<div class="plans-sec">
+  <div class="sec-title">✈️ Suggested Travel Plans</div>
+  <div class="plans-grid" id="plansGrid">
+    <div class="skel-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skel-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skel-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+    <div class="skel-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>
+  </div>
+</div>
+
+<!-- LIVE ARRIVALS -->
+<div class="arr-sec">
+  <div class="sec-title">🚌 Live Bus Arrivals at Nearby Stops</div>
+  <div class="stops-grid" id="stopsGrid">
+    <div class="skel-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
+    <div class="skel-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
+    <div class="skel-card"><div class="skeleton" style="width:50%;height:16px;"></div><div class="skeleton"></div><div class="skeleton" style="width:70%;"></div></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  GLOBALS
+// ═══════════════════════════════════════════
+const REFRESH_SEC=300;
+const GMAP_EMBED_KEY='AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
+const ROUTES_URL='https://routes.googleapis.com/directions/v2:computeRoutes';
+const COLORS=['#4fc3f7','#4caf50','#ffd166','#ff6b6b','#ce93d8','#f39c12','#48cae4','#ff8a65','#a5d6a7','#80cbc4'];
+let userLat=null,userLng=null,destLat=null,destLng=null,destName='';
+let allStops={},nearbyStops=[],stopMarkers=[];
+let map,userMarker,destMarker,routeLine;
+let refreshTimer=null,secsLeft=REFRESH_SEC,isLoading=false;
+let pickMode=false,gmapMode='transit';
+let curStops3=[],curDist=0;
+
+// ═══════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════
+function tick(){
+  const s=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  document.getElementById('clock').textContent=
+    String(s.getHours()).padStart(2,'0')+':'+String(s.getMinutes()).padStart(2,'0')+':'+String(s.getSeconds()).padStart(2,'0')+' SGT';
+}
+setInterval(tick,1000);tick();
+
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
+function hav(a,b,c,d){
+  const R=6371000,r=Math.PI/180,dA=(c-a)*r,dB=(d-b)*r;
+  const x=Math.sin(dA/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dB/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function wlkT(m){return Math.ceil(m/80);}
+function fare(m){const f=3.90+(m/400)*0.55;return{lo:Math.max(3.90,f*0.85).toFixed(2),hi:(f*1.35).toFixed(2)};}
+function etaAt(add){
+  const n=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Singapore'}));
+  n.setMinutes(n.getMinutes()+add);
+  return n.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function fmtISO(s){
+  if(!s)return'--:--';
+  try{return new Date(s).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Singapore'});}catch{return'--:--';}
+}
+function durS(s){if(!s)return 0;const n=parseInt(String(s).replace(/[^0-9]/g,''));return isNaN(n)?0:Math.round(n/60);}
+function minUntil(iso){if(!iso)return null;return Math.max(0,Math.round((new Date(iso)-Date.now())/60000));}
+function cdClass(m){if(m===null)return'cl';return m<=3?'cs':m<=10?'cm':'cl';}
+function cdLbl(m){if(m===null)return'-';return m<=1?'Arr':m+' min';}
+function copyETA(t){navigator.clipboard.writeText(t).then(()=>alert('📋 Copied: '+t)).catch(()=>prompt('Copy:',t));}
+function gUrl(mode){if(!userLat||!destLat)return'https://maps.google.com';return`https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}&travelmode=${mode}`;}
+function skelCards(n){return Array(n).fill(`<div class="skel-card"><div class="skeleton" style="width:40%;height:18px;"></div><div class="skeleton"></div><div class="skeleton" style="width:75%;"></div><div class="skeleton" style="width:55%;"></div></div>`).join('');}
+
+// MRT line colors
+function lineColor(name){
+  if(!name)return'#10b981';
+  const n=name.toUpperCase();
+  if(n.includes('EWL')||n.includes('EAST WEST'))return'#009B77';
+  if(n.includes('NSL')||n.includes('NORTH SOUTH'))return'#D42E12';
+  if(n.includes('NEL')||n.includes('NORTH EAST'))return'#9900AA';
+  if(n.includes('CCL')||n.includes('CIRCLE'))return'#FA9E0D';
+  if(n.includes('DTL')||n.includes('DOWNTOWN'))return'#005EC4';
+  if(n.includes('TEL')||n.includes('THOMSON'))return'#9D5B25';
+  if(n.includes('JRL')||n.includes('JURONG'))return'#0099AA';
+  return'#10b981';
+}
+
+// ═══════════════════════════════════════════
+//  API KEY MODAL
+// ═══════════════════════════════════════════
+function hasKey(){return !!(localStorage.getItem('gra_key')||'').trim();}
+function getKey(){return localStorage.getItem('gra_key')||'';}
+function updateKeyUI(){
+  const ok=hasKey();
+  document.getElementById('keyDot').className='key-dot '+(ok?'on':'off');
+  document.getElementById('keyLbl').textContent=ok?'Routes API ✓':'Setup API Key';
+}
+function openModal(){
+  document.getElementById('keyModal').classList.add('show');
+  const k=getKey();
+  document.getElementById('apiKeyInp').value=k;
+  const al=document.getElementById('modalAlert');
+  if(k){al.className='modal-alert ok';al.textContent='✅ API key is saved.';al.style.display='block';}
+  else{al.style.display='none';}
+}
+function closeModal(){document.getElementById('keyModal').classList.remove('show');}
+function toggleKey(){const i=document.getElementById('apiKeyInp');i.type=i.type==='password'?'text':'password';}
+function saveKey(){
+  const k=document.getElementById('apiKeyInp').value.trim();
+  const al=document.getElementById('modalAlert');
+  if(!k){al.className='modal-alert err';al.textContent='⚠️ Please paste your API key.';al.style.display='block';return;}
+  localStorage.setItem('gra_key',k);
+  al.className='modal-alert ok';al.textContent='✅ API key saved!';al.style.display='block';
+  updateKeyUI();
+  setTimeout(closeModal,1200);
+}
+
+// ═══════════════════════════════════════════
+//  MAP
+// ═══════════════════════════════════════════
+function initMap(){
+  map=L.map('map',{zoomControl:true}).setView([1.3521,103.8198],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  map.on('click',e=>{
+    if(!pickMode)return;
+    const{lat,lng}=e.latlng;
+    setDestMarker(lat,lng,'Locating…');
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,{headers:{'Accept-Language':'en'}})
+      .then(r=>r.json()).then(d=>{
+        const name=d.display_name?d.display_name.split(',').slice(0,2).join(', '):`${lat.toFixed(5)},${lng.toFixed(5)}`;
+        destLat=lat;destLng=lng;destName=name;
+        document.getElementById('destInp').value=name;
+        if(destMarker)destMarker.bindPopup(`<b>📍 ${name}</b>`).openPopup();
+        disablePick();planJourney();
+      }).catch(()=>{
+        const name=`${lat.toFixed(5)},${lng.toFixed(5)}`;
+        destLat=lat;destLng=lng;destName=name;
+        document.getElementById('destInp').value=name;
+        disablePick();planJourney();
+      });
+  });
+}
+initMap();
+const uIcon=L.divIcon({className:'',html:`<div style="width:15px;height:15px;border-radius:50%;background:#00b4d8;border:3px solid #fff;box-shadow:0 0 0 4px rgba(0,180,216,.25);"></div>`,iconSize:[15,15],iconAnchor:[7,7]});
+const sIcon=L.divIcon({className:'',html:`<div style="width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>`,iconSize:[10,10],iconAnchor:[5,5]});
+const dIcon=L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 8px rgba(16,185,129,.6);"></div>`,iconSize:[18,18],iconAnchor:[9,9]});
+
+function setDestMarker(lat,lng,lbl){
+  if(destMarker)map.removeLayer(destMarker);
+  destMarker=L.marker([lat,lng],{icon:dIcon}).addTo(map).bindPopup(`<b>📍 ${lbl}</b>`).openPopup();
+}
+function togglePick(){pickMode?disablePick():enablePick();}
+function enablePick(){pickMode=true;document.getElementById('pickBtn').classList.add('active');document.getElementById('pickBanner').classList.add('show');document.getElementById('map').classList.add('pick-mode');}
+function disablePick(){pickMode=false;document.getElementById('pickBtn').classList.remove('active');document.getElementById('pickBanner').classList.remove('show');document.getElementById('map').classList.remove('pick-mode');}
+
+// ═══════════════════════════════════════════
+//  GPS
+// ═══════════════════════════════════════════
+function getGPS(){
+  if(!navigator.geolocation){alert('Geolocation not supported.');return;}
+  document.getElementById('gpsVal').textContent='Detecting…';
+  navigator.geolocation.getCurrentPosition(p=>{
+    userLat=p.coords.latitude;userLng=p.coords.longitude;
+    document.getElementById('gpsVal').textContent=userLat.toFixed(5)+'°N, '+userLng.toFixed(5)+'°E';
+    document.getElementById('gpsDot').classList.add('on');
+    map.setView([userLat,userLng],15);
+    if(userMarker)map.removeLayer(userMarker);
+    userMarker=L.marker([userLat,userLng],{icon:uIcon}).addTo(map).bindPopup('<b>📍 You are here</b>').openPopup();
+    loadStops();
+  },()=>{document.getElementById('gpsVal').textContent='GPS denied / unavailable';},{enableHighAccuracy:true,timeout:10000});
+}
+
+// ═══════════════════════════════════════════
+//  BUS STOPS
+// ═══════════════════════════════════════════
+async function loadStops(){
+  try{const r=await fetch('https://data.busrouter.sg/v1/stops.json');allStops=await r.json();findNearby();}
+  catch(e){console.warn('Stops load failed',e);}
+}
+function findNearby(){
+  if(!userLat||!Object.keys(allStops).length)return;
+  const d=[];
+  for(const[id,v]of Object.entries(allStops)){
+    const[lng,lat,nm,rd]=v;
+    d.push({id,lat:parseFloat(lat),lng:parseFloat(lng),name:nm||'',road:rd||'',dist:hav(userLat,userLng,parseFloat(lat),parseFloat(lng))});
+  }
+  d.sort((a,b)=>a.dist-b.dist);nearbyStops=d.slice(0,10);
+  stopMarkers.forEach(m=>map.removeLayer(m));stopMarkers=[];
+  nearbyStops.slice(0,5).forEach(s=>{
+    const m=L.marker([s.lat,s.lng],{icon:sIcon}).addTo(map)
+      .bindPopup(`<b>🚏 ${s.name}</b><br>${s.road}<br><small>Stop <b>${s.id}</b> · ${Math.round(s.dist)}m</small>`);
+    stopMarkers.push(m);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  GEOCODE
+// ═══════════════════════════════════════════
+async function geocode(q){
+  const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=sg&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
+  const d=await r.json();
+  if(d&&d.length)return{lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon),name:d[0].display_name.split(',').slice(0,2).join(', ')};
+  return null;
+}
+
+// ═══════════════════════════════════════════
+//  BUS ARRIVALS
+// ═══════════════════════════════════════════
+async function fetchArr(id){try{const r=await fetch(`https://arrivelah2.busrouter.sg/?id=${id}`);return await r.json();}catch{return null;}}
+function busInfo(svc){
+  const t=svc.next?.time||svc.next,t2=svc.next2?.time||svc.next2,t3=svc.next3?.time||svc.next3;
+  return{no:svc.no,n:minUntil(t),ns:fmtISO(t),n2:minUntil(t2),n2s:fmtISO(t2),n3:minUntil(t3),n3s:fmtISO(t3)};
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE MAPS EMBED
+// ═══════════════════════════════════════════
+function updateGmap(){
+  if(!userLat||!destLat)return;
+  const src=`https://www.google.com/maps/embed/v1/directions?key=${GMAP_EMBED_KEY}&origin=${userLat},${userLng}&destination=${destLat},${destLng}&mode=${gmapMode}&language=en`;
+  document.getElementById('gmapBox').innerHTML=`<iframe src="${src}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+function setGmapMode(m){
+  gmapMode=m;
+  ['Transit','Driving','Walking'].forEach(x=>document.getElementById('mode'+x).classList.toggle('active',x.toLowerCase()===m));
+  updateGmap();
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE ROUTES API
+// ═══════════════════════════════════════════
+async function fetchRoutes(pref){
+  const key=getKey();
+  if(!key)return null;
+  // Build RFC3339 departure time in SGT (+08:00)
+  const now=new Date();
+  const sgtMs=now.getTime()+((8*60)-now.getTimezoneOffset())*60000;
+  const sgt=new Date(sgtMs);
+  const iso=sgt.toISOString().replace('Z','')+'+08:00';
+  const body={
+    origin:{location:{latLng:{latitude:userLat,longitude:userLng}}},
+    destination:{location:{latLng:{latitude:destLat,longitude:destLng}}},
+    travelMode:'TRANSIT',
+    computeAlternativeRoutes:true,
+    departureTime:iso,
+    languageCode:'en',
+    transitPreferences:{
+      routingPreference:pref||'TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED',
+      allowedTravelModes:['BUS','SUBWAY','RAIL']
+    }
+  };
+  const mask=[
+    'routes.duration','routes.distanceMeters',
+    'routes.legs.duration','routes.legs.distanceMeters',
+    'routes.legs.steps.travelMode','routes.legs.steps.distanceMeters',
+    'routes.legs.steps.staticDuration','routes.legs.steps.navigationInstruction',
+    'routes.legs.steps.transitDetails'
+  ].join(',');
+  try{
+    const resp=await fetch(ROUTES_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':mask},
+      body:JSON.stringify(body)
+    });
+    if(!resp.ok){
+      const e=await resp.json();
+      console.warn('Routes API err:',e);
+      return{error:e?.error?.message||'API error '+resp.status};
+    }
+    return await resp.json();
+  }catch(e){console.warn('Routes fetch failed',e);return null;}
+}
+
+// ═══════════════════════════════════════════
+//  PARSE ROUTE → TIMELINE STEPS
+// ═══════════════════════════════════════════
+function parseRoute(route){
+  if(!route||!route.legs||!route.legs[0])return[];
+  const steps=route.legs[0].steps||[];
+  const out=[];
+  for(const st of steps){
+    const mode=(st.travelMode||'').toUpperCase();
+    if(mode==='WALK'){
+      const m=st.distanceMeters||0,dur=durS(st.staticDuration);
+      if(dur<1&&m<40)continue;
+      const instr=st.navigationInstruction?.instructions||'Walk to next stop';
+      out.push({type:'walk',icon:'🚶',typeLabel:'Walk',
+        main:`Walk ~${Math.round(m)}m (~${dur} min)`,
+        sub:`<span class="hi">${instr}</span>`});
+    } else if(mode==='TRANSIT'){
+      const td=st.transitDetails;
+      if(!td)continue;
+      const vt=(td.transitLine?.vehicle?.type||'BUS').toUpperCase();
+      const isMRT=['SUBWAY','RAIL','TRAM','HEAVY_RAIL','COMMUTER_TRAIN','HIGH_SPEED_TRAIN','FERRY'].some(x=>vt.includes(x));
+      const lineShort=td.transitLine?.nameShort||td.transitLine?.name||'?';
+      const lineFull=td.transitLine?.name||lineShort;
+      const depStop=td.stopDetails?.departureStop?.name||'?';
+      const arrStop=td.stopDetails?.arrivalStop?.name||'?';
+      const depT=fmtISO(td.stopDetails?.departureTime);
+      const arrT=fmtISO(td.stopDetails?.arrivalTime);
+      const stops=td.stopCount||'?';
+      const head=td.headsign||'';
+      const dur=durS(st.staticDuration);
+      const lc=td.transitLine?.color?'#'+td.transitLine.color.replace('#',''):lineColor(lineFull);
+      if(isMRT){
+        out.push({type:'mrt',icon:'🚇',typeLabel:'Board MRT / Train',
+          main:`<span class="route-badge" style="background:${lc};">${lineShort}</span>`,
+          sub:`From: <span class="hi">${depStop}</span>${depT?` · Departs <span class="live">${depT}</span>`:''}<br>`+
+              `To: <span class="hi">${arrStop}</span>${arrT?` · Arrives ${arrT}`:''}<br>`+
+              `${stops} stop${stops!==1?'s':''} · ~${dur} min${head?` · Towards ${head}`:''}`});
+      } else {
+        out.push({type:'bus',icon:'🚌',typeLabel:'Board Bus',
+          main:`<span class="route-badge" style="background:var(--accent);color:#0a1520;">Bus ${lineShort}</span>`,
+          sub:`Board: <span class="hi">${depStop}</span>${depT?` · <span class="live">${depT}</span>`:''}<br>`+
+              `Alight: <span class="hi">${arrStop}</span>${arrT?` · ${arrT}`:''}<br>`+
+              `${stops} stop${stops!==1?'s':''} · ~${dur} min${head?` · Towards ${head}`:''}`});
+      }
+    }
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════
+//  PLAN JOURNEY
+// ═══════════════════════════════════════════
+async function planJourney(){
+  const dest=document.getElementById('destInp').value.trim();
+  if(!dest){alert('Please enter or pick a destination.');return;}
+  if(!userLat){alert('Please get your GPS location first.');return;}
+  document.getElementById('plansGrid').innerHTML=skelCards(4);
+  document.getElementById('stopsGrid').innerHTML=skelCards(3);
+  setLoading(true);
+
+  // Geocode
+  if(!destLat||document.getElementById('destInp').value.trim()!==destName){
+    let geo=null;try{geo=await geocode(dest);}catch{}
+    if(!geo){
+      document.getElementById('plansGrid').innerHTML=`<div class="err-card" style="grid-column:1/-1;">❌ Could not find "<strong>${dest}</strong>" in Singapore. Try a specific name or 🗺️ Pick on Map.</div>`;
+      document.getElementById('stopsGrid').innerHTML='';setLoading(false);return;
+    }
+    destLat=geo.lat;destLng=geo.lng;destName=geo.name;
+    setDestMarker(destLat,destLng,destName);
+    document.getElementById('destInp').value=destName;
+  }
+
+  curDist=hav(userLat,userLng,destLat,destLng);
+
+  // Fit map + dashed route line
+  map.fitBounds(L.latLngBounds([[userLat,userLng],[destLat,destLng]]),{padding:[50,50]});
+  if(routeLine)map.removeLayer(routeLine);
+  if(nearbyStops[0])
+    routeLine=L.polyline([[userLat,userLng],[nearbyStops[0].lat,nearbyStops[0].lng],[destLat,destLng]],
+      {color:'#00b4d8',weight:2,dashArray:'7,7',opacity:.7}).addTo(map);
+
+  updateGmap();
+
+  // Bus arrivals + Google Routes (parallel)
+  const stops3=nearbyStops.slice(0,3);
+  curStops3=stops3;
+  const [arrResults,rDefault,rFewer,rLess]=await Promise.all([
+    Promise.all(stops3.map(s=>fetchArr(s.id))),
+    hasKey()?fetchRoutes('TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED'):Promise.resolve(null),
+    hasKey()?fetchRoutes('FEWER_TRANSFERS'):Promise.resolve(null),
+    hasKey()?fetchRoutes('LESS_WALKING'):Promise.resolve(null)
+  ]);
+
+  // Pick best route for each plan
+  // Plan A = best from default (routes[0]), Plan B = FEWER_TRANSFERS routes[0], Plan C = LESS_WALKING routes[0]
+  const routeA=rDefault?.routes?.[0]||null;
+  const routeB=rFewer?.routes?.[0]||rDefault?.routes?.[1]||null;
+  const routeC=rLess?.routes?.[0]||rDefault?.routes?.[2]||null;
+  const apiError=rDefault?.error||rFewer?.error||rLess?.error||null;
+
+  renderPlans(stops3,arrResults,curDist,routeA,routeB,routeC,apiError);
+  renderArrivals(stops3,arrResults);
+  updateLastUpd();setLoading(false);
+  startCycle();
+}
+
+// ═══════════════════════════════════════════
+//  RENDER PLANS
+// ═══════════════════════════════════════════
+function planDurMin(route){
+  if(!route)return null;
+  const s=route.duration;
+  if(!s)return null;
+  return durS(s);
+}
+
+function renderPlans(stops,arrs,totalDist,rA,rB,rC,apiErr){
+  const grid=document.getElementById('plansGrid');
+  grid.innerHTML='';
+  const hasK=hasKey();
+
+  const cfgs=[
+    {id:'A',color:'var(--planA)',pill:'pill-green',pillT:'Recommended',title:'Recommended Route',sub:'Transit · Best overall',route:rA,delay:0},
+    {id:'B',color:'var(--planB)',pill:'pill-purple',pillT:'Fewer Transfers',title:'Fewer Transfers',sub:'Transit · Fewer changes',route:rB,delay:.08},
+    {id:'C',color:'var(--planC)',pill:'pill-blue',pillT:'Less Walking',title:'Less Walking',sub:'Transit · Shorter walks',route:rC,delay:.16},
+  ];
+
+  cfgs.forEach(cfg=>{
+    const card=document.createElement('div');
+    card.className='plan-card';
+    card.style.animationDelay=cfg.delay+'s';
+
+    const route=cfg.route;
+    const totalMin=planDurMin(route);
+    let body='';
+
+    if(apiErr&&!route){
+      // API error state
+      body=`<div class="fallback-box">
+        <p>⚠️ Google Routes API error:<br><code style="font-size:.72rem;color:var(--red);">${apiErr}</code><br>Check your API key or enable the Routes API.</p>
+        <button class="btn btn-secondary btn-full" style="font-size:.76rem;" onclick="openModal()">🔑 Update API Key</button>
+      </div>
+      <a href="${gUrl('transit')}" target="_blank" style="text-decoration:none;">
+        <button class="btn btn-gmaps btn-full" style="margin-top:8px;">🗺️ Open in Google Maps</button>
+      </a>`;
+    } else if(route&&totalMin!==null){
+      // Real Google Routes data
+      const steps=parseRoute(route);
+      const transits=steps.filter(s=>s.type==='bus'||s.type==='mrt').length;
+      const tl=steps.map((s,i)=>`
+        <div class="tl-step">
+          <div class="tl-left">
+            <div class="tl-circ ${s.type}">${s.icon}</div>
+            ${i<steps.length-1?'<div class="tl-conn"></div>':''}
+          </div>
+          <div class="tl-body">
+            <div class="tl-type">${s.typeLabel}</div>
+            <div class="tl-main">${s.main}</div>
+            <div class="tl-sub">${s.sub}</div>
+          </div>
+        </div>`).join('');
+      const copyT=`ETA via ${cfg.title} (Google Routes): ~${totalMin} min · Arrive ${etaAt(totalMin)} SGT`;
+      body=`
+        <div class="timeline">${tl}</div>
+        <hr class="divider"/>
+        <div class="stat-row">
+          <div class="stat"><div class="stat-num" style="color:${cfg.color};">${totalMin}</div><div class="stat-lbl">Est. Min</div></div>
+          <div class="stat"><div class="stat-num" style="color:${cfg.color};">${transits}</div><div class="stat-lbl">Transits</div></div>
+          <div class="stat"><div class="stat-num" style="color:${cfg.color};font-size:.86rem;">${etaAt(totalMin)}</div><div class="stat-lbl">ETA SGT</div></div>
+        </div>
+        <div style="display:flex;gap:7px;align-items:center;">
+          <a href="${gUrl('transit')}" target="_blank" style="text-decoration:none;flex:1;">
+            <button class="btn btn-gmaps btn-full" style="font-size:.77rem;">🗺️ Google Maps</button>
+          </a>
+          <button class="btn-copy" onclick="copyETA('${copyT.replace(/'/g,"\\'")}')">📋 Copy</button>
+        </div>`;
+    } else {
+      // Fallback
+      const svc=arrs[0]?.services?.slice(0,3).map(busInfo)||[];
+      const copyT=`ETA via ${cfg.title}: Open Google Maps for real-time route`;
+      body=`
+        <div class="fallback-box">
+          <p>${hasK?'⚠️ No route returned for this preference. Try adjusting destination.':'🔑 <strong>Add your free Google Routes API key</strong> for real step-by-step routing with bus/MRT details.'}</p>
+          ${!hasK?`<button class="btn btn-secondary btn-full" style="font-size:.76rem;" onclick="openModal()">🔑 Setup API Key (Free)</button>`:''}
+        </div>
+        ${svc.length?`
+        <div style="font-size:.7rem;color:var(--muted);margin-top:6px;">Nearest stop live arrivals:</div>
+        <div class="arr-mini">
+          ${svc.map((b,i)=>`<div class="arr-row">
+            <span class="arr-badge" style="background:${COLORS[i%COLORS.length]};">${b.no}</span>
+            <span class="${cdClass(b.n)}">${cdLbl(b.n)}</span>
+            <span class="arr-clk">${b.ns}</span>
+          </div>`).join('')}
+        </div>`:''}
+        <a href="${gUrl('transit')}" target="_blank" style="text-decoration:none;">
+          <button class="btn btn-gmaps btn-full" style="margin-top:8px;">🗺️ Open in Google Maps (Transit)</button>
+        </a>
+        <button class="btn-copy" onclick="copyETA('${copyT.replace(/'/g,"\\'")}')">📋 Copy ETA</button>`;
+    }
+
+    card.innerHTML=`
+      <div class="card-hdr">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="plan-badge" style="background:${cfg.color}22;color:${cfg.color};border:2px solid ${cfg.color}55;">${cfg.id}</div>
+          <div>
+            <div class="card-title">${cfg.title}</div>
+            <div class="card-sub">${cfg.sub}</div>
+          </div>
+        </div>
+        <div class="pills">
+          <span class="pill ${cfg.pill}">${cfg.pillT}</span>
+          <span class="pill ${route&&totalMin!==null?'pill-goog':'pill-gray'}">${route&&totalMin!==null?'✓ Google Routes':'Fallback'}</span>
+        </div>
+      </div>
+      <hr class="divider"/>
+      ${body}`;
+    grid.appendChild(card);
+  });
+
+  // Plan D: Grab
+  const f=fare(totalDist);
+  const gMin=Math.round((totalDist/1000)/30*60*1.3)+3;
+  const grabCard=document.createElement('div');
+  grabCard.className='plan-card grab';grabCard.style.animationDelay='.24s';
+  grabCard.innerHTML=`
+    <div class="card-hdr">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="plan-badge" style="background:var(--planD)22;color:var(--planD);border:2px solid var(--planD)55;">D</div>
+        <div><div class="card-title">Grab / Taxi</div><div class="card-sub">No transit · Door-to-door</div></div>
+      </div>
+      <span class="pill pill-orange">Private Hire</span>
+    </div>
+    <hr class="divider"/>
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-circ walk">📍</div><div class="tl-conn"></div></div>
+      <div class="tl-body"><div class="tl-type">Pickup</div><div class="tl-main">Your GPS Location</div><div class="tl-sub">Driver comes to you</div></div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-circ bus">🚗</div><div class="tl-conn"></div></div>
+      <div class="tl-body"><div class="tl-type">Drive</div><div class="tl-main">~${gMin} min · ${(totalDist/1000).toFixed(1)} km</div><div class="tl-sub">Via fastest route (1.3× traffic)</div></div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-circ mrt">🏁</div></div>
+      <div class="tl-body"><div class="tl-type">Drop-off</div><div class="tl-main"><span class="hi">${destName}</span></div><div class="tl-sub">Destination arrived</div></div>
+    </div>
+    <hr class="divider"/>
+    <div style="text-align:center;">
+      <div class="grab-fare">S$${f.lo} – S$${f.hi}</div>
+      <div class="grab-sub">${(totalDist/1000).toFixed(1)} km · PHV base S$3.90 + S$0.55/400m · surge may apply</div>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <a href="https://grab.onelink.me/2695613898/grabapp" target="_blank" style="text-decoration:none;flex:1;">
+        <button class="btn btn-grab" style="font-size:.79rem;">📱 Book Grab</button>
+      </a>
+      <a href="${gUrl('driving')}" target="_blank" style="text-decoration:none;flex:1;">
+        <button class="btn btn-gmaps btn-full" style="font-size:.79rem;">🗺️ Google Maps</button>
+      </a>
+    </div>
+    <button class="btn-copy" onclick="copyETA('ETA via Grab/Taxi: ~${gMin} min · Est. S$${f.lo}–S$${f.hi}')">📋 Copy ETA</button>`;
+  grid.appendChild(grabCard);
+}
+
+// ═══════════════════════════════════════════
+//  RENDER LIVE ARRIVALS
+// ═══════════════════════════════════════════
+function renderArrivals(stops,arrs){
+  const grid=document.getElementById('stopsGrid');
+  grid.innerHTML='';
+  stops.forEach((stop,i)=>{
+    const arr=arrs[i],svcs=arr?.services||[];
+    const card=document.createElement('div');
+    card.className='stop-card';card.style.animationDelay=(i*.1)+'s';
+    const rows=svcs.length?svcs.slice(0,6).map((svc,j)=>{
+      const b=busInfo(svc);
+      const sl=[{l:'Next',m:b.n,s:b.ns},{l:'2nd',m:b.n2,s:b.n2s},{l:'3rd',m:b.n3,s:b.n3s}].filter(x=>x.m!==null);
+      return`<div class="bus-row">
+        <span class="br-num" style="background:${COLORS[j%COLORS.length]};">${b.no}</span>
+        <div class="br-slots">${sl.map(x=>`<div class="br-slot">
+          <span class="br-slot-lbl">${x.l}</span>
+          <span class="br-slot-t ${cdClass(x.m)}">${cdLbl(x.m)}</span>
+          <span style="font-size:.65rem;color:var(--muted);margin-left:2px;">(${x.s})</span>
+        </div>`).join('')}</div>
+      </div>`;
+    }).join(''):`<div class="no-bus">No bus data available</div>`;
+    card.innerHTML=`
+      <div class="stop-hdr">
+        <span class="stop-id">${stop.id}</span>
+        <div><div class="stop-name">${stop.name}</div><div class="stop-road">${stop.road}</div></div>
+        <span class="stop-dist">~${Math.round(stop.dist)}m</span>
+      </div>
+      <div class="stop-buses">${rows}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  REFRESH
+// ═══════════════════════════════════════════
+async function manualRefresh(){
+  if(isLoading||!curStops3.length)return;
+  setLoading(true);
+  const [arrs,rA,rB,rC]=await Promise.all([
+    Promise.all(curStops3.map(s=>fetchArr(s.id))),
+    hasKey()&&destLat?fetchRoutes('TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED'):Promise.resolve(null),
+    hasKey()&&destLat?fetchRoutes('FEWER_TRANSFERS'):Promise.resolve(null),
+    hasKey()&&destLat?fetchRoutes('LESS_WALKING'):Promise.resolve(null)
+  ]);
+  const routeA=rA?.routes?.[0]||null;
+  const routeB=rB?.routes?.[0]||rA?.routes?.[1]||null;
+  const routeC=rC?.routes?.[0]||rA?.routes?.[2]||null;
+  const apiErr=rA?.error||rB?.error||rC?.error||null;
+  renderPlans(curStops3,arrs,curDist,routeA,routeB,routeC,apiErr);
+  renderArrivals(curStops3,arrs);
+  updateLastUpd();setLoading(false);
+  secsLeft=REFRESH_SEC;updCD();
+}
+function setLoading(on){
+  isLoading=on;
+  const b=document.getElementById('btnRefresh'),ico=document.getElementById('refreshIco');
+  b.disabled=on;ico.innerHTML=on?`<span class="spin"></span>`:'↻';
+}
+function updateLastUpd(){
+  document.getElementById('lastUpd').textContent='Updated '+new Date().toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function startCycle(){
+  if(refreshTimer)clearInterval(refreshTimer);
+  secsLeft=REFRESH_SEC;updCD();
+  refreshTimer=setInterval(async()=>{
+    if(isLoading)return;
+    secsLeft=Math.max(0,secsLeft-1);updCD();
+    if(secsLeft<=0){
+      secsLeft=REFRESH_SEC;
+      if(curStops3.length){
+        setLoading(true);
+        const [arrs,rA,rB,rC]=await Promise.all([
+          Promise.all(curStops3.map(s=>fetchArr(s.id))),
+          hasKey()&&destLat?fetchRoutes('TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED'):Promise.resolve(null),
+          hasKey()&&destLat?fetchRoutes('FEWER_TRANSFERS'):Promise.resolve(null),
+          hasKey()&&destLat?fetchRoutes('LESS_WALKING'):Promise.resolve(null)
+        ]);
+        const routeA=rA?.routes?.[0]||null;
+        const routeB=rB?.routes?.[0]||rA?.routes?.[1]||null;
+        const routeC=rC?.routes?.[0]||rA?.routes?.[2]||null;
+        const apiErr=rA?.error||rB?.error||rC?.error||null;
+        renderPlans(curStops3,arrs,curDist,routeA,routeB,routeC,apiErr);
+        renderArrivals(curStops3,arrs);
+        updateLastUpd();setLoading(false);
+      }
+    }
+  },1000);
+}
+function updCD(){
+  const m=Math.floor(secsLeft/60),s=String(secsLeft%60).padStart(2,'0');
+  document.getElementById('cdText').textContent=m+':'+s;
+  document.getElementById('rbarFill').style.width=(secsLeft/REFRESH_SEC*100)+'%';
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  updateKeyUI();
+  getGPS();
+  startCycle();
+  if(!hasKey())setTimeout(openModal,1400);
+});
+</script>
+</body>
+</html>
