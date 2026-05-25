@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bus Transfer Planner</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #181c24;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #23293a 60%, #2d3a5c 100%);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #4fc3f7;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 1.5rem; color: #4fc3f7; letter-spacing: 1px; }
+  #lastUpdate { font-size: 0.85rem; color: #aaa; }
+  .container { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+  .left-panel { flex: 1 1 380px; min-width: 340px; display: flex; flex-direction: column; gap: 14px; }
+  .right-panel { flex: 1 1 420px; min-width: 320px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Recommendation Box */
+  .recommendation {
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: all 0.4s;
+  }
+  .rec-good { background: #1b3a2a; border-color: #4caf50; color: #81c784; }
+  .rec-ok   { background: #3a3520; border-color: #ffd166; color: #ffe082; }
+  .rec-bad  { background: #3a1b1b; border-color: #ef5350; color: #ef9a9a; }
+  .rec-loading { background: #23293a; border-color: #555; color: #aaa; }
+  .recommendation .rec-title { font-size: 1.35rem; margin-bottom: 6px; }
+  .recommendation .rec-detail { font-size: 0.95rem; font-weight: 400; margin-top: 6px; opacity: 0.85; }
+
+  /* Cards */
+  .card {
+    background: #23293a;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #2d3a5c;
+  }
+  .card h3 { font-size: 1.05rem; margin-bottom: 10px; color: #4fc3f7; }
+  .stop-title { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .stop-title .dot {
+    width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  }
+  .bus-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-radius: 8px; margin-bottom: 6px;
+    background: #1a2030;
+  }
+  .bus-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 12px; border-radius: 6px; font-weight: 700; font-size: 0.95rem;
+    color: #181c24; min-width: 50px; text-align: center;
+  }
+  .bus-badge.b5  { background: #4caf50; }
+  .bus-badge.b2  { background: #4fc3f7; }
+  .bus-badge.b4  { background: #ffd166; }
+  .bus-time { font-size: 0.95rem; color: #ccc; }
+  .bus-time .mins { font-weight: 700; font-size: 1.1rem; }
+
+  /* Option cards */
+  .option-card {
+    background: #1a2030;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 8px;
+    border-left: 4px solid #555;
+  }
+  .option-card.active { border-left-color: #4caf50; }
+  .option-card.not-viable { border-left-color: #ef5350; opacity: 0.7; }
+  .option-card h4 { font-size: 0.98rem; margin-bottom: 6px; }
+  .option-card .detail { font-size: 0.88rem; color: #aaa; }
+  .option-card .wait-time { font-size: 1.1rem; font-weight: 700; margin-top: 4px; }
+  .viable { color: #81c784; }
+  .not-viable-text { color: #ef9a9a; }
+
+  /* Map */
+  #map { width: 100%; height: 420px; border-radius: 12px; border: 1px solid #2d3a5c; }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 0; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+  .legend-color {
+    width: 16px; height: 16px; border-radius: 4px; display: inline-block;
+  }
+  .legend-circle {
+    width: 14px; height: 14px; border-radius: 50%; display: inline-block;
+    border: 2px solid #fff;
+  }
+
+  footer {
+    text-align: center; padding: 12px; color: #555; font-size: 0.8rem;
+  }
+  @media (max-width: 700px) {
+    .container { flex-direction: column; }
+    #map { height: 300px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>&#x1F68C; Bus Transfer Planner</h1>
+  <span id="lastUpdate">Loading...</span>
+</header>
+
+<div class="container">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div id="recBox" class="recommendation rec-loading">
+      <div class="rec-title">&#x23F3; Checking arrivals...</div>
+      <div class="rec-detail">Fetching real-time bus data</div>
+    </div>
+
+    <div class="card">
+      <h3>&#x1F4CB; Transfer Options</h3>
+      <div id="optionA" class="option-card">
+        <h4>Option A: Bus 5 &#x2192; Bus 2 at Stop 97059</h4>
+        <div class="detail">Same stop transfer &mdash; no need to cross the road</div>
+        <div class="wait-time" id="optAWait">...</div>
+      </div>
+      <div id="optionB" class="option-card">
+        <h4>Option B: Bus 5 (Stop 98319) &#x2192; walk &#x2192; Bus 4 (Stop 98311)</h4>
+        <div class="detail">Alight at 98319, cross road to 98311 (&ge;1 min buffer)</div>
+        <div class="wait-time" id="optBWait">...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>&#x1F68F; Stop Arrivals</h3>
+      <div id="stopCards">Loading...</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="card">
+      <h3>&#x1F5FA;&#xFE0F; Map &mdash; All Stops &amp; Buses</h3>
+      <div id="map"></div>
+      <div class="legend" style="margin-top:10px;">
+        <div class="legend-item"><span class="legend-color" style="background:#4caf50;"></span> Bus 5</div>
+        <div class="legend-item"><span class="legend-color" style="background:#4fc3f7;"></span> Bus 2</div>
+        <div class="legend-item"><span class="legend-color" style="background:#ffd166;"></span> Bus 4</div>
+        <div class="legend-item"><span class="legend-circle" style="background:#e040fb;"></span> Stop 97059</div>
+        <div class="legend-item"><span class="legend-circle" style="background:#ff7043;"></span> Stop 98319</div>
+        <div class="legend-item"><span class="legend-circle" style="background:#26c6da;"></span> Stop 98311</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Auto-refreshes every 60 seconds &middot; Data from LTA DataMall via BusRouter SG</footer>
+
+<script>
+const STOPS_API = "https://data.busrouter.sg/v1/stops.json";
+const ARRIVALS_API = "https://arrivelah2.busrouter.sg/?id=";
+
+const STOP_IDS = ["97059", "98319", "98311"];
+const STOP_COLORS = { "97059": "#e040fb", "98319": "#ff7043", "98311": "#26c6da" };
+const BUS_COLORS = { "5": "#4caf50", "2": "#4fc3f7", "4": "#ffd166" };
+const BUS_INTEREST = { "97059": ["5", "2"], "98319": ["5"], "98311": ["4"] };
+
+let map, stopData = {}, stopMarkers = [], busMarkers = [];
+
+// ---- Map Setup ----
+function initMap() {
+  map = L.map("map", { zoomControl: true }).setView([1.35, 103.82], 15);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19
+  }).addTo(map);
+}
+
+function clearBusMarkers() {
+  busMarkers.forEach(m => map.removeLayer(m));
+  busMarkers = [];
+}
+
+function addStopMarkers() {
+  STOP_IDS.forEach(id => {
+    const s = stopData[id];
+    if (!s) return;
+    const lat = s[1], lng = s[0], name = s[2], road = s[3];
+    const color = STOP_COLORS[id];
+    const icon = L.divIcon({
+      className: "",
+      html: '<div style="width:18px;height:18px;border-radius:50%;background:' + color +
+            ';border:3px solid #fff;box-shadow:0 0 6px ' + color + ';"></div>',
+      iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+    const m = L.marker([lat, lng], { icon: icon }).addTo(map);
+    m.bindPopup("<b>Stop " + id + "</b><br>" + name + "<br><small>" + road + "</small>");
+    stopMarkers.push(m);
+  });
+}
+
+function addBusMarker(lat, lng, busNo, label) {
+  const color = BUS_COLORS[busNo] || "#ccc";
+  const icon = L.divIcon({
+    className: "",
+    html: '<div style="background:' + color + ';color:#181c24;font-weight:800;font-size:12px;' +
+          'padding:2px 7px;border-radius:6px;border:2px solid #fff;white-space:nowrap;' +
+          'box-shadow:0 0 6px ' + color + ';">&#x1F68C; ' + busNo + '</div>',
+    iconSize: [44, 24], iconAnchor: [22, 12]
+  });
+  const m = L.marker([lat, lng], { icon: icon }).addTo(map);
+  m.bindPopup(label);
+  busMarkers.push(m);
+  return [lat, lng];
+}
+
+// ---- Data Fetch ----
+async function fetchStops() {
+  try {
+    const res = await fetch(STOPS_API);
+    stopData = await res.json();
+  } catch (e) { console.error("Stop fetch error", e); }
+}
+
+async function fetchArrivals(stopId) {
+  try {
+    const res = await fetch(ARRIVALS_API + stopId);
+    return await res.json();
+  } catch (e) { console.error("Arrival fetch error", e); return null; }
+}
+
+// ---- Helpers ----
+function minsFromNow(isoStr) {
+  if (!isoStr) return null;
+  return (new Date(isoStr) - new Date()) / 60000;
+}
+
+function fmtMins(m) {
+  if (m === null || m === undefined) return "N/A";
+  if (m < 0.5) return "Arriving";
+  return m.toFixed(1) + " min";
+}
+
+function getNextArrival(arrivals, busNo) {
+  if (!arrivals || !arrivals.services) return null;
+  const svc = arrivals.services.find(s => s.no === busNo);
+  if (!svc) return null;
+  let best = null;
+  for (const key of ["next", "next2", "next3"]) {
+    if (svc[key] && svc[key].time) {
+      const m = minsFromNow(svc[key].time);
+      if (m !== null && m >= -0.5) {
+        if (!best || m < best.mins) {
+          best = { mins: m, time: svc[key].time, lat: svc[key].lat, lng: svc[key].lng,
+                   load: svc[key].load, type: svc[key].type };
+        }
+      }
+    }
+  }
+  return best;
+}
+
+function getAllBuses(arrivals, busNos) {
+  const results = [];
+  if (!arrivals || !arrivals.services) return results;
+  busNos.forEach(no => {
+    const svc = arrivals.services.find(s => s.no === no);
+    if (!svc) return;
+    for (const key of ["next", "next2", "next3"]) {
+      if (svc[key] && svc[key].time) {
+        const m = minsFromNow(svc[key].time);
+        if (m !== null && m >= -0.5 && svc[key].lat && svc[key].lng) {
+          results.push({ busNo: no, mins: m, lat: svc[key].lat, lng: svc[key].lng,
+                         time: svc[key].time, order: key });
+        }
+      }
+    }
+  });
+  return results;
+}
+
+// ---- UI Rendering ----
+function renderStopCards(allArrivals) {
+  let html = "";
+  STOP_IDS.forEach(id => {
+    const color = STOP_COLORS[id];
+    const s = stopData[id];
+    const name = s ? s[2] : "Unknown";
+    const road = s ? s[3] : "";
+    html += '<div style="margin-bottom:12px;">' +
+      '<div class="stop-title"><span class="dot" style="background:' + color + ';"></span>' +
+      '<b>Stop ' + id + '</b> &mdash; ' + name + ' <small style="color:#888">(' + road + ')</small></div>';
+
+    const buses = BUS_INTEREST[id] || [];
+    const arrivals = allArrivals[id];
+    buses.forEach(busNo => {
+      const a = getNextArrival(arrivals, busNo);
+      const badgeClass = "b" + busNo;
+      const timeStr = a ? '<span class="mins">' + fmtMins(a.mins) + '</span>'
+                        : '<span style="color:#ef5350;">No data</span>';
+      html += '<div class="bus-row">' +
+        '<span class="bus-badge ' + badgeClass + '">Bus ' + busNo + '</span>' +
+        '<span class="bus-time">' + timeStr + '</span></div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById("stopCards").innerHTML = html;
+}
+
+function updateRecommendation(optA, optB) {
+  const recBox = document.getElementById("recBox");
+  const optAEl = document.getElementById("optionA");
+  const optBEl = document.getElementById("optionB");
+  const optAWait = document.getElementById("optAWait");
+  const optBWait = document.getElementById("optBWait");
+
+  // ---- Option A: Bus 5 -> Bus 2 at Stop 97059 (same stop) ----
+  let aViable = false, aWait = null;
+  if (optA.bus5 && optA.bus2) {
+    aWait = optA.bus2.mins - optA.bus5.mins;
+    if (aWait >= 0 && aWait <= 10) {
+      aViable = true;
+    }
+  }
+  if (aViable) {
+    optAWait.innerHTML = '<span class="viable">&#x2705; Wait: ' + aWait.toFixed(1) + ' min after alighting</span>';
+    optAEl.className = "option-card active";
+  } else if (optA.bus5 && optA.bus2 && aWait !== null) {
+    if (aWait < 0) {
+      optAWait.innerHTML = '<span class="not-viable-text">&#x274C; Bus 2 arrives before Bus 5 &mdash; cannot catch</span>';
+    } else {
+      optAWait.innerHTML = '<span class="not-viable-text">&#x274C; Wait: ' + aWait.toFixed(1) + ' min &mdash; too long (&gt;10 min)</span>';
+    }
+    optAEl.className = "option-card not-viable";
+  } else {
+    const missing = !optA.bus5 ? "5" : "2";
+    optAWait.innerHTML = '<span class="not-viable-text">&#x274C; No arrival data for Bus ' + missing + '</span>';
+    optAEl.className = "option-card not-viable";
+  }
+
+  // ---- Option B: Bus 5 at 98319, cross road to 98311 for Bus 4 (need >= 1 min) ----
+  let bViable = false, bWait = null;
+  if (optB.bus5 && optB.bus4) {
+    bWait = optB.bus4.mins - optB.bus5.mins;
+    if (bWait >= 1 && bWait <= 10) {
+      bViable = true;
+    }
+  }
+  if (bViable) {
+    optBWait.innerHTML = '<span class="viable">&#x2705; Wait: ' + bWait.toFixed(1) + ' min (incl. crossing time)</span>';
+    optBEl.className = "option-card active";
+  } else if (optB.bus5 && optB.bus4 && bWait !== null) {
+    if (bWait < 1) {
+      optBWait.innerHTML = '<span class="not-viable-text">&#x274C; Bus 4 arrives too soon &mdash; not enough time to cross road (need &ge;1 min)</span>';
+    } else {
+      optBWait.innerHTML = '<span class="not-viable-text">&#x274C; Wait: ' + bWait.toFixed(1) + ' min &mdash; too long (&gt;10 min)</span>';
+    }
+    optBEl.className = "option-card not-viable";
+  } else {
+    const missing = !optB.bus5 ? "5" : "4";
+    optBWait.innerHTML = '<span class="not-viable-text">&#x274C; No arrival data for Bus ' + missing + '</span>';
+    optBEl.className = "option-card not-viable";
+  }
+
+  // ---- Final Recommendation ----
+  if (aViable && bViable) {
+    if (aWait <= bWait) {
+      recBox.className = "recommendation rec-good";
+      recBox.innerHTML = '<div class="rec-title">&#x2705; Recommended: Option A</div>' +
+        '<div class="rec-detail">Take Bus 5 &#x2192; Bus 2 at Stop 97059<br>Wait only ' + aWait.toFixed(1) + ' min at the same stop</div>';
+    } else {
+      recBox.className = "recommendation rec-good";
+      recBox.innerHTML = '<div class="rec-title">&#x2705; Recommended: Option B</div>' +
+        '<div class="rec-detail">Alight Bus 5 at Stop 98319, cross to Stop 98311 for Bus 4<br>Wait ' + bWait.toFixed(1) + ' min (incl. crossing)</div>';
+    }
+  } else if (aViable) {
+    recBox.className = "recommendation rec-good";
+    recBox.innerHTML = '<div class="rec-title">&#x2705; Recommended: Option A</div>' +
+      '<div class="rec-detail">Take Bus 5 &#x2192; Bus 2 at Stop 97059<br>Wait ' + aWait.toFixed(1) + ' min at the same stop</div>';
+  } else if (bViable) {
+    recBox.className = "recommendation rec-good";
+    recBox.innerHTML = '<div class="rec-title">&#x2705; Recommended: Option B</div>' +
+      '<div class="rec-detail">Alight Bus 5 at Stop 98319, cross to Stop 98311 for Bus 4<br>Wait ' + bWait.toFixed(1) + ' min (incl. crossing)</div>';
+  } else {
+    recBox.className = "recommendation rec-bad";
+    recBox.innerHTML = '<div class="rec-title">&#x1F6AB; Do Not Transfer</div>' +
+      '<div class="rec-detail">No viable transfer within 10 minutes.<br>Consider staying on Bus 5 or planning an alternative route.</div>';
+  }
+}
+
+// ---- Main Refresh ----
+async function refresh() {
+  const [arr97059, arr98319, arr98311] = await Promise.all([
+    fetchArrivals("97059"), fetchArrivals("98319"), fetchArrivals("98311")
+  ]);
+  const allArrivals = { "97059": arr97059, "98319": arr98319, "98311": arr98311 };
+
+  renderStopCards(allArrivals);
+
+  // Compute transfer options
+  const optA = {
+    bus5: getNextArrival(arr97059, "5"),
+    bus2: getNextArrival(arr97059, "2")
+  };
+  const optB = {
+    bus5: getNextArrival(arr98319, "5"),
+    bus4: getNextArrival(arr98311, "4")
+  };
+
+  updateRecommendation(optA, optB);
+
+  // ---- Map: plot bus markers ----
+  clearBusMarkers();
+  const allBounds = [];
+
+  // Stop positions
+  STOP_IDS.forEach(id => {
+    const s = stopData[id];
+    if (s) allBounds.push([s[1], s[0]]);
+  });
+
+  // Bus position markers from all stops
+  STOP_IDS.forEach(id => {
+    const buses = BUS_INTEREST[id] || [];
+    const busList = getAllBuses(allArrivals[id], buses);
+    busList.forEach(b => {
+      if (b.lat && b.lng && b.lat !== 0 && b.lng !== 0) {
+        const pos = addBusMarker(b.lat, b.lng, b.busNo,
+          "<b>Bus " + b.busNo + "</b><br>To Stop " + id + "<br>" + fmtMins(b.mins));
+        allBounds.push(pos);
+      }
+    });
+  });
+
+  // Fit map to show all markers
+  if (allBounds.length > 1) {
+    map.fitBounds(allBounds, { padding: [40, 40], maxZoom: 16 });
+  }
+
+  document.getElementById("lastUpdate").textContent =
+    "Last updated: " + new Date().toLocaleTimeString();
+}
+
+// ---- Init ----
+(async function init() {
+  initMap();
+  await fetchStops();
+  addStopMarkers();
+  await refresh();
+  setInterval(refresh, 60000);
+})();
+</script>
+</body>
+</html>
