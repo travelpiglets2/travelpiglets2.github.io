@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bus Route Planner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #181c24;
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #23293a 60%, #2d3a5c 100%);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #4fc3f7;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 1.2rem; color: #4fc3f7; letter-spacing: 0.5px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  #lastUpdate { font-size: 0.75rem; color: #aaa; display: none; }
+  .btn-refresh {
+    background: #00b4d8; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 5px; white-space: nowrap;
+    transition: background 0.2s; min-height: 38px;
+  }
+  .btn-refresh:hover { background: #0095b5; }
+  .btn-refresh:active { transform: scale(0.97); }
+  .btn-refresh:disabled { background: #1e3a4a; color: #90a4ae; cursor: not-allowed; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff;
+    border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Countdown Bar ── */
+  .countdown-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 16px; background: #1a2030; border-bottom: 1px solid #2d3a5c;
+  }
+  .countdown-label { font-size: 0.72rem; color: #777; white-space: nowrap; }
+  .progress-track { flex: 1; height: 4px; background: #2d3a5c; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#00b4d8,#48cae4);
+    border-radius: 2px; transition: width 1s linear; }
+  #countdownSec { font-size: 0.75rem; font-weight: 700; color: #00b4d8; min-width: 24px; text-align: right; }
+
+  /* ── Layout ── */
+  .main { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── Recommendation Box ── */
+  .recommendation {
+    border-radius: 14px; padding: 16px; text-align: center;
+    font-size: 1.05rem; font-weight: 600;
+    border: 2px solid transparent; transition: all 0.4s;
+    order: 1;
+  }
+  .rec-good { background: #1b3a2a; border-color: #4caf50; color: #81c784; }
+  .rec-bad  { background: #3a1b1b; border-color: #ef5350; color: #ef9a9a; }
+  .rec-loading { background: #23293a; border-color: #555; color: #aaa; }
+  .rec-title { font-size: 1.2rem; margin-bottom: 4px; }
+  .rec-wait { color: #fff; font-weight: 400; font-size: 0.95rem; }
+  .rec-detail { font-size: 0.88rem; font-weight: 400; margin-top: 4px; opacity: 0.85; }
+  .rec-warn { font-size: 0.78rem; margin-top: 6px; opacity: 0.7; }
+
+  /* ── Cards ── */
+  .card {
+    background: #23293a; border-radius: 12px; padding: 14px;
+    border: 1px solid #2d3a5c;
+  }
+  .card h3 { font-size: 0.95rem; margin-bottom: 10px; color: #4fc3f7; }
+  .card-options { order: 2; }
+  .card-arrivals { order: 3; }
+
+  /* ── Option Cards ── */
+  .option-card {
+    background: #1a2030; border-radius: 10px; padding: 12px;
+    margin-bottom: 8px; border-left: 4px solid #555;
+  }
+  .option-card.active { border-left-color: #4caf50; }
+  .option-card.not-viable { border-left-color: #ef5350; opacity: 0.7; }
+  .option-card h4 { font-size: 0.88rem; margin-bottom: 5px; line-height: 1.4; }
+  .option-card .detail { font-size: 0.8rem; color: #aaa; }
+  .option-card .wait-time { font-size: 0.95rem; font-weight: 700; margin-top: 6px; }
+  .viable { color: #81c784; }
+  .not-viable-text { color: #ef9a9a; }
+
+  /* ── Step by step ── */
+  .step {
+    font-size: 0.8rem; color: #bbb; padding: 4px 0 4px 10px;
+    border-left: 2px solid #333; margin: 4px 0;
+  }
+  .step.highlight { border-left-color: #4caf50; color: #81c784; }
+  .step.transfer { border-left-color: #e040fb; color: #ce93d8; }
+  .step.walk { border-left-color: #ffd166; color: #ffe082; }
+
+  /* ── Arrivals ── */
+  .stop-group {
+    border-radius: 10px; padding: 10px; margin-bottom: 12px;
+  }
+  .stop-group.group-a {
+    background: #1a2030; border: 1px solid #4fc3f733;
+    border-left: 4px solid #4fc3f7;
+  }
+  .stop-group.group-b {
+    background: #1a2a1a; border: 1px solid #4caf5033;
+    border-left: 4px solid #4caf50;
+  }
+  .group-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid #ffffff11;
+  }
+  .group-a .group-label { color: #4fc3f7; }
+  .group-b .group-label { color: #4caf50; }
+
+  .stop-block { margin-bottom: 10px; }
+  .stop-block:last-child { margin-bottom: 0; }
+  .stop-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .stop-dot {
+    width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff;
+    flex-shrink: 0;
+  }
+  .stop-header .stop-label { font-size: 0.85rem; font-weight: 600; }
+  .stop-header .stop-road { font-size: 0.72rem; color: #777; margin-left: auto; }
+
+  .bus-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; background: #181c2488; border-radius: 6px;
+    margin-bottom: 4px; font-size: 0.82rem;
+  }
+  .bus-row.matched { background: #1a2a1a; border: 1px solid #4caf5044; }
+  .bus-badge {
+    font-weight: 700; font-size: 0.78rem; padding: 2px 8px;
+    border-radius: 6px; color: #181c24; flex-shrink: 0; min-width: 36px;
+    text-align: center;
+  }
+  .bus-arrivals { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; }
+  .bus-arrival-item { font-size: 0.78rem; color: #ccc; }
+  .bus-arrival-item .arr-label { font-size: 0.65rem; color: #777; margin-right: 3px; }
+  .bus-arrival-item .arr-time { font-weight: 600; }
+  .match-tag {
+    font-size: 0.6rem; font-weight: 700; padding: 1px 5px;
+    border-radius: 4px; margin-left: 4px; vertical-align: middle;
+  }
+  .tag-a { background: #4fc3f744; color: #4fc3f7; }
+  .tag-b { background: #4caf5044; color: #4caf50; }
+  .no-data { font-size: 0.78rem; color: #ef9a9a; padding: 4px 8px; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 18px 10px; font-size: 0.7rem; color: #555;
+    border-top: 1px solid #23293a; margin-top: 10px;
+  }
+  footer a { color: #4fc3f7; text-decoration: none; }
+
+  /* ── Desktop ── */
+  @media (min-width: 768px) {
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .recommendation { grid-column: 1 / -1; order: 1; }
+    .card-options { order: 2; }
+    .card-arrivals { order: 3; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#x1F68C; Bus Route Planner</h1>
+  <div class="header-right">
+    <span id="lastUpdate"></span>
+    <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">&#x1F504; Refresh</button>
+  </div>
+</header>
+
+<div class="countdown-bar">
+  <span class="countdown-label">Auto-refresh</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:100%"></div></div>
+  <span id="countdownSec">60s</span>
+</div>
+
+<div class="main">
+
+  <div class="recommendation rec-loading" id="recBox">
+    <div class="rec-title">&#x23F3; Loading...</div>
+    <div class="rec-detail">Fetching bus arrival data...</div>
+  </div>
+
+  <div class="card card-options">
+    <h3>&#x1F4CB; Your Options</h3>
+    <div id="optionsContainer">
+      <div class="option-card" id="optionA">
+        <h4 id="optATitleH4">&#x1F504; Option A: Transfer via Bus 2</h4>
+        <div class="detail">Walk 4 min &#x2192; Stop 97031 &#x2192; Bus 2 &#x2192; Stop 97051 &#x2192; Transfer &#x2192; Bus 5</div>
+        <div id="optASteps" style="margin-top:8px;"></div>
+        <div id="optAResult" class="wait-time" style="margin-top:6px;"></div>
+      </div>
+      <div class="option-card" id="optionB">
+        <h4 id="optBTitleH4">&#x1F6B6; Option B: Walk to Bus 5</h4>
+        <div class="detail">Walk 9 min &#x2192; Stop 98299 &#x2192; Bus 5 directly (recommended if Bus 5 &#x2265; 10 min)</div>
+        <div id="optBSteps" style="margin-top:8px;"></div>
+        <div id="optBResult" class="wait-time" style="margin-top:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-arrivals">
+    <h3>&#x1F68F; All Arrivals</h3>
+    <div id="stopCards"></div>
+  </div>
+
+</div>
+
+<footer>
+  Data from <a href="https://busrouter.sg" target="_blank">BusRouter SG</a> &middot; Auto-refreshes every 60s
+</footer>
+
+<script>
+/* ════════════════════════════════════════════ */
+/*              CONFIGURATION                   */
+/* ════════════════════════════════════════════ */
+var STOPS_API = "https://data.busrouter.sg/v1/stops.json";
+var ARRIVALS_API = "https://arrivelah2.busrouter.sg/?id=";
+var REFRESH_SEC = 60;
+
+var STOP_IDS = ["97031", "97051", "98299"];
+var STOP_COLORS = { "97031": "#4fc3f7", "97051": "#e040fb", "98299": "#4caf50" };
+var BUS_COLORS = { "2": "#4fc3f7", "5": "#4caf50" };
+var BUS_INTEREST = { "97031": ["2"], "97051": ["2", "5"], "98299": ["5"] };
+
+var WALK_TO_97031 = 4;
+var WALK_TO_98299 = 9;
+var BUS5_MIN_98299 = 10;
+var TRANSFER_BUFFER = 1;
+
+var stopData = {}, matchedArrivals = {};
+var secondsLeft = REFRESH_SEC, refreshTimer, countdownTimer;
+
+/* ════════════════ HELPERS ════════════════ */
+function minsFromNow(iso) {
+  if (!iso) return null;
+  return (new Date(iso) - new Date()) / 60000;
+}
+function fmtMins(m) {
+  if (m === null || m === undefined) return "N/A";
+  if (m < 0.5) return "Arriving";
+  return m.toFixed(1) + " min";
+}
+function getStopName(id) {
+  var s = stopData[id];
+  return s ? s[2] : "Stop " + id;
+}
+function getStopLabel(id) {
+  var s = stopData[id];
+  return s ? s[2] + " - Stop " + id : "Stop " + id;
+}
+
+function getAllArrivalsForBus(arrivals, busNo) {
+  var results = [];
+  if (!arrivals || !arrivals.services) return results;
+  var svc = null;
+  for (var i = 0; i < arrivals.services.length; i++) {
+    if (arrivals.services[i].no === busNo) { svc = arrivals.services[i]; break; }
+  }
+  if (!svc) return results;
+  var keys = ["next", "next2", "next3"];
+  for (var k = 0; k < keys.length; k++) {
+    var b = svc[keys[k]];
+    if (b && b.time) {
+      var m = minsFromNow(b.time);
+      if (m !== null && m >= -0.5) {
+        results.push({ mins: m, time: b.time, load: b.load, type: b.type, key: keys[k] });
+      }
+    }
+  }
+  results.sort(function(a, b) { return a.mins - b.mins; });
+  return results;
+}
+
+function getNextArrivalAfter(arrivals, busNo, afterMins) {
+  var all = getAllArrivalsForBus(arrivals, busNo);
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].mins >= afterMins) return all[i];
+  }
+  return null;
+}
+
+/* ════════════════ DATA ════════════════ */
+async function fetchStops() {
+  try { var r = await fetch(STOPS_API); stopData = await r.json(); }
+  catch (e) { console.error("Stop fetch error", e); }
+}
+async function fetchArrivals(id) {
+  try { var r = await fetch(ARRIVALS_API + id); return await r.json(); }
+  catch (e) { console.error("Arrival fetch error", e); return null; }
+}
+
+/* ════════════════ LOADING STATE ════════════════ */
+function setLoading(on) {
+  var btn = document.getElementById("btnRefresh");
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Loading';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '&#x1F504; Refresh';
+  }
+}
+
+/* ════════════════ MAIN REFRESH ════════════════ */
+async function refresh() {
+  setLoading(true);
+  matchedArrivals = {};
+
+  var results = await Promise.all([
+    fetchArrivals("97031"),
+    fetchArrivals("97051"),
+    fetchArrivals("98299")
+  ]);
+  var arr97031 = results[0];
+  var arr97051 = results[1];
+  var arr98299 = results[2];
+
+  // ── OPTION A: Transfer via Bus 2 ──
+  var optA = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, steps: [] };
+
+  var bus2_97031 = getNextArrivalAfter(arr97031, "2", WALK_TO_97031);
+  if (!bus2_97031) {
+    var anyBus2 = getAllArrivalsForBus(arr97031, "2");
+    if (anyBus2.length === 0) {
+      optA.reason = "No Bus 2 data at " + getStopLabel("97031");
+    } else {
+      optA.reason = "Bus 2 arrives too soon at " + getStopName("97031") + " \u2014 can\u2019t reach in " + WALK_TO_97031 + " min (next: " + fmtMins(anyBus2[0].mins) + ")";
+    }
+  } else {
+    var waitAt97031 = bus2_97031.mins - WALK_TO_97031;
+    optA.waitAtStop = waitAt97031;
+
+    optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 2 at " + getStopLabel("97031"), value: fmtMins(bus2_97031.mins) + " (wait " + waitAt97031.toFixed(1) + " min at stop)", cls: "" });
+
+    matchedArrivals["97031_2_" + bus2_97031.key] = "A";
+
+    var bus2_97051 = getNextArrivalAfter(arr97051, "2", bus2_97031.mins);
+    if (!bus2_97051) {
+      optA.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97051") + " (no matching arrival)";
+    } else {
+      var travelTime = bus2_97051.mins - bus2_97031.mins;
+      optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 2 ride to " + getStopLabel("97051"), value: "~" + travelTime.toFixed(1) + " min", cls: "" });
+      optA.steps.push({ emoji: "\uD83D\uDD04", text: "Transfer buffer", value: TRANSFER_BUFFER + " min", cls: "transfer" });
+
+      matchedArrivals["97051_2_" + bus2_97051.key] = "A";
+
+      var minBus5Time = bus2_97051.mins + TRANSFER_BUFFER;
+      var bus5_97051 = getNextArrivalAfter(arr97051, "5", minBus5Time);
+      if (!bus5_97051) {
+        var anyBus5_97051 = getAllArrivalsForBus(arr97051, "5");
+        if (anyBus5_97051.length === 0) {
+          optA.reason = "No Bus 5 data at " + getStopLabel("97051");
+        } else {
+          optA.reason = "No Bus 5 at " + getStopName("97051") + " after transfer (need \u2265 " + fmtMins(minBus5Time) + ", latest: " + fmtMins(anyBus5_97051[anyBus5_97051.length - 1].mins) + ")";
+        }
+      } else {
+        var waitForBus5 = bus5_97051.mins - bus2_97051.mins - TRANSFER_BUFFER;
+        optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("97051"), value: fmtMins(bus5_97051.mins) + " (wait " + waitForBus5.toFixed(1) + " min)", cls: "highlight" });
+        optA.viable = true;
+        optA.boardBus5At = bus5_97051.mins;
+
+        matchedArrivals["97051_5_" + bus5_97051.key] = "A";
+      }
+    }
+  }
+
+  // ── OPTION B: Walk to Bus 5 ──
+  var optB = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, steps: [] };
+
+  var bus5_98299 = getNextArrivalAfter(arr98299, "5", BUS5_MIN_98299);
+  if (!bus5_98299) {
+    var anyBus5_98299 = getAllArrivalsForBus(arr98299, "5");
+    if (anyBus5_98299.length === 0) {
+      optB.reason = "No Bus 5 data at " + getStopLabel("98299");
+    } else {
+      optB.reason = "Bus 5 arrives too soon at " + getStopName("98299") + " \u2014 can\u2019t walk in " + WALK_TO_98299 + " min (next: " + fmtMins(anyBus5_98299[0].mins) + ")";
+    }
+  } else {
+    var waitAt98299 = bus5_98299.mins - WALK_TO_98299;
+    optB.waitAtStop = waitAt98299;
+
+    optB.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("98299"), value: fmtMins(bus5_98299.mins) + " (wait " + waitAt98299.toFixed(1) + " min at stop)", cls: "highlight" });
+    optB.viable = true;
+    optB.boardBus5At = bus5_98299.mins;
+
+    matchedArrivals["98299_5_" + bus5_98299.key] = "B";
+  }
+
+  // ── Update UI ──
+  updateOptions(optA, optB);
+  updateRecommendation(optA, optB);
+  renderStopCards({ "97031": arr97031, "97051": arr97051, "98299": arr98299 });
+
+  // Timestamp
+  var now = new Date();
+  var ts = now.toLocaleTimeString();
+  var el = document.getElementById("lastUpdate");
+  el.textContent = "Updated: " + ts;
+  el.style.display = "inline";
+
+  setLoading(false);
+}
+
+/* ════════════════ UPDATE OPTIONS ════════════════ */
+function updateOptions(optA, optB) {
+  var elA = document.getElementById("optionA");
+  var stepsA = document.getElementById("optASteps");
+  var resultA = document.getElementById("optAResult");
+  var titleA = document.getElementById("optATitleH4");
+
+  var elB = document.getElementById("optionB");
+  var stepsB = document.getElementById("optBSteps");
+  var resultB = document.getElementById("optBResult");
+  var titleB = document.getElementById("optBTitleH4");
+
+  // Option A
+  if (optA.viable) {
+    elA.className = "option-card active";
+    titleA.innerHTML = "\uD83D\uDD04 Option A: Transfer via Bus 2 (wait " + optA.waitAtStop.toFixed(1) + " min at stop)";
+    var html = "";
+    optA.steps.forEach(function(s) {
+      html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
+    });
+    stepsA.innerHTML = html;
+    resultA.innerHTML = '<span class="viable">\u2705 Board Bus 5 in ' + fmtMins(optA.boardBus5At) + ' from now</span>';
+  } else {
+    elA.className = "option-card not-viable";
+    titleA.innerHTML = "\uD83D\uDD04 Option A: Transfer via Bus 2";
+    var html = "";
+    optA.steps.forEach(function(s) {
+      html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
+    });
+    stepsA.innerHTML = html;
+    resultA.innerHTML = '<span class="not-viable-text">\u274C ' + optA.reason + '</span>';
+  }
+
+  // Option B
+  if (optB.viable) {
+    elB.className = "option-card active";
+    titleB.innerHTML = "\uD83D\uDEB6 Option B: Walk to Bus 5 (wait " + optB.waitAtStop.toFixed(1) + " min at stop)";
+    var html = "";
+    optB.steps.forEach(function(s) {
+      html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
+    });
+    stepsB.innerHTML = html;
+    resultB.innerHTML = '<span class="viable">\u2705 Board Bus 5 in ' + fmtMins(optB.boardBus5At) + ' from now</span>';
+  } else {
+    elB.className = "option-card not-viable";
+    titleB.innerHTML = "\uD83D\uDEB6 Option B: Walk to Bus 5";
+    var html = "";
+    optB.steps.forEach(function(s) {
+      html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
+    });
+    stepsB.innerHTML = html;
+    resultB.innerHTML = '<span class="not-viable-text">\u274C ' + optB.reason + '</span>';
+  }
+
+  // ── Sort: least wait on top ──
+  var container = document.getElementById("optionsContainer");
+  var aWait = optA.waitAtStop !== null ? optA.waitAtStop : 9999;
+  var bWait = optB.waitAtStop !== null ? optB.waitAtStop : 9999;
+
+  if (bWait < aWait) {
+    container.insertBefore(elB, elA);
+  } else {
+    container.insertBefore(elA, elB);
+  }
+}
+
+/* ════════════════ UPDATE RECOMMENDATION ════════════════ */
+function updateRecommendation(optA, optB) {
+  var box = document.getElementById("recBox");
+  var title, detail, warn, cls;
+  var nameA = getStopName("97031");
+  var nameB = getStopName("98299");
+
+  function waitTag(mins) {
+    return ' <span class="rec-wait">(wait for ' + mins.toFixed(1) + ' min at stop)</span>';
+  }
+
+  if (optA.viable && optB.viable) {
+    if (optA.boardBus5At <= optB.boardBus5At) {
+      var diff = optB.boardBus5At - optA.boardBus5At;
+      cls = "rec-good";
+      title = "\u2705 Recommended: Walk " + nameA + waitTag(optA.waitAtStop);
+      detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + (diff > 0.1 ? " (" + diff.toFixed(1) + " min faster than walking to " + nameB + ")" : " (same as walking to " + nameB + ")");
+      warn = "Walk " + nameB + " also viable \u2014 Board Bus 5 in " + fmtMins(optB.boardBus5At);
+    } else {
+      var diff = optA.boardBus5At - optB.boardBus5At;
+      cls = "rec-good";
+      title = "\u2705 Recommended: Walk " + nameB + waitTag(optB.waitAtStop);
+      detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + (diff > 0.1 ? " (" + diff.toFixed(1) + " min faster than walking to " + nameA + ")" : " (same as walking to " + nameA + ")");
+      warn = "Walk " + nameA + " also viable \u2014 Board Bus 5 in " + fmtMins(optA.boardBus5At);
+    }
+  } else if (optA.viable) {
+    cls = "rec-good";
+    title = "\u2705 Recommended: Walk " + nameA + waitTag(optA.waitAtStop);
+    detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + " (transfer via Bus 2)";
+    warn = "Walk " + nameB + " not viable: " + optB.reason;
+  } else if (optB.viable) {
+    cls = "rec-good";
+    title = "\u2705 Recommended: Walk " + nameB + waitTag(optB.waitAtStop);
+    detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + " (direct Bus 5)";
+    warn = "Walk " + nameA + " not viable: " + optA.reason;
+  } else {
+    cls = "rec-bad";
+    title = "\uD83D\uDEAB No Viable Option Right Now";
+    detail = "Neither transfer nor walk option is available.";
+    warn = "Walk " + nameA + ": " + optA.reason + " | Walk " + nameB + ": " + optB.reason;
+  }
+
+  box.className = "recommendation " + cls;
+  box.innerHTML =
+    '<div class="rec-title">' + title + '</div>' +
+    '<div class="rec-detail">' + detail + '</div>' +
+    (warn ? '<div class="rec-warn">' + warn + '</div>' : '');
+}
+
+/* ════════════════ RENDER STOP CARDS ════════════════ */
+function renderStopCards(allArrivals) {
+  var container = document.getElementById("stopCards");
+  var html = "";
+
+  // ── Group A: Stops 97031 + 97051 (Transfer route) ──
+  html += '<div class="stop-group group-a">';
+  html += '<div class="group-label">\uD83D\uDD04 Option A \u2014 Transfer via Bus 2</div>';
+
+  ["97031", "97051"].forEach(function(stopId) {
+    html += renderSingleStop(stopId, allArrivals[stopId]);
+  });
+
+  html += '</div>';
+
+  // ── Group B: Stop 98299 (Walk route) ──
+  html += '<div class="stop-group group-b">';
+  html += '<div class="group-label">\uD83D\uDEB6 Option B \u2014 Walk to Bus 5</div>';
+
+  html += renderSingleStop("98299", allArrivals["98299"]);
+
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function renderSingleStop(stopId, arrivals) {
+  var s = stopData[stopId];
+  var stopName = s ? s[2] : "";
+  var stopRoad = s ? s[3] : "";
+  var color = STOP_COLORS[stopId];
+  var html = "";
+
+  html += '<div class="stop-block">';
+  html += '<div class="stop-header">';
+  html += '<div class="stop-dot" style="background:' + color + ';box-shadow:0 0 6px ' + color + ';"></div>';
+  html += '<span class="stop-label">' + (stopName ? stopName + ' - Stop ' + stopId : 'Stop ' + stopId) + '</span>';
+  html += '<span class="stop-road">' + (stopRoad ? stopRoad : '') + '</span>';
+  html += '</div>';
+
+  var buses = BUS_INTEREST[stopId];
+  buses.forEach(function(busNo) {
+    var allArr = getAllArrivalsForBus(arrivals, busNo);
+    var badgeColor = BUS_COLORS[busNo] || "#ccc";
+
+    if (allArr.length === 0) {
+      html += '<div class="bus-row"><span class="bus-badge" style="background:' + badgeColor + ';">Bus ' + busNo + '</span>';
+      html += '<span class="no-data">No data</span></div>';
+      return;
+    }
+
+    var labels = ["1st", "2nd", "3rd"];
+    allArr.forEach(function(a, idx) {
+      if (idx >= 3) return;
+      var matchKey = stopId + "_" + busNo + "_" + a.key;
+      var isMatched = matchedArrivals[matchKey];
+      var rowCls = isMatched ? "bus-row matched" : "bus-row";
+
+      html += '<div class="' + rowCls + '">';
+      html += '<span class="bus-badge" style="background:' + badgeColor + ';">Bus ' + busNo + '</span>';
+      html += '<div class="bus-arrivals">';
+      html += '<div class="bus-arrival-item"><span class="arr-label">' + labels[idx] + '</span>';
+      html += '<span class="arr-time">' + fmtMins(a.mins) + '</span>';
+      if (isMatched) {
+        var tagCls = isMatched === "A" ? "tag-a" : "tag-b";
+        var tagText = isMatched === "A" ? "OPT A" : "OPT B";
+        html += '<span class="match-tag ' + tagCls + '">' + tagText + '</span>';
+      }
+      html += '</div></div></div>';
+    });
+  });
+
+  html += '</div>';
+  return html;
+}
+
+/* ════════════════ COUNTDOWN & AUTO-REFRESH ════════════════ */
+function updateCountdownUI() {
+  document.getElementById("countdownSec").textContent = secondsLeft + "s";
+  var pct = (secondsLeft / REFRESH_SEC) * 100;
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+function startCountdown() {
+  secondsLeft = REFRESH_SEC;
+  updateCountdownUI();
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(function() {
+    secondsLeft--;
+    if (secondsLeft < 0) secondsLeft = 0;
+    updateCountdownUI();
+  }, 1000);
+}
+
+function startAutoRefresh() {
+  startCountdown();
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(function() {
+    refresh();
+    startCountdown();
+  }, REFRESH_SEC * 1000);
+}
+
+function manualRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  if (countdownTimer) clearInterval(countdownTimer);
+  refresh().then(function() {
+    startAutoRefresh();
+  });
+}
+
+/* ════════════════ INIT ════════════════ */
+(async function() {
+  await fetchStops();
+  await refresh();
+  startAutoRefresh();
+})();
+</script>
+</body>
+</html>
