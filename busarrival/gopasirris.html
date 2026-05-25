@@ -384,8 +384,9 @@ async function refresh() {
           optA.reason = "No Bus 5 at " + getStopName("97051") + " after transfer (need \u2265 " + fmtMins(minBus5Time) + ", latest: " + fmtMins(anyBus5_97051[anyBus5_97051.length - 1].mins) + ")";
         }
       } else {
-        var waitForBus5 = bus5_97051.mins - bus2_97051.mins - TRANSFER_BUFFER;
-        optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("97051"), value: fmtMins(bus5_97051.mins) + " (wait " + waitForBus5.toFixed(1) + " min)", cls: "highlight" });
+        // FIXED: actual wait at Komo Shoppes = time from alighting Bus 2 until Bus 5 arrives
+        var waitAtKomo = bus5_97051.mins - bus2_97051.mins;
+        optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("97051"), value: fmtMins(bus5_97051.mins) + " (wait " + waitAtKomo.toFixed(1) + " min at stop)", cls: "highlight" });
         optA.viable = true;
         optA.boardBus5At = bus5_97051.mins;
 
