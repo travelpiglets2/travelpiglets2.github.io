@@ -69,6 +69,7 @@
   .rec-loading { background: #23293a; border-color: #555; color: #aaa; }
   .rec-title { font-size: 1.2rem; margin-bottom: 4px; }
   .rec-detail { font-size: 0.88rem; font-weight: 400; margin-top: 4px; opacity: 0.85; }
+  .rec-warn { font-size: 0.78rem; margin-top: 6px; opacity: 0.7; }
 
   /* ── Cards ── */
   .card {
@@ -117,6 +118,14 @@
   .match-tag {
     font-size: 0.6rem; background: #4caf50; color: #fff; padding: 2px 6px;
     border-radius: 10px; font-weight: 700; margin-left: 4px; white-space: nowrap;
+  }
+  .tag-live {
+    font-size: 0.6rem; background: #1e3a0a; color: #a5d6a7; padding: 2px 6px;
+    border-radius: 10px; font-weight: 600; margin-left: 4px; white-space: nowrap;
+  }
+  .tag-est {
+    font-size: 0.6rem; background: #2a2a2a; color: #90a4ae; padding: 2px 6px;
+    border-radius: 10px; font-weight: 600; margin-left: 4px; white-space: nowrap;
   }
 
   /* ── Map ── */
@@ -208,6 +217,8 @@
       <div class="legend-item"><span class="legend-circle" style="background:#e040fb;"></span>97059</div>
       <div class="legend-item"><span class="legend-circle" style="background:#ff7043;"></span>98319</div>
       <div class="legend-item"><span class="legend-circle" style="background:#26c6da;"></span>98311</div>
+      <div class="legend-item" style="margin-left:4px;"><span class="tag-live">&#x25CF; Live</span> = GPS tracked</div>
+      <div class="legend-item"><span class="tag-est">&#x25E6; Est.</span> = Estimated</div>
     </div>
   </div>
 </div>
@@ -227,6 +238,11 @@ var BUS_INTEREST = { "97059": ["5", "2", "2B"], "98319": ["5"], "98311": ["4"] }
 var map, stopData = {}, stopMarkers = [], busMarkers = [];
 var matchedArrivals = {};
 var secondsLeft = REFRESH_SEC, refreshTimer, countdownTimer;
+
+/* ── Helper: check if arrival has valid GPS ── */
+function hasGPS(arrival) {
+  return arrival && arrival.lat && arrival.lng && arrival.lat !== 0 && arrival.lng !== 0;
+}
 
 /* ── Map ── */
 function initMap() {
@@ -368,10 +384,11 @@ function renderStopCards(allArrivals) {
           var hl=matchedArrivals[mk]||false;
           var rc=hl?"bus-row highlighted":"bus-row";
           var mt=hl?'<span class="match-tag">'+matchedArrivals[mk]+'</span>':"";
+          var gpsTag=hasGPS(a)?'<span class="tag-live">&#x25CF; Live</span>':'<span class="tag-est">&#x25E6; Est.</span>';
           html+='<div class="'+rc+'">'+
             '<span class="bus-badge '+bc+'">Bus '+busNo+'</span>'+
             '<span class="bus-order">'+orderLabels[a.key]+'</span>'+
-            '<span class="bus-time"><span class="mins">'+fmtMins(a.mins)+'</span>'+mt+'</span></div>';
+            '<span class="bus-time"><span class="mins">'+fmtMins(a.mins)+'</span>'+gpsTag+mt+'</span></div>';
         }
       }
     });
@@ -388,20 +405,22 @@ function updateRecommendation(optA,optB) {
   var optAWait=document.getElementById("optAWait");
   var optBWait=document.getElementById("optBWait");
 
-  var aViable=false, aWait=null, aBusNo=null;
+  var aViable=false, aWait=null, aBusNo=null, aIsEst=false;
   if(optA.bus5 && optA.bestBus){
     aWait = optA.bestBus.mins - optA.bus5.mins;
     aBusNo = optA.bestBusNo;
+    aIsEst = !hasGPS(optA.bestBus);
     if(aWait>=0 && aWait<=10) aViable=true;
   }
+  var estLabelA = aIsEst ? ' <span class="tag-est">&#x25E6; Est.</span>' : ' <span class="tag-live">&#x25CF; Live</span>';
   if(aViable){
-    optAWait.innerHTML='<span class="viable">&#x2705; Bus '+aBusNo+' in '+aWait.toFixed(1)+' min after alighting</span>';
+    optAWait.innerHTML='<span class="viable">&#x2705; Bus '+aBusNo+' in '+aWait.toFixed(1)+' min after alighting'+estLabelA+'</span>';
     optAEl.className="option-card active";
   } else if(optA.bus5 && optA.bestBus && aWait!==null){
     if(aWait<0)
-      optAWait.innerHTML='<span class="not-viable-text">&#x274C; Bus '+aBusNo+' arrives before Bus 5 &mdash; cannot catch</span>';
+      optAWait.innerHTML='<span class="not-viable-text">&#x274C; Bus '+aBusNo+' arrives before Bus 5 &mdash; cannot catch'+estLabelA+'</span>';
     else
-      optAWait.innerHTML='<span class="not-viable-text">&#x274C; Bus '+aBusNo+' wait: '+aWait.toFixed(1)+' min &mdash; too long (&gt;10 min)</span>';
+      optAWait.innerHTML='<span class="not-viable-text">&#x274C; Bus '+aBusNo+' wait: '+aWait.toFixed(1)+' min &mdash; too long (&gt;10 min)'+estLabelA+'</span>';
     optAEl.className="option-card not-viable";
   } else {
     var m1=!optA.bus5?"5":"2/2B";
@@ -409,19 +428,21 @@ function updateRecommendation(optA,optB) {
     optAEl.className="option-card not-viable";
   }
 
-  var bViable=false, bWait=null;
+  var bViable=false, bWait=null, bIsEst=false;
   if(optB.bus5_98319 && optB.bus4){
     bWait=optB.bus4.mins - optB.bus5_98319.mins;
+    bIsEst = !hasGPS(optB.bus4);
     if(bWait>=1 && bWait<=10) bViable=true;
   }
+  var estLabelB = bIsEst ? ' <span class="tag-est">&#x25E6; Est.</span>' : ' <span class="tag-live">&#x25CF; Live</span>';
   if(bViable){
-    optBWait.innerHTML='<span class="viable">&#x2705; Wait: '+bWait.toFixed(1)+' min (incl. crossing)</span>';
+    optBWait.innerHTML='<span class="viable">&#x2705; Wait: '+bWait.toFixed(1)+' min (incl. crossing)'+estLabelB+'</span>';
     optBEl.className="option-card active";
   } else if(optB.bus5_98319 && optB.bus4 && bWait!==null){
     if(bWait<1)
-      optBWait.innerHTML='<span class="not-viable-text">&#x274C; Bus 4 too soon &mdash; no time to cross (&ge;1 min needed)</span>';
+      optBWait.innerHTML='<span class="not-viable-text">&#x274C; Bus 4 too soon &mdash; no time to cross (&ge;1 min needed)'+estLabelB+'</span>';
     else
-      optBWait.innerHTML='<span class="not-viable-text">&#x274C; Wait: '+bWait.toFixed(1)+' min &mdash; too long (&gt;10 min)</span>';
+      optBWait.innerHTML='<span class="not-viable-text">&#x274C; Wait: '+bWait.toFixed(1)+' min &mdash; too long (&gt;10 min)'+estLabelB+'</span>';
     optBEl.className="option-card not-viable";
   } else {
     var m2=!optB.bus5_98319?"5 at 98319":"4";
@@ -429,24 +450,30 @@ function updateRecommendation(optA,optB) {
     optBEl.className="option-card not-viable";
   }
 
+  // Final Recommendation
+  var recEstWarn = "";
   if(aViable&&bViable){
     if(aWait<=bWait){
+      if(aIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
       recBox.className="recommendation rec-good";
       recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women&#39;s Prison</div>'+
-        '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>';
+        '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>'+recEstWarn;
     } else {
+      if(bIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
       recBox.className="recommendation rec-good";
       recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Mariam</div>'+
-        '<div class="rec-detail">Alight Bus 5 at 98319, cross to 98311 for Bus 4<br>Wait '+bWait.toFixed(1)+' min</div>';
+        '<div class="rec-detail">Alight Bus 5 at 98319, cross to 98311 for Bus 4<br>Wait '+bWait.toFixed(1)+' min</div>'+recEstWarn;
     }
   } else if(aViable){
+    if(aIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
     recBox.className="recommendation rec-good";
     recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women&#39;s Prison</div>'+
-      '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>';
+      '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>'+recEstWarn;
   } else if(bViable){
+    if(bIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
     recBox.className="recommendation rec-good";
     recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Mariam</div>'+
-      '<div class="rec-detail">Alight Bus 5 at 98319, cross to 98311 for Bus 4<br>Wait '+bWait.toFixed(1)+' min</div>';
+      '<div class="rec-detail">Alight Bus 5 at 98319, cross to 98311 for Bus 4<br>Wait '+bWait.toFixed(1)+' min</div>'+recEstWarn;
   } else {
     recBox.className="recommendation rec-bad";
     recBox.innerHTML='<div class="rec-title">&#x1F6AB; Do Not Transfer</div>'+
@@ -520,7 +547,7 @@ async function refresh() {
   );
   renderStopCards(allArrivals);
 
-  // Map
+  // Map — only plot buses with valid GPS
   clearBusMarkers();
   var allBounds=[];
   STOP_IDS.forEach(function(id){
