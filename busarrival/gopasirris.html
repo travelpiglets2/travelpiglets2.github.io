@@ -149,8 +149,8 @@
     border-radius: 6px; color: #181c24; flex-shrink: 0; min-width: 36px;
     text-align: center;
   }
-  .bus-arrivals { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; }
-  .bus-arrival-item { font-size: 0.78rem; color: #ccc; }
+  .bus-arrivals { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; align-items: center; }
+  .bus-arrival-item { font-size: 0.78rem; color: #ccc; display: flex; align-items: center; gap: 4px; }
   .bus-arrival-item .arr-label { font-size: 0.65rem; color: #777; margin-right: 3px; }
   .bus-arrival-item .arr-time { font-weight: 600; }
   .match-tag {
@@ -160,6 +160,17 @@
   .tag-a { background: #4fc3f744; color: #4fc3f7; }
   .tag-b { background: #4caf5044; color: #4caf50; }
   .no-data { font-size: 0.78rem; color: #ef9a9a; padding: 4px 8px; }
+
+  /* ── Load/Crowd Tags ── */
+  .load-tag {
+    font-size: 0.58rem; font-weight: 700; padding: 1px 5px;
+    border-radius: 4px; margin-left: 2px; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 2px;
+  }
+  .load-sea { background: #1b3a2a; color: #81c784; }
+  .load-sda { background: #3a3a1b; color: #ffd166; }
+  .load-lsd { background: #3a1b1b; color: #ef9a9a; }
+  .load-na  { background: #2a2a2a; color: #777; }
 
   /* ── Footer ── */
   footer {
@@ -277,6 +288,12 @@ function fmtClockTime(minsFromNow) {
   var m = t.getMinutes().toString().padStart(2, "0");
   return h + ":" + m;
 }
+function loadTag(load) {
+  if (load === "SEA") return '<span class="load-tag load-sea">\u{1F7E2} Seats</span>';
+  if (load === "SDA") return '<span class="load-tag load-sda">\u{1F7E1} Standing</span>';
+  if (load === "LSD") return '<span class="load-tag load-lsd">\u{1F534} Full</span>';
+  return '<span class="load-tag load-na">\u25CB N/A</span>';
+}
 
 function getAllArrivalsForBus(arrivals, busNo) {
   var results = [];
@@ -306,6 +323,32 @@ function getNextArrivalAfter(arrivals, busNo, afterMins) {
     if (all[i].mins >= afterMins) return all[i];
   }
   return null;
+}
+
+/* ════════════════ SAME BUS DETECTION ════════════════ */
+/*
+ * Bus 5 route: Parc Olympia (98299) → Komo Shoppes (97051)
+ * Match each Bus 5 at 98299 to a Bus 5 at 97051 that arrives AFTER it.
+ * Returns a map: { "98299_key": "97051_key" }
+ */
+function matchBus5BetweenStops(arr98299, arr97051) {
+  var bus5_at_98299 = getAllArrivalsForBus(arr98299, "5");
+  var bus5_at_97051 = getAllArrivalsForBus(arr97051, "5");
+  var pairs = {};
+  var used = {};
+
+  for (var i = 0; i < bus5_at_98299.length; i++) {
+    for (var j = 0; j < bus5_at_97051.length; j++) {
+      if (used[j]) continue;
+      // Bus 5 at 97051 must arrive AFTER Bus 5 at 98299
+      if (bus5_at_97051[j].mins > bus5_at_98299[i].mins) {
+        pairs[bus5_at_98299[i].key] = bus5_at_97051[j].key;
+        used[j] = true;
+        break;
+      }
+    }
+  }
+  return pairs;
 }
 
 /* ════════════════ DATA ════════════════ */
@@ -345,7 +388,7 @@ async function refresh() {
   var arr98299 = results[2];
 
   // ── OPTION A: Transfer via Bus 2 ──
-  var optA = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 2", steps: [] };
+  var optA = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 2", bus5Key: null, steps: [] };
 
   var bus2_97031 = getNextArrivalAfter(arr97031, "2", WALK_TO_97031);
   if (!bus2_97031) {
@@ -368,10 +411,6 @@ async function refresh() {
     if (!bus2_97051) {
       optA.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97051") + " (no matching arrival)";
     } else {
-      var travelTime = bus2_97051.mins - bus2_97031.mins;
-      optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 2 ride to " + getStopLabel("97051"), value: "~" + travelTime.toFixed(1) + " min", cls: "" });
-      optA.steps.push({ emoji: "\uD83D\uDD04", text: "Transfer buffer", value: TRANSFER_BUFFER + " min", cls: "transfer" });
-
       matchedArrivals["97051_2_" + bus2_97051.key] = "A";
 
       var minBus5Time = bus2_97051.mins + TRANSFER_BUFFER;
@@ -384,11 +423,11 @@ async function refresh() {
           optA.reason = "No Bus 5 at " + getStopName("97051") + " after transfer (need \u2265 " + fmtMins(minBus5Time) + ", latest: " + fmtMins(anyBus5_97051[anyBus5_97051.length - 1].mins) + ")";
         }
       } else {
-        // FIXED: actual wait at Komo Shoppes = time from alighting Bus 2 until Bus 5 arrives
         var waitAtKomo = bus5_97051.mins - bus2_97051.mins;
         optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("97051"), value: fmtMins(bus5_97051.mins) + " (wait " + waitAtKomo.toFixed(1) + " min at stop)", cls: "highlight" });
         optA.viable = true;
         optA.boardBus5At = bus5_97051.mins;
+        optA.bus5Key = bus5_97051.key;
 
         matchedArrivals["97051_5_" + bus5_97051.key] = "A";
       }
@@ -396,7 +435,7 @@ async function refresh() {
   }
 
   // ── OPTION B: Walk to Bus 5 ──
-  var optB = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 5", steps: [] };
+  var optB = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 5", bus5Key: null, steps: [] };
 
   var bus5_98299 = getNextArrivalAfter(arr98299, "5", BUS5_MIN_98299);
   if (!bus5_98299) {
@@ -410,6 +449,7 @@ async function refresh() {
     var waitAt98299 = bus5_98299.mins - WALK_TO_98299;
     optB.waitAtStop = waitAt98299;
     optB.leaveIn = bus5_98299.mins - WALK_TO_98299 - TARGET_EARLY;
+    optB.bus5Key = bus5_98299.key;
 
     optB.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("98299"), value: fmtMins(bus5_98299.mins) + " (wait " + waitAt98299.toFixed(1) + " min at stop)", cls: "highlight" });
     optB.viable = true;
@@ -418,9 +458,19 @@ async function refresh() {
     matchedArrivals["98299_5_" + bus5_98299.key] = "B";
   }
 
+  // ── Same Bus 5 Detection ──
+  var sameBus5 = false;
+  if (optA.viable && optB.viable) {
+    var pairs = matchBus5BetweenStops(arr98299, arr97051);
+    // Check if Option B's Bus 5 at 98299 maps to Option A's Bus 5 at 97051
+    if (optB.bus5Key && pairs[optB.bus5Key] && pairs[optB.bus5Key] === optA.bus5Key) {
+      sameBus5 = true;
+    }
+  }
+
   // ── Update UI ──
   updateOptions(optA, optB);
-  updateRecommendation(optA, optB);
+  updateRecommendation(optA, optB, sameBus5);
   renderStopCards({ "97031": arr97031, "97051": arr97051, "98299": arr98299 });
 
   // Timestamp
@@ -513,7 +563,7 @@ function buildLeaveTag(leaveIn, busLabel) {
 }
 
 /* ════════════════ UPDATE RECOMMENDATION ════════════════ */
-function updateRecommendation(optA, optB) {
+function updateRecommendation(optA, optB, sameBus5) {
   var box = document.getElementById("recBox");
   var title, detail, warn, leaveHtml, cls;
   var nameA = getStopName("97031");
@@ -525,7 +575,14 @@ function updateRecommendation(optA, optB) {
   }
 
   if (optA.viable && optB.viable) {
-    if (optA.boardBus5At <= optB.boardBus5At) {
+    if (sameBus5) {
+      // Same Bus 5 — always prefer A (less walking)
+      cls = "rec-good";
+      title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
+      detail = "Same Bus 5 at both stops \u2014 no need to walk 9 min to " + nameB;
+      leaveHtml = buildLeaveTag(optA.leaveIn, optA.busLabel);
+      warn = "\uD83D\uDE8C Both options catch the same Bus 5 \u2014 save " + (WALK_TO_98299 - WALK_TO_97031) + " min walking via Option A";
+    } else if (optA.boardBus5At <= optB.boardBus5At) {
       // Option A wins or tie — prefer A (less walking)
       cls = "rec-good";
       title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
@@ -533,7 +590,7 @@ function updateRecommendation(optA, optB) {
       leaveHtml = buildLeaveTag(optA.leaveIn, optA.busLabel);
       warn = "Walk to " + nameB + " also viable \u2014 Board Bus 5 in " + fmtMins(optB.boardBus5At);
     } else {
-      // Option B wins — long wait at Komo Shoppes
+      // Option B wins — long wait at Komo Shoppes, different bus
       var diff = optA.boardBus5At - optB.boardBus5At;
       cls = "rec-good";
       title = "\u2705 Recommended: Walk to " + nameB + waitTag(optB.waitAtStop);
@@ -632,6 +689,7 @@ function renderSingleStop(stopId, arrivals) {
       html += '<div class="bus-arrivals">';
       html += '<div class="bus-arrival-item"><span class="arr-label">' + labels[idx] + '</span>';
       html += '<span class="arr-time">' + fmtMins(a.mins) + '</span>';
+      html += loadTag(a.load);
       if (isMatched) {
         var tagCls = isMatched === "A" ? "tag-a" : "tag-b";
         var tagText = isMatched === "A" ? "OPT A" : "OPT B";
