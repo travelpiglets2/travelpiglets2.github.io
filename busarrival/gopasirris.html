@@ -87,7 +87,6 @@
   .option-card.active { border-left-color: #4caf50; }
   .option-card.not-viable { border-left-color: #ef5350; opacity: 0.7; }
   .option-card h4 { font-size: 0.88rem; margin-bottom: 5px; line-height: 1.4; }
-  .option-card .detail { font-size: 0.8rem; color: #aaa; }
   .option-card .wait-time { font-size: 0.95rem; font-weight: 700; margin-top: 6px; }
   .viable { color: #81c784; }
   .not-viable-text { color: #ef9a9a; }
@@ -203,14 +202,12 @@
     <h3>&#x1F4CB; Your Options</h3>
     <div id="optionsContainer">
       <div class="option-card" id="optionA">
-        <h4 id="optATitleH4">&#x1F504; Option A: Transfer via Bus 2</h4>
-        <div class="detail">Walk 4 min &#x2192; Stop 97031 &#x2192; Bus 2 &#x2192; Stop 97051 &#x2192; Transfer &#x2192; Bus 5</div>
+        <h4 id="optATitleH4">&#x1F504; Option A: Board at ...</h4>
         <div id="optASteps" style="margin-top:8px;"></div>
         <div id="optAResult" class="wait-time" style="margin-top:6px;"></div>
       </div>
       <div class="option-card" id="optionB">
-        <h4 id="optBTitleH4">&#x1F6B6; Option B: Walk to Bus 5</h4>
-        <div class="detail">Walk 9 min &#x2192; Stop 98299 &#x2192; Bus 5 directly (recommended if Bus 5 &#x2265; 10 min)</div>
+        <h4 id="optBTitleH4">&#x1F6B6; Option B: Board at ...</h4>
         <div id="optBSteps" style="margin-top:8px;"></div>
         <div id="optBResult" class="wait-time" style="margin-top:6px;"></div>
       </div>
@@ -432,10 +429,13 @@ function updateOptions(optA, optB) {
   var resultB = document.getElementById("optBResult");
   var titleB = document.getElementById("optBTitleH4");
 
+  var nameA = getStopName("97031");
+  var nameB = getStopName("98299");
+
   // Option A
   if (optA.viable) {
     elA.className = "option-card active";
-    titleA.innerHTML = "\uD83D\uDD04 Option A: Transfer via Bus 2 (wait " + optA.waitAtStop.toFixed(1) + " min at stop)";
+    titleA.innerHTML = "\uD83D\uDD04 Option A: Board at " + nameA + " (wait " + optA.waitAtStop.toFixed(1) + " min at stop)";
     var html = "";
     optA.steps.forEach(function(s) {
       html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
@@ -444,7 +444,7 @@ function updateOptions(optA, optB) {
     resultA.innerHTML = '<span class="viable">\u2705 Board Bus 5 in ' + fmtMins(optA.boardBus5At) + ' from now</span>';
   } else {
     elA.className = "option-card not-viable";
-    titleA.innerHTML = "\uD83D\uDD04 Option A: Transfer via Bus 2";
+    titleA.innerHTML = "\uD83D\uDD04 Option A: Board at " + nameA;
     var html = "";
     optA.steps.forEach(function(s) {
       html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
@@ -456,7 +456,7 @@ function updateOptions(optA, optB) {
   // Option B
   if (optB.viable) {
     elB.className = "option-card active";
-    titleB.innerHTML = "\uD83D\uDEB6 Option B: Walk to Bus 5 (wait " + optB.waitAtStop.toFixed(1) + " min at stop)";
+    titleB.innerHTML = "\uD83D\uDEB6 Option B: Board at " + nameB + " (wait " + optB.waitAtStop.toFixed(1) + " min at stop)";
     var html = "";
     optB.steps.forEach(function(s) {
       html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
@@ -465,7 +465,7 @@ function updateOptions(optA, optB) {
     resultB.innerHTML = '<span class="viable">\u2705 Board Bus 5 in ' + fmtMins(optB.boardBus5At) + ' from now</span>';
   } else {
     elB.className = "option-card not-viable";
-    titleB.innerHTML = "\uD83D\uDEB6 Option B: Walk to Bus 5";
+    titleB.innerHTML = "\uD83D\uDEB6 Option B: Board at " + nameB;
     var html = "";
     optB.steps.forEach(function(s) {
       html += '<div class="step ' + s.cls + '">' + s.emoji + ' ' + s.text + ': <strong>' + s.value + '</strong></div>';
@@ -501,31 +501,31 @@ function updateRecommendation(optA, optB) {
     if (optA.boardBus5At <= optB.boardBus5At) {
       var diff = optB.boardBus5At - optA.boardBus5At;
       cls = "rec-good";
-      title = "\u2705 Recommended: Walk " + nameA + waitTag(optA.waitAtStop);
+      title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
       detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + (diff > 0.1 ? " (" + diff.toFixed(1) + " min faster than walking to " + nameB + ")" : " (same as walking to " + nameB + ")");
-      warn = "Walk " + nameB + " also viable \u2014 Board Bus 5 in " + fmtMins(optB.boardBus5At);
+      warn = "Walk to " + nameB + " also viable \u2014 Board Bus 5 in " + fmtMins(optB.boardBus5At);
     } else {
       var diff = optA.boardBus5At - optB.boardBus5At;
       cls = "rec-good";
-      title = "\u2705 Recommended: Walk " + nameB + waitTag(optB.waitAtStop);
+      title = "\u2705 Recommended: Walk to " + nameB + waitTag(optB.waitAtStop);
       detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + (diff > 0.1 ? " (" + diff.toFixed(1) + " min faster than walking to " + nameA + ")" : " (same as walking to " + nameA + ")");
-      warn = "Walk " + nameA + " also viable \u2014 Board Bus 5 in " + fmtMins(optA.boardBus5At);
+      warn = "Walk to " + nameA + " also viable \u2014 Board Bus 5 in " + fmtMins(optA.boardBus5At);
     }
   } else if (optA.viable) {
     cls = "rec-good";
-    title = "\u2705 Recommended: Walk " + nameA + waitTag(optA.waitAtStop);
+    title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
     detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + " (transfer via Bus 2)";
-    warn = "Walk " + nameB + " not viable: " + optB.reason;
+    warn = "Walk to " + nameB + " not viable: " + optB.reason;
   } else if (optB.viable) {
     cls = "rec-good";
-    title = "\u2705 Recommended: Walk " + nameB + waitTag(optB.waitAtStop);
+    title = "\u2705 Recommended: Walk to " + nameB + waitTag(optB.waitAtStop);
     detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + " (direct Bus 5)";
-    warn = "Walk " + nameA + " not viable: " + optA.reason;
+    warn = "Walk to " + nameA + " not viable: " + optA.reason;
   } else {
     cls = "rec-bad";
     title = "\uD83D\uDEAB No Viable Option Right Now";
     detail = "Neither transfer nor walk option is available.";
-    warn = "Walk " + nameA + ": " + optA.reason + " | Walk " + nameB + ": " + optB.reason;
+    warn = "Walk to " + nameA + ": " + optA.reason + " | Walk to " + nameB + ": " + optB.reason;
   }
 
   box.className = "recommendation " + cls;
