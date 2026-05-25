@@ -70,23 +70,15 @@
   .rec-title { font-size: 1.2rem; margin-bottom: 4px; }
   .rec-detail { font-size: 0.88rem; font-weight: 400; margin-top: 4px; opacity: 0.85; }
 
-  /* ── Route Note ── */
-  .route-note {
-    background: #1a2a3a; border-radius: 10px; padding: 10px 12px;
-    font-size: 0.82rem; color: #90caf9; border: 1px solid #2d3a5c;
-    order: 2; line-height: 1.5;
-  }
-  .route-note b { color: #4fc3f7; }
-
   /* ── Cards ── */
   .card {
     background: #23293a; border-radius: 12px; padding: 14px;
     border: 1px solid #2d3a5c;
   }
   .card h3 { font-size: 0.95rem; margin-bottom: 10px; color: #4fc3f7; }
-  .card-options { order: 3; }
-  .card-map { order: 4; }
-  .card-arrivals { order: 5; }
+  .card-options { order: 2; }
+  .card-map { order: 3; }
+  .card-arrivals { order: 4; }
 
   /* ── Option Cards ── */
   .option-card {
@@ -146,16 +138,15 @@
     .main {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto auto;
+      grid-template-rows: auto auto auto;
       gap: 16px;
       padding: 16px;
       max-width: 1200px; margin: 0 auto;
     }
     .recommendation { order: 1; grid-column: 1 / -1; }
-    .route-note { order: 2; grid-column: 1 / -1; }
-    .card-options { order: 3; grid-column: 1; }
-    .card-map { order: 4; grid-column: 2; grid-row: 3 / 6; }
-    .card-arrivals { order: 5; grid-column: 1; }
+    .card-options { order: 2; grid-column: 1; }
+    .card-map { order: 3; grid-column: 2; grid-row: 2 / 5; }
+    .card-arrivals { order: 4; grid-column: 1; }
     #map { height: 100%; min-height: 420px; }
     .rec-title { font-size: 1.35rem; }
     .recommendation { font-size: 1.15rem; padding: 20px; }
@@ -185,13 +176,6 @@
   <div id="recBox" class="recommendation rec-loading">
     <div class="rec-title">&#x23F3; Checking arrivals...</div>
     <div class="rec-detail">Fetching real-time bus data</div>
-  </div>
-
-  <div class="route-note">
-    <b>&#x1F6E3;&#xFE0F; Route:</b> You are on <b>Bus 5</b> travelling
-    <b>Stop 97059</b> &#x2192; <b>Stop 98319</b>.
-    The system tracks the <b>same Bus 5</b> across stops.
-    <b>Bus 2B</b> is included at Stop 97059 when available.
   </div>
 
   <div class="card card-options">
@@ -374,7 +358,6 @@ function renderStopCards(allArrivals) {
       var all=getAllArrivalsForBus(arrivals,busNo);
       var bc="b"+busNo;
       if(all.length===0){
-        /* Bus not available — skip silently for 2B; show "No data" for others */
         if(busNo==="2B") return;
         html+='<div class="bus-row"><span class="bus-badge '+bc+'">Bus '+busNo+'</span>'+
               '<span class="bus-time"><span style="color:#ef5350;">No data</span></span></div>';
@@ -405,7 +388,6 @@ function updateRecommendation(optA,optB) {
   var optAWait=document.getElementById("optAWait");
   var optBWait=document.getElementById("optBWait");
 
-  // ---- Option A: Bus 5 -> Bus 2 or 2B at 97059 ----
   var aViable=false, aWait=null, aBusNo=null;
   if(optA.bus5 && optA.bestBus){
     aWait = optA.bestBus.mins - optA.bus5.mins;
@@ -427,7 +409,6 @@ function updateRecommendation(optA,optB) {
     optAEl.className="option-card not-viable";
   }
 
-  // ---- Option B: Bus 5 at 98319, cross to 98311 for Bus 4 ----
   var bViable=false, bWait=null;
   if(optB.bus5_98319 && optB.bus4){
     bWait=optB.bus4.mins - optB.bus5_98319.mins;
@@ -448,7 +429,6 @@ function updateRecommendation(optA,optB) {
     optBEl.className="option-card not-viable";
   }
 
-  // ---- Final Recommendation ----
   if(aViable&&bViable){
     if(aWait<=bWait){
       recBox.className="recommendation rec-good";
@@ -492,16 +472,15 @@ async function refresh() {
 
   matchedArrivals={};
 
-  // ======== STEP 1: Our Bus 5 = earliest Bus 5 at Stop 97059 ========
+  // STEP 1: Our Bus 5 = earliest at 97059
   var bus5at97059=getNextArrival(arr97059,"5");
 
-  // ======== STEP 2: Option A — find Bus 2 AND Bus 2B at 97059 after our Bus 5 ========
+  // STEP 2: Option A — find Bus 2 AND Bus 2B at 97059 after our Bus 5
   var bus2forA=null, bus2BforA=null, bestBusForA=null, bestBusNoForA=null;
   if(bus5at97059){
     bus2forA=getNextArrivalAfter(arr97059,"2",bus5at97059.mins);
     bus2BforA=getNextArrivalAfter(arr97059,"2B",bus5at97059.mins);
 
-    // Pick whichever arrives sooner (shorter wait)
     if(bus2forA && bus2BforA){
       if(bus2forA.mins <= bus2BforA.mins){
         bestBusForA=bus2forA; bestBusNoForA="2";
@@ -514,12 +493,11 @@ async function refresh() {
       bestBusForA=bus2BforA; bestBusNoForA="2B";
     }
 
-    // Mark matched arrivals for highlighting
     matchedArrivals["97059_5_"+bus5at97059.key]="YOUR BUS";
     if(bestBusForA) matchedArrivals["97059_"+bestBusNoForA+"_"+bestBusForA.key]="OPT A";
   }
 
-  // ======== STEP 3: Option B — same Bus 5 at 98319, then Bus 4 at 98311 ========
+  // STEP 3: Option B — same Bus 5 at 98319, then Bus 4 at 98311
   var bus5at98319=null, bus4forB=null;
   if(bus5at97059){
     bus5at98319=getNextArrivalAfter(arr98319,"5",bus5at97059.mins);
