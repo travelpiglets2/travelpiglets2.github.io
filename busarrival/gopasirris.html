@@ -68,6 +68,12 @@
   .rec-title { font-size: 1.2rem; margin-bottom: 4px; }
   .rec-wait { color: #fff; font-weight: 400; font-size: 0.95rem; }
   .rec-detail { font-size: 0.88rem; font-weight: 400; margin-top: 4px; opacity: 0.85; }
+  .rec-leave {
+    font-size: 0.95rem; font-weight: 600; margin-top: 8px;
+    color: #ffd166; padding: 6px 12px;
+    background: #2a2a1a; border-radius: 8px;
+    display: inline-block;
+  }
   .rec-warn { font-size: 0.78rem; margin-top: 6px; opacity: 0.7; }
 
   /* ── Cards ── */
@@ -242,6 +248,7 @@ var WALK_TO_97031 = 4;
 var WALK_TO_98299 = 9;
 var BUS5_MIN_98299 = 10;
 var TRANSFER_BUFFER = 1;
+var TARGET_EARLY = 2; // arrive ~2 min before bus
 
 var stopData = {}, matchedArrivals = {};
 var secondsLeft = REFRESH_SEC, refreshTimer, countdownTimer;
@@ -263,6 +270,12 @@ function getStopName(id) {
 function getStopLabel(id) {
   var s = stopData[id];
   return s ? s[2] + " - Stop " + id : "Stop " + id;
+}
+function fmtClockTime(minsFromNow) {
+  var t = new Date(Date.now() + minsFromNow * 60000);
+  var h = t.getHours().toString().padStart(2, "0");
+  var m = t.getMinutes().toString().padStart(2, "0");
+  return h + ":" + m;
 }
 
 function getAllArrivalsForBus(arrivals, busNo) {
@@ -332,7 +345,7 @@ async function refresh() {
   var arr98299 = results[2];
 
   // ── OPTION A: Transfer via Bus 2 ──
-  var optA = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, steps: [] };
+  var optA = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 2", steps: [] };
 
   var bus2_97031 = getNextArrivalAfter(arr97031, "2", WALK_TO_97031);
   if (!bus2_97031) {
@@ -345,6 +358,7 @@ async function refresh() {
   } else {
     var waitAt97031 = bus2_97031.mins - WALK_TO_97031;
     optA.waitAtStop = waitAt97031;
+    optA.leaveIn = bus2_97031.mins - WALK_TO_97031 - TARGET_EARLY;
 
     optA.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 2 at " + getStopLabel("97031"), value: fmtMins(bus2_97031.mins) + " (wait " + waitAt97031.toFixed(1) + " min at stop)", cls: "" });
 
@@ -381,7 +395,7 @@ async function refresh() {
   }
 
   // ── OPTION B: Walk to Bus 5 ──
-  var optB = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, steps: [] };
+  var optB = { viable: false, reason: "", boardBus5At: null, waitAtStop: null, leaveIn: null, busLabel: "Bus 5", steps: [] };
 
   var bus5_98299 = getNextArrivalAfter(arr98299, "5", BUS5_MIN_98299);
   if (!bus5_98299) {
@@ -394,6 +408,7 @@ async function refresh() {
   } else {
     var waitAt98299 = bus5_98299.mins - WALK_TO_98299;
     optB.waitAtStop = waitAt98299;
+    optB.leaveIn = bus5_98299.mins - WALK_TO_98299 - TARGET_EARLY;
 
     optB.steps.push({ emoji: "\uD83D\uDE8C", text: "Bus 5 at " + getStopLabel("98299"), value: fmtMins(bus5_98299.mins) + " (wait " + waitAt98299.toFixed(1) + " min at stop)", cls: "highlight" });
     optB.viable = true;
@@ -486,10 +501,20 @@ function updateOptions(optA, optB) {
   }
 }
 
+/* ════════════════ LEAVE HOME HELPER ════════════════ */
+function buildLeaveTag(leaveIn, busLabel) {
+  if (leaveIn === null) return "";
+  if (leaveIn <= 0) {
+    return '<div class="rec-leave">\uD83C\uDFE0 Leave now!</div>';
+  }
+  var clockTime = fmtClockTime(leaveIn);
+  return '<div class="rec-leave">\uD83C\uDFE0 Leave home at ' + clockTime + ' (in ' + leaveIn.toFixed(1) + ' min) \u2014 arrive ~2 min before ' + busLabel + '</div>';
+}
+
 /* ════════════════ UPDATE RECOMMENDATION ════════════════ */
 function updateRecommendation(optA, optB) {
   var box = document.getElementById("recBox");
-  var title, detail, warn, cls;
+  var title, detail, warn, leaveHtml, cls;
   var nameA = getStopName("97031");
   var nameB = getStopName("98299");
   var name97051 = getStopName("97051");
@@ -504,6 +529,7 @@ function updateRecommendation(optA, optB) {
       cls = "rec-good";
       title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
       detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + " \u2014 preferred, less walking";
+      leaveHtml = buildLeaveTag(optA.leaveIn, optA.busLabel);
       warn = "Walk to " + nameB + " also viable \u2014 Board Bus 5 in " + fmtMins(optB.boardBus5At);
     } else {
       // Option B wins — long wait at Komo Shoppes
@@ -511,22 +537,26 @@ function updateRecommendation(optA, optB) {
       cls = "rec-good";
       title = "\u2705 Recommended: Walk to " + nameB + waitTag(optB.waitAtStop);
       detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + " (" + diff.toFixed(1) + " min faster than walking to " + nameA + ")";
+      leaveHtml = buildLeaveTag(optB.leaveIn, optB.busLabel);
       warn = "Long wait at " + name97051 + " for Bus 5 \u2014 walk to " + nameB + " instead";
     }
   } else if (optA.viable) {
     cls = "rec-good";
     title = "\u2705 Recommended: Walk to " + nameA + waitTag(optA.waitAtStop);
     detail = "Board Bus 5 in " + fmtMins(optA.boardBus5At) + " (transfer via Bus 2)";
+    leaveHtml = buildLeaveTag(optA.leaveIn, optA.busLabel);
     warn = "Walk to " + nameB + " not viable: " + optB.reason;
   } else if (optB.viable) {
     cls = "rec-good";
     title = "\u2705 Recommended: Walk to " + nameB + waitTag(optB.waitAtStop);
     detail = "Board Bus 5 in " + fmtMins(optB.boardBus5At) + " (direct Bus 5)";
+    leaveHtml = buildLeaveTag(optB.leaveIn, optB.busLabel);
     warn = "Walk to " + nameA + " not viable: " + optA.reason;
   } else {
     cls = "rec-bad";
     title = "\uD83D\uDEAB No Viable Option Right Now";
     detail = "Neither transfer nor walk option is available.";
+    leaveHtml = "";
     warn = "Walk to " + nameA + ": " + optA.reason + " | Walk to " + nameB + ": " + optB.reason;
   }
 
@@ -534,6 +564,7 @@ function updateRecommendation(optA, optB) {
   box.innerHTML =
     '<div class="rec-title">' + title + '</div>' +
     '<div class="rec-detail">' + detail + '</div>' +
+    leaveHtml +
     (warn ? '<div class="rec-warn">' + warn + '</div>' : '');
 }
 
