@@ -279,7 +279,7 @@ function sortServices(services) {
 
 // ── MAP SETUP ────────────────────────────────────────────────────────────
 // Zoom 16 = ~500m-1km radius, centred on bus stop
-var map = L.map("map").setView([1.3521, 103.8198], 16);
+var map = L.map("map").setView([1.3521, 103.8198], 15);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors", maxZoom: 19
 }).addTo(map);
@@ -373,7 +373,7 @@ function renderMap(services) {
 
   // Always centre on the bus stop at zoom 16 (~500m-1km radius)
   if (currentStopInfo) {
-    map.setView([currentStopInfo.lat, currentStopInfo.lng], 16);
+    map.setView([currentStopInfo.lat, currentStopInfo.lng], 15);
   }
   setTimeout(function() { map.invalidateSize(); }, 150);
   updateBusLegend(services);
