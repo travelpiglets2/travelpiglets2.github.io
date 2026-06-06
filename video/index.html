@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Gallery with Full Navigation</title>
+    <title>Dynamic Photo Gallery</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,7 +16,6 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        /* Organized multi-column column grid layout */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -38,11 +37,12 @@
         .gallery-item:hover {
             transform: scale(1.02);
         }
-        /* Keeps original thumbnail aspect ratio uncropped */
         .gallery-item img {
             width: 100%;
             height: auto;
             display: block;
+            background: #2a2a2a; /* Fallback skeleton while loading */
+            min-height: 200px;
         }
         .filename {
             padding: 12px;
@@ -52,7 +52,6 @@
             background: #1a1a1a;
             margin-top: auto;
         }
-        /* Lightbox Container */
         .lightbox {
             display: none;
             position: fixed;
@@ -66,7 +65,6 @@
             align-items: center;
             flex-direction: column;
         }
-        /* Lightbox Image Wrapper */
         .lightbox-wrapper {
             position: relative;
             max-width: 85%;
@@ -81,15 +79,12 @@
             border-radius: 4px;
             box-shadow: 0 4px 20px rgba(255,255,255,0.1);
         }
-        /* Caption Text */
         .lightbox-caption {
             margin-top: 15px;
             font-size: 18px;
             color: #ddd;
-            letter-spacing: 0.5px;
             text-align: center;
         }
-        /* Close Button */
         .close-btn {
             position: absolute;
             top: 20px;
@@ -102,7 +97,6 @@
             z-index: 1000;
         }
         .close-btn:hover { color: #ff4d4d; }
-        /* Navigation Arrows */
         .nav-btn {
             position: absolute;
             top: 50%;
@@ -116,7 +110,6 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 5px;
             z-index: 1000;
-            transition: background 0.2s;
         }
         .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
         .prev-btn { left: 20px; }
@@ -127,22 +120,9 @@
 
     <h1>Photo Gallery</h1>
 
-    <div class="gallery">
-        <div class="gallery-item" onclick="openLightbox(0)">
-            <img src="DSC05543.JPG" alt="DSC05543.JPG">
-            <div class="filename">DSC05543.JPG</div>
-        </div>
-        <div class="gallery-item" onclick="openLightbox(1)">
-            <img src="DSC05961.JPG" alt="DSC05961.JPG">
-            <div class="filename">DSC05961.JPG</div>
-        </div>
-        <div class="gallery-item" onclick="openLightbox(2)">
-            <img src="DSC06391.JPG" alt="DSC06391.JPG">
-            <div class="filename">DSC06391.JPG</div>
-        </div>
-    </div>
+    <!-- Container starts completely empty. JavaScript builds it. -->
+    <div class="gallery" id="galleryContainer"></div>
 
-    <!-- Lightbox Pop-up Modal -->
     <div id="lightbox" class="lightbox">
         <span class="close-btn" onclick="closeLightbox()">&times;</span>
         <span class="nav-btn prev-btn" onclick="changeImage(-1, event)">&#10094;</span>
@@ -151,14 +131,70 @@
         <div class="lightbox-wrapper">
             <img class="lightbox-content" id="lightbox-img" src="" alt="Enlarged view">
         </div>
-        <div class="lightbox-caption" id="lightbox-caption">Filename.jpg</div>
+        <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
 
     <script>
-        const items = document.querySelectorAll('.gallery-item');
-        let currentIndex = 0;
+        // CONFIGURATION: Set your numbering rules here
+        const START_NUM = 5543; 
+        const END_NUM = 5800;   
+        const PREFIX = "DSC0";
+        const EXTENSION = ".JPG";
 
+        const container = document.getElementById('galleryContainer');
+        let imageElements = [];
+        let currentIndex = 0;
+        let activeCardIndex = 0;
+
+        // 1. Automatically generate layout items into the DOM
+        for (let i = START_NUM; i <= END_NUM; i++) {
+            const fileName = `${PREFIX}${i}${EXTENSION}`;
+            
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            // Store a temporary index tracking ID
+            item.setAttribute('data-index', activeCardIndex);
+            
+            const img = document.createElement('img');
+            img.src = fileName;
+            img.alt = fileName;
+            
+            const label = document.createElement('div');
+            label.className = 'filename';
+            label.textContent = fileName;
+            
+            item.appendChild(img);
+            item.appendChild(label);
+            container.appendChild(item);
+
+            // Bind click logic
+            item.addEventListener('click', function() {
+                openLightbox(parseInt(this.getAttribute('data-index')));
+            });
+
+            // 2. Hide image cards that don't actually exist in the folder
+            img.onerror = function() {
+                item.remove();
+                reindexGalleryItems();
+            };
+
+            activeCardIndex++;
+        }
+
+        // Fixes image index positions after non-existent images break sequence
+        function reindexGalleryItems() {
+            imageElements = document.querySelectorAll('.gallery-item');
+            imageElements.forEach((el, newIdx) => {
+                el.setAttribute('data-index', newIdx);
+            });
+        }
+
+        // Initial setup for existing images
+        setTimeout(reindexGalleryItems, 100);
+
+        // Lightbox controller operations
         function openLightbox(index) {
+            if (imageElements.length === 0) return;
             currentIndex = index;
             updateLightboxContent();
             document.getElementById('lightbox').style.display = 'flex';
@@ -169,7 +205,7 @@
         }
 
         function updateLightboxContent() {
-            const targetItem = items[currentIndex];
+            const targetItem = imageElements[currentIndex];
             const imgSrc = targetItem.querySelector('img').src;
             const fileName = imgSrc.substring(imgSrc.lastIndexOf('/') + 1);
 
@@ -179,22 +215,18 @@
 
         function changeImage(direction, event) {
             event.stopPropagation(); 
-            
             currentIndex += direction;
             
-            // Loop infinitely around boundaries
-            if (currentIndex >= items.length) currentIndex = 0;
-            if (currentIndex < 0) currentIndex = items.length - 1;
+            if (currentIndex >= imageElements.length) currentIndex = 0;
+            if (currentIndex < 0) currentIndex = imageElements.length - 1;
             
             updateLightboxContent();
         }
 
-        // Close when clicking empty dark background space
         document.getElementById('lightbox').addEventListener('click', function(e) {
             if (e.target === this) closeLightbox();
         });
 
-        // Add keyboard key listening functions
         document.addEventListener('keydown', function(event) {
             if (document.getElementById('lightbox').style.display === 'flex') {
                 if (event.key === "Escape") closeLightbox();
