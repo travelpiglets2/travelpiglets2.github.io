@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Pages</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px auto; max-width: 600px; background-color: #f6f8fa; color: #24292e; }
+        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 8px 0; background: white; padding: 12px; border: 1px solid #e1e4e8; border-radius: 6px; }
+        a { text-decoration: none; color: #0366d6; font-weight: 600; font-size: 16px; text-transform: capitalize; }
+        a:hover { text-decoration: underline; }
+        .loading { color: #586069; font-style: italic; }
+        .error { color: #cb2431; }
+    </style>
+</head>
+<body>
+
+    <h1>Project Pages</h1>
+    <ul id="file-list">
+        <li class="loading">Scanning directory...</li>
+    </ul>
+
+    <script>
+        async function fetchHtmlFiles() {
+            const listElement = document.getElementById('file-list');
+            
+            try {
+                // Automatically extract username and repo from the GitHub Pages URL
+                // Example: https://username.github.io/repo-name/
+                const hostname = window.location.hostname; // "username.github.io"
+                const pathSegments = window.location.pathname.split('/').filter(Boolean); // ["repo-name"]
+                
+                const username = hostname.split('.')[0];
+                const repo = pathSegments[0] || ""; // Catches root domains if repo name isn't in path
+
+                if (!username || username === "localhost" || username === "127") {
+                    throw new Error("This script needs to be hosted on github.io to auto-detect your repository.");
+                }
+
+                const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/`;
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch repository contents');
+                
+                const files = await response.json();
+                listElement.innerHTML = '';
+
+                // Filter for HTML files, excluding index.html
+                const htmlFiles = files.filter(file => 
+                    file.name.endsWith('.html') && 
+                    file.name.toLowerCase() !== 'index.html'
+                );
+
+                if (htmlFiles.length === 0) {
+                    listElement.innerHTML = '<li>No HTML files found.</li>';
+                    return;
+                }
+
+                // Generate links dynamically
+                htmlFiles.forEach(file => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    
+                    a.href = file.path; 
+                    // Cleans up the filename for display (e.g., "gopasirris.html" -> "Gopasirris")
+                    a.textContent = file.name.replace('.html', ''); 
+                    
+                    li.appendChild(a);
+                    listElement.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error(error);
+                listElement.innerHTML = `<li class="error">Unable to auto-scan files. (Note: This tracking method only works once pushed live to github.io).</li>`;
+            }
+        }
+
+        fetchHtmlFiles();
+    </script>
+</body>
+</html>
