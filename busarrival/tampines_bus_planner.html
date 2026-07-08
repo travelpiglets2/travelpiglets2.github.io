@@ -14,7 +14,6 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-  /* ── Header ── */
   header {
     background: linear-gradient(135deg, #23293a 60%, #2d3a5c 100%);
     padding: 14px 16px;
@@ -39,7 +38,6 @@
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff;
     border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  /* ── Countdown Bar ── */
   .countdown-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 6px 16px; background: #1a2030; border-bottom: 1px solid #2d3a5c;
@@ -49,9 +47,7 @@
   .progress-fill { height: 100%; background: linear-gradient(90deg,#00b4d8,#48cae4);
     border-radius: 2px; transition: width 1s linear; }
   #countdownSec { font-size: 0.75rem; font-weight: 700; color: #00b4d8; min-width: 24px; text-align: right; }
-  /* ── Layout ── */
   .main { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-  /* ── Recommendation Box ── */
   .recommendation {
     border-radius: 14px; padding: 16px; text-align: center;
     font-size: 1.05rem; font-weight: 600;
@@ -71,7 +67,6 @@
     display: inline-block;
   }
   .rec-warn { font-size: 0.78rem; margin-top: 6px; opacity: 0.7; }
-  /* ── Cards ── */
   .card {
     background: #23293a; border-radius: 12px; padding: 14px;
     border: 1px solid #2d3a5c;
@@ -79,7 +74,6 @@
   .card h3 { font-size: 0.95rem; margin-bottom: 10px; color: #4fc3f7; }
   .card-options { order: 2; }
   .card-arrivals { order: 3; }
-  /* ── Option Cards ── */
   .option-card {
     background: #1a2030; border-radius: 10px; padding: 12px;
     margin-bottom: 8px; border-left: 4px solid #555;
@@ -93,7 +87,7 @@
   .not-viable-text { color: #ef9a9a; }
   .best-tag { display:inline-block; background:#ffd166; color:#181c24; font-size:0.65rem;
     font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; }
-  /* ── Step by step ── */
+  .cross-tag { color:#ffd166; font-weight:700; }
   .step {
     font-size: 0.8rem; color: #bbb; padding: 4px 0 4px 10px;
     border-left: 2px solid #333; margin: 4px 0;
@@ -101,26 +95,11 @@
   .step.highlight { border-left-color: #4caf50; color: #81c784; }
   .step.transfer { border-left-color: #e040fb; color: #ce93d8; }
   .step.walk { border-left-color: #ffd166; color: #ffe082; }
-  /* ── Arrivals ── */
-  .stop-group {
-    border-radius: 10px; padding: 10px; margin-bottom: 12px;
-  }
-  .stop-group.group-a {
-    background: #1a2030; border: 1px solid #4fc3f733;
-    border-left: 4px solid #4fc3f7;
-  }
-  .stop-group.group-b {
-    background: #201a30; border: 1px solid #b39ddb33;
-    border-left: 4px solid #b39ddb;
-  }
-  .stop-group.group-c {
-    background: #1a2a1a; border: 1px solid #4caf5033;
-    border-left: 4px solid #4caf50;
-  }
-  .stop-group.group-d {
-    background: #2a1a1a; border: 1px solid #ff8a6533;
-    border-left: 4px solid #ff8a65;
-  }
+  .stop-group { border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+  .stop-group.group-a { background: #1a2030; border: 1px solid #4fc3f733; border-left: 4px solid #4fc3f7; }
+  .stop-group.group-b { background: #201a30; border: 1px solid #b39ddb33; border-left: 4px solid #b39ddb; }
+  .stop-group.group-c { background: #1a2a1a; border: 1px solid #4caf5033; border-left: 4px solid #4caf50; }
+  .stop-group.group-d { background: #2a1a1a; border: 1px solid #ff8a6533; border-left: 4px solid #ff8a65; }
   .group-label {
     font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 6px;
@@ -132,12 +111,9 @@
   .group-d .group-label { color: #ff8a65; }
   .stop-block { margin-bottom: 10px; }
   .stop-block:last-child { margin-bottom: 0; }
-  .stop-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-  }
+  .stop-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .stop-dot {
-    width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff;
-    flex-shrink: 0;
+    width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; flex-shrink: 0;
   }
   .stop-header .stop-label { font-size: 0.85rem; font-weight: 600; }
   .stop-header .stop-road { font-size: 0.72rem; color: #777; margin-left: auto; }
@@ -165,7 +141,6 @@
   .tag-c { background: #4caf5044; color: #4caf50; }
   .tag-d { background: #ff8a6544; color: #ff8a65; }
   .no-data { font-size: 0.78rem; color: #ef9a9a; padding: 4px 8px; }
-  /* ── Load/Crowd Tags ── */
   .load-tag {
     font-size: 0.58rem; font-weight: 700; padding: 1px 5px;
     border-radius: 4px; margin-left: 2px; white-space: nowrap;
@@ -175,7 +150,6 @@
   .load-sda { background: #3a3a1b; color: #ffd166; }
   .load-lsd { background: #3a1b1b; color: #ef9a9a; }
   .load-na  { background: #2a2a2a; color: #777; }
-  /* ── Bus Type Tags ── */
   .type-tag {
     font-size: 0.58rem; font-weight: 700; padding: 1px 5px;
     border-radius: 4px; margin-left: 2px; white-space: nowrap;
@@ -183,13 +157,11 @@
   }
   .type-sd { background: #2a2a2a; color: #999; }
   .type-dd { background: #2a2a3a; color: #b39ddb; }
-  /* ── Footer ── */
   footer {
     text-align: center; padding: 18px 10px; font-size: 0.7rem; color: #555;
     border-top: 1px solid #23293a; margin-top: 10px;
   }
   footer a { color: #4fc3f7; text-decoration: none; }
-  /* ── Desktop ── */
   @media (min-width: 768px) {
     .main {
       display: grid;
@@ -239,7 +211,7 @@
         <div id="optCResult" class="wait-time" style="margin-top:6px;"></div>
       </div>
       <div class="option-card" id="optionD">
-        <h4 id="optDTitleH4">&#x1F504; Option D: Walk 4 min &rarr; 97031 &rarr; Bus 2 &rarr; 97051 &rarr; walk 3 min &rarr; 97059 &rarr; Bus 4</h4>
+        <h4 id="optDTitleH4">&#x1F504; Option D <strong class="cross-tag">Cross the road</strong>: Walk 4 min &rarr; 97031 &rarr; Bus 2 &rarr; 97051 &rarr; walk 3 min &rarr; 97059 &rarr; Bus 4</h4>
         <div id="optDSteps" style="margin-top:8px;"></div>
         <div id="optDResult" class="wait-time" style="margin-top:6px;"></div>
       </div>
@@ -261,71 +233,43 @@ var STOPS_API = "https://data.busrouter.sg/v1/stops.json";
 var ARRIVALS_API = "https://arrivelah2.busrouter.sg/?id=";
 var REFRESH_SEC = 60;
 
-// Stops we need to query
 var STOP_IDS = ["97019", "97039", "97031", "97041", "97051", "98319", "97059"];
 
-// Colors per stop (for dots)
 var STOP_COLORS = {
-  "97019": "#4fc3f7",
-  "97039": "#b39ddb",
-  "97031": "#4caf50",
-  "97041": "#81c784",
-  "97051": "#ff8a65",
-  "98319": "#e040fb",
-  "97059": "#ffd166"
+  "97019": "#4fc3f7", "97039": "#b39ddb", "97031": "#4caf50",
+  "97041": "#81c784", "97051": "#ff8a65", "98319": "#e040fb", "97059": "#ffd166"
 };
-
-// Bus badge colors
 var BUS_COLORS = { "2": "#4fc3f7", "4": "#ff8a65", "37": "#4caf50" };
 
-// Which buses to display per stop
 var BUS_INTEREST = {
-  "97019": ["37", "2"],   // 37 = board (A,B); 2 = arrival check for B
-  "97039": ["2"],         // 2 = board (B)
-  "97031": ["2"],         // 2 = board (C,D)
-  "97041": ["2"],         // 2 = alight point (C)
-  "97051": ["2"],         // 2 = alight point (D)
-  "98319": ["4"],         // 4 = board (C)
-  "97059": ["4"]          // 4 = board (D)
+  "97019": ["37", "2"], "97039": ["2"], "97031": ["2"],
+  "97041": ["2"], "97051": ["2"], "98319": ["4"], "97059": ["4"]
 };
 
-// Walking times (minutes)
-var WALK_HOME_TO_97019 = 12;   // Option A
-var WALK_HOME_TO_97039 = 6;    // Option B
-var WALK_HOME_TO_97031 = 4;    // Options C & D
-var WALK_97041_TO_98319 = 3;   // Option C transfer
-var WALK_97051_TO_97059 = 3;   // Option D transfer
+var WALK_HOME_TO_97019 = 12;
+var WALK_HOME_TO_97039 = 6;
+var WALK_HOME_TO_97031 = 4;
+var WALK_97041_TO_98319 = 3;
+var WALK_97051_TO_97059 = 3;
 
-// Buffers
-var TRANSFER_BUFFER = 1;       // min slack between alight & board
-var TARGET_EARLY = 2;          // arrive N min before bus at boarding stop
+var TRANSFER_BUFFER = 1;
+var TARGET_EARLY = 2;
 
 var stopData = {}, matchedArrivals = {};
 var secondsLeft = REFRESH_SEC, refreshTimer, countdownTimer;
 
 /* ════════════════ HELPERS ════════════════ */
-function minsFromNow(iso) {
-  if (!iso) return null;
-  return (new Date(iso) - new Date()) / 60000;
-}
+function minsFromNow(iso) { if (!iso) return null; return (new Date(iso) - new Date()) / 60000; }
 function fmtMins(m) {
   if (m === null || m === undefined) return "N/A";
   if (m < 0.5) return "Arriving";
   return m.toFixed(1) + " min";
 }
-function getStopName(id) {
-  var s = stopData[id];
-  return s ? s[2] : "Stop " + id;
-}
-function getStopLabel(id) {
-  var s = stopData[id];
-  return s ? s[2] + " - Stop " + id : "Stop " + id;
-}
+function getStopName(id) { var s = stopData[id]; return s ? s[2] : "Stop " + id; }
+function getStopLabel(id) { var s = stopData[id]; return s ? s[2] + " - Stop " + id : "Stop " + id; }
 function fmtClockTime(minsFromNow) {
   var t = new Date(Date.now() + minsFromNow * 60000);
-  var h = t.getHours().toString().padStart(2, "0");
-  var m = t.getMinutes().toString().padStart(2, "0");
-  return h + ":" + m;
+  return t.getHours().toString().padStart(2,"0") + ":" + t.getMinutes().toString().padStart(2,"0");
 }
 function loadTag(load) {
   if (load === "SEA") return '<span class="load-tag load-sea">\u{1F7E2} Seats</span>';
@@ -377,76 +321,67 @@ async function fetchArrivals(id) {
   catch (e) { console.error("Arrival fetch error " + id, e); return null; }
 }
 
-/* ════════════════ LOADING STATE ════════════════ */
 function setLoading(on) {
   var btn = document.getElementById("btnRefresh");
-  if (on) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Loading';
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = '&#x1F504; Refresh';
-  }
+  if (on) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Loading'; }
+  else { btn.disabled = false; btn.innerHTML = '&#x1F504; Refresh'; }
 }
 
-/* ════════════════════════════════════════════ */
-/*   OPTION SOLVERS — build each option        */
-/* ════════════════════════════════════════════ */
+/* ════════════════ OPTION SOLVERS ════════════════ */
 
-// Option A: Walk 12 min → 97019 → Bus 37 (direct)
+// Option A: Walk 12 → 97019 → Bus 37
 function solveOptionA(arr) {
-  var opt = { key: "A", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null, steps: [], busLabel: "Bus 37" };
+  var opt = { key: "A", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null,
+              steps: [], busLabel: "Bus 37", bus37Key: null };
   var bus37 = getNextArrivalAfter(arr["97019"], "37", WALK_HOME_TO_97019);
   if (!bus37) {
     var any37 = getAllArrivalsForBus(arr["97019"], "37");
-    if (any37.length === 0) {
-      opt.reason = "No Bus 37 data at " + getStopLabel("97019");
-    } else {
-      opt.reason = "Bus 37 too soon at " + getStopName("97019") + " \u2014 can't walk in " + WALK_HOME_TO_97019 + " min (next: " + fmtMins(any37[0].mins) + ")";
-    }
+    opt.reason = any37.length === 0
+      ? "No Bus 37 data at " + getStopLabel("97019")
+      : "Bus 37 too soon at " + getStopName("97019") + " \u2014 can't walk in " + WALK_HOME_TO_97019 + " min (next: " + fmtMins(any37[0].mins) + ")";
     return opt;
   }
   opt.viable = true;
   opt.boardTime = bus37.mins;
   opt.waitAtStop = bus37.mins - WALK_HOME_TO_97019;
   opt.leaveIn = bus37.mins - WALK_HOME_TO_97019 - TARGET_EARLY;
+  opt.bus37Key = bus37.key;
   opt.steps.push({ emoji: "\u{1F6B6}", text: "Walk " + WALK_HOME_TO_97019 + " min to " + getStopLabel("97019"), value: "", cls: "walk" });
   opt.steps.push({ emoji: "\u{1F68C}", text: "Bus 37 at " + getStopName("97019"), value: fmtMins(bus37.mins) + " (wait " + opt.waitAtStop.toFixed(1) + " min at stop)", cls: "highlight" });
-  matchedArrivals["97019_37_" + bus37.key] = "A";
+  matchedArrivals["97019_37_" + bus37.key] = (matchedArrivals["97019_37_" + bus37.key] || "") + "A";
   return opt;
 }
 
 // Option B: Walk 6 → 97039 → Bus 2 → arrive 97019 → Bus 37
 function solveOptionB(arr) {
-  var opt = { key: "B", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null, steps: [], busLabel: "Bus 2" };
+  var opt = { key: "B", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null,
+              steps: [], busLabel: "Bus 2", bus37Key: null };
   var bus2_39 = getNextArrivalAfter(arr["97039"], "2", WALK_HOME_TO_97039);
   if (!bus2_39) {
     var any2 = getAllArrivalsForBus(arr["97039"], "2");
-    if (any2.length === 0) { opt.reason = "No Bus 2 data at " + getStopLabel("97039"); }
-    else { opt.reason = "Bus 2 too soon at " + getStopName("97039") + " \u2014 can't walk in " + WALK_HOME_TO_97039 + " min (next: " + fmtMins(any2[0].mins) + ")"; }
+    opt.reason = any2.length === 0
+      ? "No Bus 2 data at " + getStopLabel("97039")
+      : "Bus 2 too soon at " + getStopName("97039") + " \u2014 can't walk in " + WALK_HOME_TO_97039 + " min (next: " + fmtMins(any2[0].mins) + ")";
     return opt;
   }
   opt.waitAtStop = bus2_39.mins - WALK_HOME_TO_97039;
   opt.leaveIn = bus2_39.mins - WALK_HOME_TO_97039 - TARGET_EARLY;
-  matchedArrivals["97039_2_" + bus2_39.key] = "B";
+  matchedArrivals["97039_2_" + bus2_39.key] = (matchedArrivals["97039_2_" + bus2_39.key] || "") + "B";
   opt.steps.push({ emoji: "\u{1F6B6}", text: "Walk " + WALK_HOME_TO_97039 + " min to " + getStopLabel("97039"), value: "", cls: "walk" });
   opt.steps.push({ emoji: "\u{1F68C}", text: "Bus 2 at " + getStopName("97039"), value: fmtMins(bus2_39.mins) + " (wait " + opt.waitAtStop.toFixed(1) + " min at stop)", cls: "" });
 
-  // Estimate arrival at 97019 via Bus 2 (query Bus 2 arrival at 97019)
   var bus2_19 = getNextArrivalAfter(arr["97019"], "2", bus2_39.mins);
-  if (!bus2_19) {
-    opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97019") + " (no matching arrival)";
-    return opt;
-  }
-  matchedArrivals["97019_2_" + bus2_19.key] = "B";
+  if (!bus2_19) { opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97019") + " (no matching arrival)"; return opt; }
+  matchedArrivals["97019_2_" + bus2_19.key] = (matchedArrivals["97019_2_" + bus2_19.key] || "") + "B";
   opt.steps.push({ emoji: "\u{1F53B}", text: "Alight at " + getStopLabel("97019"), value: "~" + fmtMins(bus2_19.mins), cls: "transfer" });
 
   var minBoard = bus2_19.mins + TRANSFER_BUFFER;
   var bus37 = getNextArrivalAfter(arr["97019"], "37", minBoard);
   if (!bus37) {
     var any37 = getAllArrivalsForBus(arr["97019"], "37");
-    if (any37.length === 0) { opt.reason = "No Bus 37 data at " + getStopLabel("97019"); }
-    else { opt.reason = "No Bus 37 at " + getStopName("97019") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any37[any37.length-1].mins) + ")"; }
+    opt.reason = any37.length === 0
+      ? "No Bus 37 data at " + getStopLabel("97019")
+      : "No Bus 37 at " + getStopName("97019") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any37[any37.length-1].mins) + ")";
     return opt;
   }
   var xferWait = bus37.mins - bus2_19.mins;
@@ -454,17 +389,19 @@ function solveOptionB(arr) {
   matchedArrivals["97019_37_" + bus37.key] = (matchedArrivals["97019_37_" + bus37.key] || "") + "B";
   opt.viable = true;
   opt.boardTime = bus37.mins;
+  opt.bus37Key = bus37.key;
   return opt;
 }
 
-// Option C: Walk 4 → 97031 → Bus 2 → 97041 → walk 3 → 98319 → Bus 4
+// Option C
 function solveOptionC(arr) {
   var opt = { key: "C", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null, steps: [], busLabel: "Bus 2" };
   var bus2_31 = getNextArrivalAfter(arr["97031"], "2", WALK_HOME_TO_97031);
   if (!bus2_31) {
     var any2 = getAllArrivalsForBus(arr["97031"], "2");
-    if (any2.length === 0) { opt.reason = "No Bus 2 data at " + getStopLabel("97031"); }
-    else { opt.reason = "Bus 2 too soon at " + getStopName("97031") + " \u2014 can't walk in " + WALK_HOME_TO_97031 + " min (next: " + fmtMins(any2[0].mins) + ")"; }
+    opt.reason = any2.length === 0
+      ? "No Bus 2 data at " + getStopLabel("97031")
+      : "Bus 2 too soon at " + getStopName("97031") + " \u2014 can't walk in " + WALK_HOME_TO_97031 + " min (next: " + fmtMins(any2[0].mins) + ")";
     return opt;
   }
   opt.waitAtStop = bus2_31.mins - WALK_HOME_TO_97031;
@@ -474,10 +411,7 @@ function solveOptionC(arr) {
   opt.steps.push({ emoji: "\u{1F68C}", text: "Bus 2 at " + getStopName("97031"), value: fmtMins(bus2_31.mins) + " (wait " + opt.waitAtStop.toFixed(1) + " min at stop)", cls: "" });
 
   var bus2_41 = getNextArrivalAfter(arr["97041"], "2", bus2_31.mins);
-  if (!bus2_41) {
-    opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97041") + " (no matching arrival)";
-    return opt;
-  }
+  if (!bus2_41) { opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97041") + " (no matching arrival)"; return opt; }
   matchedArrivals["97041_2_" + bus2_41.key] = "C";
   opt.steps.push({ emoji: "\u{1F53B}", text: "Alight at " + getStopLabel("97041"), value: "~" + fmtMins(bus2_41.mins), cls: "transfer" });
   opt.steps.push({ emoji: "\u{1F6B6}", text: "Walk " + WALK_97041_TO_98319 + " min to " + getStopLabel("98319"), value: "", cls: "walk" });
@@ -487,8 +421,9 @@ function solveOptionC(arr) {
   var bus4 = getNextArrivalAfter(arr["98319"], "4", minBoard);
   if (!bus4) {
     var any4 = getAllArrivalsForBus(arr["98319"], "4");
-    if (any4.length === 0) { opt.reason = "No Bus 4 data at " + getStopLabel("98319"); }
-    else { opt.reason = "No Bus 4 at " + getStopName("98319") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any4[any4.length-1].mins) + ")"; }
+    opt.reason = any4.length === 0
+      ? "No Bus 4 data at " + getStopLabel("98319")
+      : "No Bus 4 at " + getStopName("98319") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any4[any4.length-1].mins) + ")";
     return opt;
   }
   var xferWait = bus4.mins - arriveAtXfer;
@@ -499,14 +434,15 @@ function solveOptionC(arr) {
   return opt;
 }
 
-// Option D: Walk 4 → 97031 → Bus 2 → 97051 → walk 3 → 97059 → Bus 4
+// Option D
 function solveOptionD(arr) {
   var opt = { key: "D", viable: false, reason: "", boardTime: null, waitAtStop: null, leaveIn: null, steps: [], busLabel: "Bus 2" };
   var bus2_31 = getNextArrivalAfter(arr["97031"], "2", WALK_HOME_TO_97031);
   if (!bus2_31) {
     var any2 = getAllArrivalsForBus(arr["97031"], "2");
-    if (any2.length === 0) { opt.reason = "No Bus 2 data at " + getStopLabel("97031"); }
-    else { opt.reason = "Bus 2 too soon at " + getStopName("97031") + " \u2014 can't walk in " + WALK_HOME_TO_97031 + " min (next: " + fmtMins(any2[0].mins) + ")"; }
+    opt.reason = any2.length === 0
+      ? "No Bus 2 data at " + getStopLabel("97031")
+      : "Bus 2 too soon at " + getStopName("97031") + " \u2014 can't walk in " + WALK_HOME_TO_97031 + " min (next: " + fmtMins(any2[0].mins) + ")";
     return opt;
   }
   opt.waitAtStop = bus2_31.mins - WALK_HOME_TO_97031;
@@ -516,21 +452,19 @@ function solveOptionD(arr) {
   opt.steps.push({ emoji: "\u{1F68C}", text: "Bus 2 at " + getStopName("97031"), value: fmtMins(bus2_31.mins) + " (wait " + opt.waitAtStop.toFixed(1) + " min at stop)", cls: "" });
 
   var bus2_51 = getNextArrivalAfter(arr["97051"], "2", bus2_31.mins);
-  if (!bus2_51) {
-    opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97051") + " (no matching arrival)";
-    return opt;
-  }
+  if (!bus2_51) { opt.reason = "Cannot estimate Bus 2 travel to " + getStopLabel("97051") + " (no matching arrival)"; return opt; }
   matchedArrivals["97051_2_" + bus2_51.key] = "D";
   opt.steps.push({ emoji: "\u{1F53B}", text: "Alight at " + getStopLabel("97051"), value: "~" + fmtMins(bus2_51.mins), cls: "transfer" });
-  opt.steps.push({ emoji: "\u{1F6B6}", text: "Walk " + WALK_97051_TO_97059 + " min to " + getStopLabel("97059"), value: "", cls: "walk" });
+  opt.steps.push({ emoji: "\u{1F6B6}", text: "Walk " + WALK_97051_TO_97059 + " min to " + getStopLabel("97059") + " (cross the road)", value: "", cls: "walk" });
 
   var arriveAtXfer = bus2_51.mins + WALK_97051_TO_97059;
   var minBoard = arriveAtXfer + TRANSFER_BUFFER;
   var bus4 = getNextArrivalAfter(arr["97059"], "4", minBoard);
   if (!bus4) {
     var any4 = getAllArrivalsForBus(arr["97059"], "4");
-    if (any4.length === 0) { opt.reason = "No Bus 4 data at " + getStopLabel("97059"); }
-    else { opt.reason = "No Bus 4 at " + getStopName("97059") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any4[any4.length-1].mins) + ")"; }
+    opt.reason = any4.length === 0
+      ? "No Bus 4 data at " + getStopLabel("97059")
+      : "No Bus 4 at " + getStopName("97059") + " after transfer (need \u2265 " + fmtMins(minBoard) + ", latest: " + fmtMins(any4[any4.length-1].mins) + ")";
     return opt;
   }
   var xferWait = bus4.mins - arriveAtXfer;
@@ -555,20 +489,24 @@ async function refresh() {
   var optC = solveOptionC(arr);
   var optD = solveOptionD(arr);
 
-  updateOptions([optA, optB, optC, optD]);
-  updateRecommendation([optA, optB, optC, optD]);
+  // ── Same Bus 37 detection: if A & B catch same Bus 37, prefer B (less walking under sun/rain) ──
+  var sameBus37 = false;
+  if (optA.viable && optB.viable && optA.bus37Key && optB.bus37Key && optA.bus37Key === optB.bus37Key) {
+    sameBus37 = true;
+  }
+
+  updateOptions([optA, optB, optC, optD], sameBus37);
+  updateRecommendation([optA, optB, optC, optD], sameBus37);
   renderStopCards(arr);
 
-  var now = new Date();
   var el = document.getElementById("lastUpdate");
-  el.textContent = "Updated: " + now.toLocaleTimeString();
+  el.textContent = "Updated: " + new Date().toLocaleTimeString();
   el.style.display = "inline";
   setLoading(false);
 }
 
 /* ════════════════ UPDATE OPTIONS ════════════════ */
-function renderOption(opt, elCard, elTitle, elSteps, elResult, titlePrefix, bestKey) {
-  var name = titlePrefix;
+function renderOption(opt, elCard, elTitle, elSteps, elResult, titleHtml, bestKey) {
   var cls = "option-card";
   if (opt.key === bestKey) cls += " best";
   if (opt.viable) cls += " active"; else cls += " not-viable";
@@ -576,7 +514,7 @@ function renderOption(opt, elCard, elTitle, elSteps, elResult, titlePrefix, best
 
   var waitSuffix = opt.waitAtStop !== null ? " (wait " + opt.waitAtStop.toFixed(1) + " min at stop)" : "";
   var bestBadge = (opt.key === bestKey) ? '<span class="best-tag">BEST</span>' : "";
-  elTitle.innerHTML = name + waitSuffix + bestBadge;
+  elTitle.innerHTML = titleHtml + waitSuffix + bestBadge;
 
   var html = "";
   opt.steps.forEach(function(s) {
@@ -591,17 +529,33 @@ function renderOption(opt, elCard, elTitle, elSteps, elResult, titlePrefix, best
   }
 }
 
-function updateOptions(opts) {
-  // Determine best: viable options only, sorted by boardTime ascending
+function pickBestKey(opts, sameBus37) {
   var viable = opts.filter(function(o){ return o.viable; });
+  if (viable.length === 0) return null;
+
+  // Rule: if A & B viable and same Bus 37, prefer B (less walking under sun/rain)
+  if (sameBus37) {
+    // Best is B if it beats C,D by boardTime; else earliest overall
+    var b = viable.find(function(o){ return o.key === "B"; });
+    var others = viable.filter(function(o){ return o.key !== "A" && o.key !== "B"; });
+    others.sort(function(a,c){ return a.boardTime - c.boardTime; });
+    if (!others.length || b.boardTime <= others[0].boardTime) return "B";
+    // else earliest of others wins
+    return others[0].key;
+  }
+
   viable.sort(function(a,b){ return a.boardTime - b.boardTime; });
-  var bestKey = viable.length ? viable[0].key : null;
+  return viable[0].key;
+}
+
+function updateOptions(opts, sameBus37) {
+  var bestKey = pickBestKey(opts, sameBus37);
 
   var titles = {
     A: "\u{1F6B6} Option A: Walk 12 min \u2192 97019 \u2192 Bus 37",
     B: "\u{1F504} Option B: Walk 6 min \u2192 97039 \u2192 Bus 2 \u2192 xfer @ 97019 \u2192 Bus 37",
     C: "\u{1F504} Option C: Walk 4 min \u2192 97031 \u2192 Bus 2 \u2192 97041 \u2192 walk 3 min \u2192 98319 \u2192 Bus 4",
-    D: "\u{1F504} Option D: Walk 4 min \u2192 97031 \u2192 Bus 2 \u2192 97051 \u2192 walk 3 min \u2192 97059 \u2192 Bus 4"
+    D: "\u{1F504} Option D <strong class=\"cross-tag\">Cross the road</strong>: Walk 4 min \u2192 97031 \u2192 Bus 2 \u2192 97051 \u2192 walk 3 min \u2192 97059 \u2192 Bus 4"
   };
 
   opts.forEach(function(opt) {
@@ -617,32 +571,30 @@ function updateOptions(opts) {
     );
   });
 
-  // Sort DOM: best first, then by boardTime (viable), then not-viable at bottom
+  // Sort DOM: best first, then viable by boardTime, then non-viable
   var container = document.getElementById("optionsContainer");
   var sorted = opts.slice().sort(function(a, b) {
+    if (a.key === bestKey) return -1;
+    if (b.key === bestKey) return 1;
     if (a.viable && !b.viable) return -1;
     if (!a.viable && b.viable) return 1;
     if (a.viable && b.viable) return a.boardTime - b.boardTime;
     return 0;
   });
-  sorted.forEach(function(opt) {
-    container.appendChild(document.getElementById("option" + opt.key));
-  });
+  sorted.forEach(function(opt) { container.appendChild(document.getElementById("option" + opt.key)); });
 }
 
 /* ════════════════ LEAVE HOME HELPER ════════════════ */
 function buildLeaveTag(leaveIn, busLabel) {
   if (leaveIn === null || leaveIn === undefined) return "";
   if (leaveIn <= 0) return '<div class="rec-leave">\u{1F3E0} Leave now!</div>';
-  var clockTime = fmtClockTime(leaveIn);
-  return '<div class="rec-leave">\u{1F3E0} Leave home at ' + clockTime + ' (in ' + leaveIn.toFixed(1) + ' min) \u2014 arrive ~' + TARGET_EARLY + ' min before ' + busLabel + '</div>';
+  return '<div class="rec-leave">\u{1F3E0} Leave home at ' + fmtClockTime(leaveIn) + ' (in ' + leaveIn.toFixed(1) + ' min) \u2014 arrive ~' + TARGET_EARLY + ' min before ' + busLabel + '</div>';
 }
 
 /* ════════════════ UPDATE RECOMMENDATION ════════════════ */
-function updateRecommendation(opts) {
+function updateRecommendation(opts, sameBus37) {
   var box = document.getElementById("recBox");
   var viable = opts.filter(function(o){ return o.viable; });
-  viable.sort(function(a,b){ return a.boardTime - b.boardTime; });
 
   if (viable.length === 0) {
     box.className = "recommendation rec-bad";
@@ -654,28 +606,45 @@ function updateRecommendation(opts) {
     return;
   }
 
-  var best = viable[0];
-  var boardLabels = { A: "Bus 37 at 97019", B: "Bus 37 at 97019 (via Bus 2)", C: "Bus 4 at 98319", D: "Bus 4 at 97059" };
-  var startLabels = { A: "Walk 12 min to " + getStopName("97019"),
-                      B: "Walk 6 min to " + getStopName("97039") + ", take Bus 2",
-                      C: "Walk 4 min to " + getStopName("97031") + ", take Bus 2",
-                      D: "Walk 4 min to " + getStopName("97031") + ", take Bus 2" };
+  var bestKey = pickBestKey(opts, sameBus37);
+  var best = viable.find(function(o){ return o.key === bestKey; });
+
+  var startLabels = {
+    A: "Walk 12 min to " + getStopName("97019"),
+    B: "Walk 6 min to " + getStopName("97039") + ", take Bus 2",
+    C: "Walk 4 min to " + getStopName("97031") + ", take Bus 2",
+    D: "Walk 4 min to " + getStopName("97031") + ", take Bus 2 (cross road at " + getStopName("97051") + ")"
+  };
+  var boardLabels = {
+    A: "Bus 37 at 97019", B: "Bus 37 at 97019 (via Bus 2)",
+    C: "Bus 4 at 98319", D: "Bus 4 at 97059"
+  };
 
   var title = "\u2705 Recommended: Option " + best.key + " \u2014 " + startLabels[best.key];
   if (best.waitAtStop !== null) title += ' <span class="rec-wait">(wait ' + best.waitAtStop.toFixed(1) + ' min at stop)</span>';
 
-  var detail = "Board " + boardLabels[best.key] + " in " + fmtMins(best.boardTime) + " \u2014 fastest to Tampines";
+  var detail = "Board " + boardLabels[best.key] + " in " + fmtMins(best.boardTime);
+  if (sameBus37 && best.key === "B") {
+    detail = "\u{1F31E}\u{1F327}\uFE0F Same Bus 37 as Option A \u2014 Option B saves " + (WALK_HOME_TO_97019 - WALK_HOME_TO_97039) + " min walking under sun/rain";
+  } else {
+    detail += " \u2014 fastest to Tampines";
+  }
   var leaveHtml = buildLeaveTag(best.leaveIn, best.busLabel);
 
-  var warn = "";
-  if (viable.length > 1) {
-    var alt = viable[1];
+  var warnParts = [];
+  if (sameBus37) {
+    var optA = opts.find(function(o){ return o.key === "A"; });
+    warnParts.push("\u{1F68C} Option A catches the same Bus 37 (boards in " + fmtMins(optA.boardTime) + ") \u2014 use B to walk less");
+  }
+  var others = viable.filter(function(o){ return o.key !== bestKey; }).sort(function(a,b){ return a.boardTime - b.boardTime; });
+  if (others.length) {
+    var alt = others[0];
     var diff = alt.boardTime - best.boardTime;
-    warn = "Next best: Option " + alt.key + " boards in " + fmtMins(alt.boardTime) + " (" + diff.toFixed(1) + " min slower)";
+    warnParts.push("Next best: Option " + alt.key + " boards in " + fmtMins(alt.boardTime) + " (" + (diff >= 0 ? "+" : "") + diff.toFixed(1) + " min)");
   }
   var notViable = opts.filter(function(o){ return !o.viable; });
   if (notViable.length) {
-    warn += (warn ? " | " : "") + notViable.map(function(o){ return "Opt " + o.key + " \u274C " + o.reason; }).join(" | ");
+    warnParts.push(notViable.map(function(o){ return "Opt " + o.key + " \u274C " + o.reason; }).join(" | "));
   }
 
   box.className = "recommendation rec-good";
@@ -683,7 +652,7 @@ function updateRecommendation(opts) {
     '<div class="rec-title">' + title + '</div>' +
     '<div class="rec-detail">' + detail + '</div>' +
     leaveHtml +
-    (warn ? '<div class="rec-warn">' + warn + '</div>' : '');
+    (warnParts.length ? '<div class="rec-warn">' + warnParts.join(" | ") + '</div>' : '');
 }
 
 /* ════════════════ RENDER STOP CARDS ════════════════ */
@@ -691,32 +660,24 @@ function renderStopCards(allArrivals) {
   var container = document.getElementById("stopCards");
   var html = "";
 
-  // Group A: Option A boarding (97019 for Bus 37)
   html += '<div class="stop-group group-a">';
   html += '<div class="group-label">\u{1F6B6} Option A \u2014 Direct Bus 37 @ 97019</div>';
   html += renderSingleStop("97019", allArrivals["97019"]);
   html += '</div>';
 
-  // Group B: Option B (97039 board Bus 2)
   html += '<div class="stop-group group-b">';
   html += '<div class="group-label">\u{1F504} Option B \u2014 Bus 2 @ 97039 \u2192 xfer Bus 37 @ 97019</div>';
   html += renderSingleStop("97039", allArrivals["97039"]);
   html += '</div>';
 
-  // Group C: Option C (97031 board Bus 2, 97041 alight, 98319 board Bus 4)
   html += '<div class="stop-group group-c">';
   html += '<div class="group-label">\u{1F504} Option C \u2014 Bus 2 @ 97031 \u2192 97041 \u2192 walk \u2192 Bus 4 @ 98319</div>';
-  ["97031", "97041", "98319"].forEach(function(id) {
-    html += renderSingleStop(id, allArrivals[id]);
-  });
+  ["97031", "97041", "98319"].forEach(function(id) { html += renderSingleStop(id, allArrivals[id]); });
   html += '</div>';
 
-  // Group D: Option D (97051 alight, 97059 board Bus 4). 97031 already shown above; add if not shown.
   html += '<div class="stop-group group-d">';
-  html += '<div class="group-label">\u{1F504} Option D \u2014 Bus 2 @ 97031 \u2192 97051 \u2192 walk \u2192 Bus 4 @ 97059</div>';
-  ["97051", "97059"].forEach(function(id) {
-    html += renderSingleStop(id, allArrivals[id]);
-  });
+  html += '<div class="group-label">\u{1F504} Option D \u2014 Bus 2 @ 97031 \u2192 97051 \u2192 CROSS ROAD \u2192 Bus 4 @ 97059</div>';
+  ["97051", "97059"].forEach(function(id) { html += renderSingleStop(id, allArrivals[id]); });
   html += '</div>';
 
   container.innerHTML = html;
@@ -757,17 +718,15 @@ function renderSingleStop(stopId, arrivals) {
       html += loadTag(a.load);
       html += typeTag(a.type);
       if (isMatched) {
-        // isMatched may be "A", "B", "C", "D", or concat like "CD"
-        var uniqueOpts = "";
         var seen = {};
+        var uniqueOpts = "";
         for (var ci = 0; ci < isMatched.length; ci++) {
           var ch = isMatched[ci];
           if (!seen[ch]) { seen[ch] = true; uniqueOpts += ch; }
         }
         for (var ii = 0; ii < uniqueOpts.length; ii++) {
-          var ch = uniqueOpts[ii];
-          var tagCls = "tag-" + ch.toLowerCase();
-          html += '<span class="match-tag ' + tagCls + '">OPT ' + ch + '</span>';
+          var ch2 = uniqueOpts[ii];
+          html += '<span class="match-tag tag-' + ch2.toLowerCase() + '">OPT ' + ch2 + '</span>';
         }
       }
       html += '</div></div></div>';
@@ -780,8 +739,7 @@ function renderSingleStop(stopId, arrivals) {
 /* ════════════════ COUNTDOWN & AUTO-REFRESH ════════════════ */
 function updateCountdownUI() {
   document.getElementById("countdownSec").textContent = secondsLeft + "s";
-  var pct = (secondsLeft / REFRESH_SEC) * 100;
-  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressFill").style.width = ((secondsLeft / REFRESH_SEC) * 100) + "%";
 }
 function startCountdown() {
   secondsLeft = REFRESH_SEC;
@@ -804,9 +762,7 @@ function startAutoRefresh() {
 function manualRefresh() {
   if (refreshTimer) clearInterval(refreshTimer);
   if (countdownTimer) clearInterval(countdownTimer);
-  refresh().then(function() {
-    startAutoRefresh();
-  });
+  refresh().then(function() { startAutoRefresh(); });
 }
 
 /* ════════════════ INIT ════════════════ */
