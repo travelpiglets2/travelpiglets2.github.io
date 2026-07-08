@@ -110,7 +110,7 @@ body{
     0%,100%{opacity:1;}
     50%{opacity:0.5;}
 }
-.container{padding:22px 18px 100px;}
+.container{padding:22px 18px 40px;}
 .section-title{
     font-weight:700;
     margin:22px 4px 14px;
@@ -120,12 +120,6 @@ body{
     justify-content:space-between;
 }
 .section-title:first-child{margin-top:0;}
-.see-all{
-    font-size:13px;
-    color:var(--primary);
-    font-weight:500;
-    text-decoration:none;
-}
 .grid{display:grid;gap:12px;}
 .card{
     background:var(--card);
@@ -156,75 +150,11 @@ body{
 .blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
 .green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
 .orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
-.grey{background:linear-gradient(135deg,#f3f4f6,#e5e7eb);}
 .purple{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
 .card-body{flex:1;min-width:0;}
 .card-title{font-size:16px;font-weight:600;margin-bottom:3px;}
 .card-desc{color:var(--muted);font-size:13px;line-height:1.4;}
 .chevron{color:var(--muted);font-size:20px;margin-left:8px;}
-.quick-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-}
-.quick-btn{
-    background:var(--card);
-    border:none;
-    border-radius:16px;
-    padding:16px 8px;
-    box-shadow:var(--shadow);
-    font-weight:600;
-    color:var(--text);
-    font-family:inherit;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    cursor:pointer;
-    transition:transform .2s;
-}
-.quick-btn:active{transform:scale(.95);}
-.quick-icon{font-size:24px;}
-.quick-label{font-size:12px;}
-.hero-card{
-    background:linear-gradient(135deg,#3b82f6,#2563eb);
-    color:white;
-    padding:20px;
-    border-radius:20px;
-    box-shadow:var(--shadow-lg);
-    margin-bottom:8px;
-    display:block;
-    text-decoration:none;
-    position:relative;
-    overflow:hidden;
-}
-.hero-card::after{
-    content:"🚌";
-    position:absolute;
-    right:-10px;bottom:-20px;
-    font-size:120px;
-    opacity:0.15;
-}
-.hero-label{
-    font-size:12px;
-    opacity:0.9;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin-bottom:6px;
-}
-.hero-title{
-    font-size:22px;
-    font-weight:700;
-    margin-bottom:6px;
-    position:relative;
-    z-index:1;
-}
-.hero-desc{
-    font-size:13px;
-    opacity:0.9;
-    position:relative;
-    z-index:1;
-}
 .footer{
     text-align:center;
     margin-top:30px;
@@ -252,20 +182,32 @@ body{
 
 <div class="container">
 
-    <a href="gotamp.html" class="hero-card">
-        <div class="hero-label">Recommended for you</div>
-        <div class="hero-title">Go to Tampines Office</div>
-        <div class="hero-desc">Tap to view fastest route now →</div>
-    </a>
-
     <div class="section-title">Route Planner</div>
     <div class="grid">
+
+        <a href="busarrival.html" class="card">
+            <div class="icon purple">⏱️</div>
+            <div class="card-body">
+                <div class="card-title">Bus Arrival</div>
+                <div class="card-desc">General bus arrival information app</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
 
         <a href="gopasirris.html" class="card">
             <div class="icon blue">🚍</div>
             <div class="card-body">
                 <div class="card-title">Go Pasir Ris</div>
                 <div class="card-desc">Fastest routes & live bus options</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="transfer.html" class="card">
+            <div class="icon orange">🔄</div>
+            <div class="card-body">
+                <div class="card-title">Transfer Planner from Pasir Ris to Home</div>
+                <div class="card-desc">Find optimal interchange routes</div>
             </div>
             <div class="chevron">›</div>
         </a>
@@ -279,75 +221,14 @@ body{
             <div class="chevron">›</div>
         </a>
 
-        <a href="transfer.html" class="card">
-            <div class="icon orange">🔄</div>
-            <div class="card-body">
-                <div class="card-title">Transfer Planner</div>
-                <div class="card-desc">Find optimal interchange routes</div>
-            </div>
-            <div class="chevron">›</div>
-        </a>
-
-        <a href="index.html" class="card">
-            <div class="icon grey">🧪</div>
-            <div class="card-body">
-                <div class="card-title">Bus Arrival</div>
-                <div class="card-desc">General Bus Arrival apps</div>
-            </div>
-            <div class="chevron">›</div>
-        </a>
-
-    </div>
-
-    <div class="section-title">Quick Actions</div>
-    <div class="quick-grid">
-        <button class="quick-btn" onclick="location.href='gotamp.html'">
-            <div class="quick-icon">🏢</div>
-            <div class="quick-label">Office</div>
-        </button>
-        <button class="quick-btn" onclick="location.href='gopasirris.html'">
-            <div class="quick-icon">🚍</div>
-            <div class="quick-label">Pasir Ris</div>
-        </button>
-        <button class="quick-btn" onclick="location.href='transfer.html'">
-            <div class="quick-icon">🔄</div>
-            <div class="quick-label">Transfer</div>
-        </button>
     </div>
 
     <div class="footer">
         <div class="footer-brand">🚌 Bus Navigator</div>
-        <div style="margin-top:4px;">v1.0 · Mobile Edition</div>
+        <div style="margin-top:4px;">v1.1 · Mobile Edition</div>
     </div>
 
 </div>
 
-<script>
-// Remember last visited page for quick resume
-document.querySelectorAll('a[href$=".html"]').forEach(a=>{
-    a.addEventListener('click',()=>{
-        try{localStorage.setItem('lastPage',a.getAttribute('href'));}catch(e){}
-    });
-});
-
-// Optional: Show last-used shortcut (subtle enhancement)
-window.addEventListener('load',()=>{
-    try{
-        const last=localStorage.getItem('lastPage');
-        if(last){
-            const map={'gopasirris.html':'Go Pasir Ris','gotamp.html':'Go Tampines','transfer.html':'Transfer Planner','test.html':'Testing Lab'};
-            const name=map[last];
-            if(name){
-                const hero=document.querySelector('.hero-card');
-                if(hero){
-                    hero.href=last;
-                    hero.querySelector('.hero-title').textContent='Continue: '+name;
-                    hero.querySelector('.hero-label').textContent='Resume last route';
-                }
-            }
-        }
-    }catch(e){}
-});
-</script>
 </body>
 </html>
