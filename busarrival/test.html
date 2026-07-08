@@ -1,82 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Pages</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px auto; max-width: 600px; background-color: #f6f8fa; color: #24292e; }
-        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin: 8px 0; background: white; padding: 12px; border: 1px solid #e1e4e8; border-radius: 6px; }
-        a { text-decoration: none; color: #0366d6; font-weight: 600; font-size: 16px; text-transform: capitalize; }
-        a:hover { text-decoration: underline; }
-        .loading { color: #586069; font-style: italic; }
-        .error { color: #cb2431; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2563eb">
+<title>Bus Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#2563eb;
+    --secondary:#1e40af;
+    --accent:#3b82f6;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --shadow:0 6px 20px rgba(0,0,0,0.08);
+    --shadow-lg:0 10px 30px rgba(37,99,235,0.25);
+}
+@media (prefers-color-scheme: dark){
+    :root{
+        --bg:#0f172a;
+        --card:#1e293b;
+        --text:#f1f5f9;
+        --muted:#94a3b8;
+        --shadow:0 6px 20px rgba(0,0,0,0.4);
+    }
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{overscroll-behavior-y:contain;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    min-height:100vh;
+    color:var(--text);
+    padding-bottom:env(safe-area-inset-bottom);
+}
+.header{
+    background:linear-gradient(135deg,#2563eb 0%,#1e40af 50%,#1e3a8a 100%);
+    color:white;
+    padding:calc(env(safe-area-inset-top) + 28px) 22px 32px;
+    border-radius:0 0 28px 28px;
+    box-shadow:var(--shadow-lg);
+    position:relative;
+    overflow:hidden;
+}
+.header::before{
+    content:"";
+    position:absolute;
+    top:-50px;right:-50px;
+    width:180px;height:180px;
+    background:rgba(255,255,255,0.08);
+    border-radius:50%;
+}
+.header::after{
+    content:"";
+    position:absolute;
+    bottom:-80px;left:-30px;
+    width:150px;height:150px;
+    background:rgba(255,255,255,0.05);
+    border-radius:50%;
+}
+.header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    z-index:1;
+}
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.logo-icon{
+    width:44px;height:44px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+}
+.title{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
+.subtitle{opacity:.85;margin-top:8px;font-size:14px;position:relative;z-index:1;}
+.status-pill{
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.dot{
+    width:8px;height:8px;
+    background:#4ade80;
+    border-radius:50%;
+    animation:pulse 2s infinite;
+}
+@keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.5;}
+}
+.container{padding:22px 18px 100px;}
+.section-title{
+    font-weight:700;
+    margin:22px 4px 14px;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.section-title:first-child{margin-top:0;}
+.see-all{
+    font-size:13px;
+    color:var(--primary);
+    font-weight:500;
+    text-decoration:none;
+}
+.grid{display:grid;gap:12px;}
+.card{
+    background:var(--card);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:var(--shadow);
+    text-decoration:none;
+    color:inherit;
+    display:flex;
+    align-items:center;
+    transition:transform .2s,box-shadow .2s;
+    border:1px solid rgba(0,0,0,0.03);
+}
+.card:active{
+    transform:scale(.97);
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+.icon{
+    width:54px;height:54px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:14px;
+    font-size:26px;
+    margin-right:14px;
+    flex-shrink:0;
+}
+.blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
+.green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
+.orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
+.grey{background:linear-gradient(135deg,#f3f4f6,#e5e7eb);}
+.purple{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.card-body{flex:1;min-width:0;}
+.card-title{font-size:16px;font-weight:600;margin-bottom:3px;}
+.card-desc{color:var(--muted);font-size:13px;line-height:1.4;}
+.chevron{color:var(--muted);font-size:20px;margin-left:8px;}
+.quick-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+.quick-btn{
+    background:var(--card);
+    border:none;
+    border-radius:16px;
+    padding:16px 8px;
+    box-shadow:var(--shadow);
+    font-weight:600;
+    color:var(--text);
+    font-family:inherit;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    transition:transform .2s;
+}
+.quick-btn:active{transform:scale(.95);}
+.quick-icon{font-size:24px;}
+.quick-label{font-size:12px;}
+.hero-card{
+    background:linear-gradient(135deg,#3b82f6,#2563eb);
+    color:white;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:var(--shadow-lg);
+    margin-bottom:8px;
+    display:block;
+    text-decoration:none;
+    position:relative;
+    overflow:hidden;
+}
+.hero-card::after{
+    content:"🚌";
+    position:absolute;
+    right:-10px;bottom:-20px;
+    font-size:120px;
+    opacity:0.15;
+}
+.hero-label{
+    font-size:12px;
+    opacity:0.9;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:6px;
+}
+.hero-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:6px;
+    position:relative;
+    z-index:1;
+}
+.hero-desc{
+    font-size:13px;
+    opacity:0.9;
+    position:relative;
+    z-index:1;
+}
+.footer{
+    text-align:center;
+    margin-top:30px;
+    color:var(--muted);
+    font-size:12px;
+}
+.footer-brand{font-weight:600;color:var(--text);}
+</style>
 </head>
 <body>
 
-    <h1>Project Pages</h1>
-    <ul id="file-list">
-        <li class="loading">Scanning directory...</li>
-    </ul>
+<div class="header">
+    <div class="header-row">
+        <div class="logo">
+            <div class="logo-icon">🚌</div>
+            <div class="title">Bus Navigator</div>
+        </div>
+        <div class="status-pill">
+            <span class="dot"></span>
+            <span>Live</span>
+        </div>
+    </div>
+    <div class="subtitle">Smart Bus Tracking & Route Planning</div>
+</div>
 
-    <script>
-        async function fetchHtmlFiles() {
-            const listElement = document.getElementById('file-list');
-            
-            try {
-                // Automatically extract username and repo from the GitHub Pages URL
-                // Example: https://username.github.io/repo-name/
-                const hostname = window.location.hostname; // "username.github.io"
-                const pathSegments = window.location.pathname.split('/').filter(Boolean); // ["repo-name"]
-                
-                const username = hostname.split('.')[0];
-                const repo = pathSegments[0] || ""; // Catches root domains if repo name isn't in path
+<div class="container">
 
-                if (!username || username === "localhost" || username === "127") {
-                    throw new Error("This script needs to be hosted on github.io to auto-detect your repository.");
+    <a href="gotamp.html" class="hero-card">
+        <div class="hero-label">Recommended for you</div>
+        <div class="hero-title">Go to Tampines Office</div>
+        <div class="hero-desc">Tap to view fastest route now →</div>
+    </a>
+
+    <div class="section-title">Route Planner</div>
+    <div class="grid">
+
+        <a href="gopasirris.html" class="card">
+            <div class="icon blue">🚍</div>
+            <div class="card-body">
+                <div class="card-title">Go Pasir Ris</div>
+                <div class="card-desc">Fastest routes & live bus options</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="gotamp.html" class="card">
+            <div class="icon green">🏢</div>
+            <div class="card-body">
+                <div class="card-title">Go Tampines</div>
+                <div class="card-desc">Office commute planner</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="transfer.html" class="card">
+            <div class="icon orange">🔄</div>
+            <div class="card-body">
+                <div class="card-title">Transfer Planner</div>
+                <div class="card-desc">Find optimal interchange routes</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="test.html" class="card">
+            <div class="icon grey">🧪</div>
+            <div class="card-body">
+                <div class="card-title">Testing Lab</div>
+                <div class="card-desc">Experimental features</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+    </div>
+
+    <div class="section-title">Quick Actions</div>
+    <div class="quick-grid">
+        <button class="quick-btn" onclick="location.href='gotamp.html'">
+            <div class="quick-icon">🏢</div>
+            <div class="quick-label">Office</div>
+        </button>
+        <button class="quick-btn" onclick="location.href='gopasirris.html'">
+            <div class="quick-icon">🚍</div>
+            <div class="quick-label">Pasir Ris</div>
+        </button>
+        <button class="quick-btn" onclick="location.href='transfer.html'">
+            <div class="quick-icon">🔄</div>
+            <div class="quick-label">Transfer</div>
+        </button>
+    </div>
+
+    <div class="footer">
+        <div class="footer-brand">🚌 Bus Navigator</div>
+        <div style="margin-top:4px;">v1.0 · Mobile Edition</div>
+    </div>
+
+</div>
+
+<script>
+// Remember last visited page for quick resume
+document.querySelectorAll('a[href$=".html"]').forEach(a=>{
+    a.addEventListener('click',()=>{
+        try{localStorage.setItem('lastPage',a.getAttribute('href'));}catch(e){}
+    });
+});
+
+// Optional: Show last-used shortcut (subtle enhancement)
+window.addEventListener('load',()=>{
+    try{
+        const last=localStorage.getItem('lastPage');
+        if(last){
+            const map={'gopasirris.html':'Go Pasir Ris','gotamp.html':'Go Tampines','transfer.html':'Transfer Planner','test.html':'Testing Lab'};
+            const name=map[last];
+            if(name){
+                const hero=document.querySelector('.hero-card');
+                if(hero){
+                    hero.href=last;
+                    hero.querySelector('.hero-title').textContent='Continue: '+name;
+                    hero.querySelector('.hero-label').textContent='Resume last route';
                 }
-
-                const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/`;
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Failed to fetch repository contents');
-                
-                const files = await response.json();
-                listElement.innerHTML = '';
-
-                // Filter for HTML files, excluding index.html
-                const htmlFiles = files.filter(file => 
-                    file.name.endsWith('.html') && 
-                    file.name.toLowerCase() !== 'index.html'
-                );
-
-                if (htmlFiles.length === 0) {
-                    listElement.innerHTML = '<li>No HTML files found.</li>';
-                    return;
-                }
-
-                // Generate links dynamically
-                htmlFiles.forEach(file => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    
-                    a.href = file.path; 
-                    // Cleans up the filename for display (e.g., "gopasirris.html" -> "Gopasirris")
-                    a.textContent = file.name.replace('.html', ''); 
-                    
-                    li.appendChild(a);
-                    listElement.appendChild(li);
-                });
-
-            } catch (error) {
-                console.error(error);
-                listElement.innerHTML = `<li class="error">Unable to auto-scan files. (Note: This tracking method only works once pushed live to github.io).</li>`;
             }
         }
-
-        fetchHtmlFiles();
-    </script>
+    }catch(e){}
+});
+</script>
 </body>
 </html>
