@@ -3,20 +3,180 @@
 
   <head>
       <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, user-scalable=no" />
-      <title>Photo album - Home</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+      <title>Nagoya Higashiyama Zoo and Sakae</title>
       <link rel="stylesheet" href="public/lightgallery/css/lightgallery.css" />
       <link rel="stylesheet" href="public/lightgallery/css/lg-exif.min.css" />
       <link rel="stylesheet" href="public/videojs/video-js.min.css" />
       <link rel="stylesheet" href="public/core.css" />
       <link rel="stylesheet" href="public/theme.css" />
+
+      <!-- Mobile-optimized styles -->
+      <style>
+        /* === Base Mobile Reset === */
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          padding: 8px;
+          padding: 8px env(safe-area-inset-right, 8px) 8px env(safe-area-inset-left, 8px);
+        }
+
+        header {
+          text-align: left;
+          padding: 8px 0;
+        }
+
+        header h1 {
+          margin: 4px 0;
+          font-size: 1.4em;
+        }
+
+        /* === Thumbnail Grid === */
+        #media {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          justify-content: center;
+        }
+
+        #media li {
+          flex: 0 0 auto;
+          overflow: hidden;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        #media li img {
+          display: block;
+          object-fit: cover;
+          border-radius: 4px;
+          transition: transform 0.2s ease;
+        }
+
+        #media li img:hover {
+          transform: scale(1.05);
+        }
+
+        /* === Portrait Mode (phones) === */
+        @media screen and (max-width: 600px) and (orientation: portrait) {
+          header h1 {
+            font-size: 1.2em;
+          }
+
+          #media {
+            gap: 4px;
+          }
+
+          #media li {
+            width: calc(33.333% - 4px);
+          }
+
+          #media li img {
+            width: 100%;
+            height: auto;
+          }
+        }
+
+        /* === Landscape Mode (phones) === */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+          header {
+            padding: 2px 0;
+          }
+
+          header h1 {
+            font-size: 1em;
+            margin: 2px 0;
+          }
+
+          #media {
+            gap: 4px;
+          }
+
+          #media li {
+            width: auto;
+          }
+
+          #media li img {
+            width: 80px;
+            height: 80px;
+          }
+
+          /* === CRITICAL: Hide LightGallery thumbnails in landscape === */
+          .lg-thumb-outer,
+          .lg-outer .lg-thumb-outer {
+            display: none !important;
+            height: 0 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+          }
+
+          /* Hide captions in landscape to maximize photo space */
+          .lg-sub-html {
+            display: none !important;
+          }
+
+          /* Make the photo use full height */
+          .lg-outer .lg-inner {
+            bottom: 0 !important;
+          }
+
+          .lg-outer .lg-img-wrap {
+            padding: 0 !important;
+          }
+        }
+
+        /* === Tablet portrait === */
+        @media screen and (min-width: 601px) and (max-width: 1024px) {
+          #media li img {
+            width: 120px;
+            height: 120px;
+          }
+        }
+
+        /* === General LightGallery Overrides for Mobile === */
+        .lg-backdrop {
+          background-color: #000 !important;
+        }
+
+        .lg-item {
+          touch-action: manipulation;
+        }
+
+        .lg-outer .lg-image {
+          max-width: 100vw;
+          max-height: 100vh;
+          object-fit: contain;
+        }
+
+        /* Ensure toolbar doesn't get cut off on notched phones */
+        .lg-toolbar {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        /* When thumbs are hidden, reclaim the space for the image */
+        .lg-outer.lg-thumb-open .lg-inner {
+          bottom: 0;
+        }
+
+        /* Smooth swipe transitions */
+        .lg-css3.lg-slide .lg-item {
+          will-change: transform;
+        }
+      </style>
+
   </head>
 
   <body>
 
     <header>
       <a href="index.html">
-        <h1>Photo album</h1>
+        <h1>Nagoya Higashiyama Zoo and Sakae - 名古屋 - 東山動植物園 与 荣</h1>
       </a>
     </header>
     
@@ -2959,6 +3119,7 @@
     <script src="public/lightgallery/js/lg-thumbnail.js"></script>
     <script src="public/lightgallery/js/lg-video.js"></script>
     <script src="public/lightgallery/js/lg-exif.min.js"></script>
+    <script src="public/lightgallery/js/lg-fullscreen.js"></script>
 
     <script>
       $(document).ready(function() {
