@@ -1,0 +1,11 @@
+#1. Compress video using last script
+#2. Use original video for generate html then copy mp4 in 1 over,  delete .mp4 in large folder
+docker run --rm -t -v c:/data/in:/input:ro -v c:/data/out:/output ghcr.io/thumbsup/thumbsup:2.18.0 thumbsup --input /input --output /output --video-preview copy
+
+#not in use
+compress video, quality=50
+docker run --rm -v c:/vidin:/input -v c:/vidout:/output --entrypoint /bin/sh jrottenberg/ffmpeg:4.4-alpine -c "echo 'Scanning /input directory...'; for file in /input/*; do [ -f \"$file\" ] || continue; ext=$(echo \"${file##*.}\" | tr '[:upper:]' '[:lower:]'); name=$(basename \"$file\"); if [ \"$ext\" = \"mp4\" ]; then echo \"Compressing Video: $name\"; ffmpeg -y -i \"$file\" -vf \"scale='min(1920,iw)':-2\" -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -movflags +faststart \"/output/$name\"; elif [ \"$ext\" = \"jpg\" ] || [ \"$ext\" = \"jpeg\" ] || [ \"$ext\" = \"png\" ]; then echo \"Compressing Photo: $name\"; base=\"${name%.*}\"; ffmpeg -y -i \"$file\" -vf \"scale='min(1920,iw)':-1\" -c:v libwebp -quality 50 \"/output/${base}.webp\"; fi; done; echo 'Done! check c:\vidout';"
+
+
+compress video, quality=50, limit output to less than 100mb
+docker run --rm -v c:/vidin:/input -v c:/vidout:/output --entrypoint /bin/sh jrottenberg/ffmpeg:4.4-alpine -c "echo 'Scanning /input directory...'; for file in /input/*; do [ -f \"$file\" ] || continue; ext=$(echo \"${file##*.}\" | tr '[:upper:]' '[:lower:]'); name=$(basename \"$file\"); if [ \"$ext\" = \"mp4\" ]; then echo \"Compressing Video: $name\"; ffmpeg -y -i \"$file\" -vf \"scale='min(1920,iw)':-2\" -c:v libx264 -crf 24 -maxrate 2000k -bufsize 4000k -preset medium -c:a aac -b:a 128k -movflags +faststart \"/output/$name\"; elif [ \"$ext\" = \"jpg\" ] || [ \"$ext\" = \"jpeg\" ] || [ \"$ext\" = \"png\" ]; then echo \"Compressing Photo: $name\"; base=\"${name%.*}\"; ffmpeg -y -i \"$file\" -vf \"scale='min(1920,iw)':-1\" -c:v libwebp -quality 50 \"/output/${base}.webp\"; fi; done; echo 'Done! check c:\vidout';"
