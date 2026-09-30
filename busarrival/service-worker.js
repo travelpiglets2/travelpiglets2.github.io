@@ -1,6 +1,6 @@
 // Bus Navigator — Service Worker
 // Bump CACHE_VERSION whenever you change any cached file so old caches get replaced.
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `bus-navigator-${CACHE_VERSION}`;
 
 // Core "app shell" files needed for the app to load instantly, even offline.
@@ -13,6 +13,7 @@ const PRECACHE_URLS = [
   './icons/icon-512.png',
   './icons/icon-192-maskable.png',
   './icons/icon-512-maskable.png',
+  './icons/favicon-32.png',
   './gopasirris.html',
   './transfer.html',
   './gotamp.html'

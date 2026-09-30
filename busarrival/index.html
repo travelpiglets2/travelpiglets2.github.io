@@ -18,6 +18,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 
 <!-- Icons -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
 
@@ -94,13 +95,19 @@ body{
 }
 .logo-icon{
     width:44px;height:44px;
-    background:rgba(255,255,255,0.2);
-    backdrop-filter:blur(10px);
     border-radius:12px;
+    overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:24px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+}
+.logo-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
 }
 .title{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
 .subtitle{opacity:.85;margin-top:8px;font-size:14px;position:relative;z-index:1;}
@@ -158,10 +165,10 @@ body{
     justify-content:center;
     align-items:center;
     border-radius:14px;
-    font-size:26px;
     margin-right:14px;
     flex-shrink:0;
 }
+.icon svg{width:26px;height:26px;}
 .blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
 .green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
 .orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
@@ -176,7 +183,20 @@ body{
     color:var(--muted);
     font-size:12px;
 }
-.footer-brand{font-weight:600;color:var(--text);}
+.footer-brand{
+    font-weight:600;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+}
+.footer-brand img{
+    width:20px;
+    height:20px;
+    border-radius:5px;
+    display:block;
+}
 </style>
 </head>
 <body>
@@ -184,7 +204,7 @@ body{
 <div class="header">
     <div class="header-row">
         <div class="logo">
-            <div class="logo-icon">🚌</div>
+            <div class="logo-icon"><img src="icons/icon-192.png" alt="Bus Navigator icon"></div>
             <div class="title">Bus Navigator</div>
         </div>
         <div class="status-pill">
@@ -201,7 +221,9 @@ body{
     <div class="grid">
 
         <a href="https://busrouter.sg/bus-arrival/#97031" target="_blank" rel="noopener noreferrer" class="card">
-            <div class="icon purple">⏱️</div>
+            <div class="icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+            </div>
             <div class="card-body">
                 <div class="card-title">Bus Arrival</div>
                 <div class="card-desc">Live arrival times - Aft Jln Bena (97031)</div>
@@ -210,7 +232,9 @@ body{
         </a>
 
         <a href="gopasirris.html" class="card">
-            <div class="icon blue">🚍</div>
+            <div class="icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="11" rx="2"></rect><path d="M3 11h18"></path><circle cx="7.5" cy="17" r="1.6" fill="#2563eb" stroke="none"></circle><circle cx="16.5" cy="17" r="1.6" fill="#2563eb" stroke="none"></circle></svg>
+            </div>
             <div class="card-body">
                 <div class="card-title">Go Pasir Ris</div>
                 <div class="card-desc">Fastest routes &amp; live bus options</div>
@@ -219,7 +243,9 @@ body{
         </a>
 
         <a href="transfer.html" class="card">
-            <div class="icon orange">🔄</div>
+            <div class="icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"></polyline><path d="M3 6h18"></path><polyline points="7 22 3 18 7 14"></polyline><path d="M21 18H3"></path></svg>
+            </div>
             <div class="card-body">
                 <div class="card-title">From Pasir Ris to Home</div>
                 <div class="card-desc">Find optimal interchange routes</div>
@@ -228,7 +254,9 @@ body{
         </a>
 
         <a href="gotamp.html" class="card">
-            <div class="icon green">🏢</div>
+            <div class="icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"></path><path d="M6 22h12"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path></svg>
+            </div>
             <div class="card-body">
                 <div class="card-title">Go Tampines</div>
                 <div class="card-desc">Tampines route planner</div>
@@ -239,8 +267,8 @@ body{
     </div>
 
     <div class="footer">
-        <div class="footer-brand">🚌 Bus Navigator</div>
-        <div style="margin-top:4px;">v1.2 · Mobile Edition · Installable</div>
+        <div class="footer-brand"><img src="icons/icon-192.png" alt="">Bus Navigator</div>
+        <div style="margin-top:4px;">v1.3 · Mobile Edition · Installable</div>
     </div>
 
 </div>
