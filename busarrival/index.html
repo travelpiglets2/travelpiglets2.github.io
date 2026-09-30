@@ -3,9 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+<!-- PWA manifest: this is what tells Chrome on Android the site is installable -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Android / Chrome install + theming -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2563eb">
+
+<!-- iOS install + theming (Safari ignores the manifest, so these are still needed) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-title" content="Bus Navigator">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
 <title>Bus Navigator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -177,7 +192,7 @@ body{
             <span>Live</span>
         </div>
     </div>
-    <div class="subtitle">Smart Bus Tracking & Route Planning</div>
+    <div class="subtitle">Smart Bus Tracking &amp; Route Planning</div>
 </div>
 
 <div class="container">
@@ -185,11 +200,11 @@ body{
     <div class="section-title">Route Planner</div>
     <div class="grid">
 
-        <a href="busarrival.html" class="card">
+        <a href="https://busrouter.sg/bus-arrival/#97031" target="_blank" rel="noopener noreferrer" class="card">
             <div class="icon purple">⏱️</div>
             <div class="card-body">
                 <div class="card-title">Bus Arrival</div>
-                <div class="card-desc">General bus arrival information app</div>
+                <div class="card-desc">Live arrival times - Aft Jln Bena (97031)</div>
             </div>
             <div class="chevron">›</div>
         </a>
@@ -198,7 +213,7 @@ body{
             <div class="icon blue">🚍</div>
             <div class="card-body">
                 <div class="card-title">Go Pasir Ris</div>
-                <div class="card-desc">Fastest routes & live bus options</div>
+                <div class="card-desc">Fastest routes &amp; live bus options</div>
             </div>
             <div class="chevron">›</div>
         </a>
@@ -225,10 +240,22 @@ body{
 
     <div class="footer">
         <div class="footer-brand">🚌 Bus Navigator</div>
-        <div style="margin-top:4px;">v1.1 · Mobile Edition</div>
+        <div style="margin-top:4px;">v1.2 · Mobile Edition · Installable</div>
     </div>
 
 </div>
+
+<script>
+  // Register the service worker so Chrome recognizes this as an installable PWA
+  // (manifest + service worker + icons = Chrome mints a real WebAPK on "Add to Home screen").
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then((reg) => console.log('Service worker registered:', reg.scope))
+        .catch((err) => console.error('Service worker registration failed:', err));
+    });
+  }
+</script>
 
 </body>
 </html>
