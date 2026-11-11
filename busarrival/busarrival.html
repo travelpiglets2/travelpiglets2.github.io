@@ -11,6 +11,9 @@
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1923; color: #e0e6ed; min-height: 100vh; }
     header { background: linear-gradient(135deg,#1a2a3a,#0d1f2d); padding: 16px 24px; border-bottom: 2px solid #00b4d8; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     header h1 { font-size: 1.4rem; color: #00b4d8; letter-spacing: 1px; }
+    /* Clickable title = back to previous page */
+    #header-title { cursor: pointer; }
+    #header-title:hover { text-decoration: underline; }
     header .subtitle { font-size: 0.82rem; color: #90a4ae; margin-top: 3px; }
     .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
     .stop-input-wrap { display: flex; align-items: center; gap: 8px; }
@@ -70,7 +73,7 @@
     .legend-dot  { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
     .legend-divider { width: 1px; height: 14px; background: #1e3a4a; margin: 0 4px; }
     @media (max-width:600px) { .arrival-row { flex-wrap: wrap; } .tags { min-width: unset; } }
-  
+
 /* ── GPS Nearest Stop Button ── */
 .btn-gps {
   background: linear-gradient(135deg, #0077a8, #00b4d8);
@@ -190,7 +193,7 @@
 <body>
 <header>
 <div>
-<h1 id="header-title">🚌 Bus Stop 97039</h1>
+<h1 id="header-title" onclick="goBack()" title="Back to menu">🚌 Bus Stop 97039</h1>
 <div class="subtitle" id="header-subtitle">Singapore · Real-time Bus Arrivals</div>
 </div>
 <div class="header-right">
@@ -259,6 +262,15 @@ function getBusColor(busNo) {
     colorIndex++;
   }
   return colorAssignment[busNo];
+}
+
+// ── BACK TO PREVIOUS PAGE (click on title) ───────────────────────────────
+function goBack() {
+  if (document.referrer || history.length > 1) {
+    history.back();
+  } else {
+    window.location.href = "index.html";   // fallback if opened directly (no history)
+  }
 }
 
 // ── SORT SERVICES BY PRIORITY ─────────────────────────────────────────────
