@@ -26,6 +26,9 @@
     position: sticky; top: 0; z-index: 100;
   }
   header h1 { font-size: 1.2rem; color: #4fc3f7; letter-spacing: 0.5px; }
+  /* Clickable title = back to previous page */
+  #page-title { cursor: pointer; }
+  #page-title:hover { text-decoration: underline; }
   .header-right { display: flex; align-items: center; gap: 10px; }
   #lastUpdate { font-size: 0.75rem; color: #aaa; display: none; }
   .btn-refresh {
@@ -204,7 +207,7 @@
 <body>
 
 <header>
-  <h1>&#x1F68C; Bus Route Planner</h1>
+  <h1 id="page-title" onclick="goBack()" title="Back to menu">&#x1F68C; Bus Route Planner</h1>
   <div class="header-right">
     <span id="lastUpdate"></span>
     <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">&#x1F504; Refresh</button>
@@ -253,6 +256,17 @@
 
 <script>
 /* ════════════════════════════════════════════ */
+/*         BACK TO PREVIOUS PAGE (title)        */
+/* ════════════════════════════════════════════ */
+function goBack() {
+  if (document.referrer || history.length > 1) {
+    history.back();
+  } else {
+    window.location.href = "index.html";   // fallback if opened directly (no history)
+  }
+}
+
+/* ════════════════════════════════════════════ */
 /*              CONFIGURATION                   */
 /* ════════════════════════════════════════════ */
 var STOPS_API = "https://data.busrouter.sg/v1/stops.json";
@@ -298,9 +312,9 @@ function fmtClockTime(minsFromNow) {
   return h + ":" + m;
 }
 function loadTag(load) {
-  if (load === "SEA") return '<span class="load-tag load-sea">\u{1F7E2} Seats</span>';
-  if (load === "SDA") return '<span class="load-tag load-sda">\u{1F7E1} Standing</span>';
-  if (load === "LSD") return '<span class="load-tag load-lsd">\u{1F534} Full</span>';
+  if (load === "SEA") return '<span class="load-tag load-sea">🟢 Seats</span>';
+  if (load === "SDA") return '<span class="load-tag load-sda">🟡 Standing</span>';
+  if (load === "LSD") return '<span class="load-tag load-lsd">🔴 Full</span>';
   return '<span class="load-tag load-na">\u25CB N/A</span>';
 }
 function typeTag(type) {
