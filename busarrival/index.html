@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+
+<!-- Icons (normal website icons only - no PWA manifest, no service worker) -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
+<title>Bus Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#2563eb;
+    --secondary:#1e40af;
+    --accent:#3b82f6;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --shadow:0 6px 20px rgba(0,0,0,0.08);
+    --shadow-lg:0 10px 30px rgba(37,99,235,0.25);
+}
+@media (prefers-color-scheme: dark){
+    :root{
+        --bg:#0f172a;
+        --card:#1e293b;
+        --text:#f1f5f9;
+        --muted:#94a3b8;
+        --shadow:0 6px 20px rgba(0,0,0,0.4);
+    }
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{overscroll-behavior-y:contain;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    min-height:100vh;
+    color:var(--text);
+    padding-bottom:env(safe-area-inset-bottom);
+}
+.header{
+    background:linear-gradient(135deg,#2563eb 0%,#1e40af 50%,#1e3a8a 100%);
+    color:white;
+    padding:calc(env(safe-area-inset-top) + 28px) 22px 32px;
+    border-radius:0 0 28px 28px;
+    box-shadow:var(--shadow-lg);
+    position:relative;
+    overflow:hidden;
+}
+.header::before{
+    content:"";
+    position:absolute;
+    top:-50px;right:-50px;
+    width:180px;height:180px;
+    background:rgba(255,255,255,0.08);
+    border-radius:50%;
+}
+.header::after{
+    content:"";
+    position:absolute;
+    bottom:-80px;left:-30px;
+    width:150px;height:150px;
+    background:rgba(255,255,255,0.05);
+    border-radius:50%;
+}
+.header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    z-index:1;
+}
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.logo-icon{
+    width:44px;height:44px;
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+}
+.logo-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.title{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
+.subtitle{opacity:.85;margin-top:8px;font-size:14px;position:relative;z-index:1;}
+.status-pill{
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.dot{
+    width:8px;height:8px;
+    background:#4ade80;
+    border-radius:50%;
+    animation:pulse 2s infinite;
+}
+@keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.5;}
+}
+.container{padding:22px 18px 40px;}
+.section-title{
+    font-weight:700;
+    margin:22px 4px 14px;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.section-title:first-child{margin-top:0;}
+.grid{display:grid;gap:12px;}
+.card{
+    background:var(--card);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:var(--shadow);
+    text-decoration:none;
+    color:inherit;
+    display:flex;
+    align-items:center;
+    transition:transform .2s,box-shadow .2s;
+    border:1px solid rgba(0,0,0,0.03);
+}
+.card:active{
+    transform:scale(.97);
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+.icon{
+    width:54px;height:54px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:14px;
+    margin-right:14px;
+    flex-shrink:0;
+}
+.icon svg{width:26px;height:26px;}
+.blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
+.green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
+.orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
+.purple{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.teal{background:linear-gradient(135deg,#ccfbf1,#99f6e4);}
+.card-body{flex:1;min-width:0;}
+.card-title{font-size:16px;font-weight:600;margin-bottom:3px;}
+.card-desc{color:var(--muted);font-size:13px;line-height:1.4;}
+.chevron{color:var(--muted);font-size:20px;margin-left:8px;}
+.footer{
+    text-align:center;
+    margin-top:30px;
+    color:var(--muted);
+    font-size:12px;
+}
+.footer-brand{
+    font-weight:600;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+}
+.footer-brand img{
+    width:20px;
+    height:20px;
+    border-radius:5px;
+    display:block;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-row">
+        <div class="logo">
+            <div class="logo-icon"><img src="icons/icon-192.png" alt="Bus Navigator icon"></div>
+            <div class="title">Bus Navigator</div>
+        </div>
+        <div class="status-pill">
+            <span class="dot"></span>
+            <span>Live</span>
+        </div>
+    </div>
+    <div class="subtitle">Smart Bus Tracking &amp; Route Planning</div>
+</div>
+
+<div class="container">
+
+    <div class="section-title">Route Planner</div>
+    <div class="grid">
+
+        <a href="busarrival.html" class="card">
+            <div class="icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Bus Arrival</div>
+                <div class="card-desc">Live arrival times</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <!-- NEW: Bus Arrival + Seating Plan (same folder as index.html) -->
+        <a href="bus_side_planner.html" class="card">
+            <div class="icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M3 10h18"></path><path d="M12 4v6"></path><circle cx="7.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle><circle cx="16.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Bus Arrival + Seating Plan</div>
+                <div class="card-desc">Live arrivals &amp; shady side to sit</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="gopasirris.html" class="card">
+            <div class="icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="11" rx="2"></rect><path d="M3 11h18"></path><circle cx="7.5" cy="17" r="1.6" fill="#2563eb" stroke="none"></circle><circle cx="16.5" cy="17" r="1.6" fill="#2563eb" stroke="none"></circle></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Go Pasir Ris</div>
+                <div class="card-desc">Fastest routes &amp; live bus options</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="transfer.html" class="card">
+            <div class="icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"></polyline><path d="M3 6h18"></path><polyline points="7 22 3 18 7 14"></polyline><path d="M21 18H3"></path></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">From Pasir Ris to Home</div>
+                <div class="card-desc">Find optimal interchange routes</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <a href="gotamp.html" class="card">
+            <div class="icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"></path><path d="M6 22h12"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Go Tampines</div>
+                <div class="card-desc">Tampines route planner</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        <div class="footer-brand"><img src="icons/icon-192.png" alt="">Bus Navigator</div>
+        <div style="margin-top:4px;">v1.3 · Mobile Edition</div>
+    </div>
+
+</div>
+
+<script>
+  // Plain website mode (same as the gallery page): no PWA / no service worker.
+  // This also removes any old service worker + cache left on the phone from the previous app version.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { r.unregister(); });
+    });
+  }
+  if (window.caches) {
+    caches.keys().then(function (keys) { keys.forEach(function (k) { caches.delete(k); }); });
+  }
+</script>
+
+</body>
+</html>
