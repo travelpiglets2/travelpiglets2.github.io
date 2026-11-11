@@ -173,6 +173,7 @@ body{
 .green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
 .orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
 .purple{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.teal{background:linear-gradient(135deg,#ccfbf1,#99f6e4);}
 .card-body{flex:1;min-width:0;}
 .card-title{font-size:16px;font-weight:600;margin-bottom:3px;}
 .card-desc{color:var(--muted);font-size:13px;line-height:1.4;}
@@ -227,6 +228,18 @@ body{
             <div class="card-body">
                 <div class="card-title">Bus Arrival</div>
                 <div class="card-desc">Live arrival times</div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
+
+        <!-- NEW: Bus Arrival + Seating Plan (same folder as index.html) -->
+        <a href="bus_side_planner.html" class="card">
+            <div class="icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M3 10h18"></path><path d="M12 4v6"></path><circle cx="7.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle><circle cx="16.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle></svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Bus Arrival + Seating Plan</div>
+                <div class="card-desc">Live arrivals &amp; shady side to sit</div>
             </div>
             <div class="chevron">›</div>
         </a>
