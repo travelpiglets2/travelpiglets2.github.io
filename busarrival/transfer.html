@@ -28,6 +28,9 @@
     position: sticky; top: 0; z-index: 100;
   }
   header h1 { font-size: 1.2rem; color: #4fc3f7; letter-spacing: 0.5px; }
+  /* Clickable title = back to previous page */
+  #page-title { cursor: pointer; }
+  #page-title:hover { text-decoration: underline; }
   .header-right { display: flex; align-items: center; gap: 10px; }
   #lastUpdate { font-size: 0.75rem; color: #aaa; display: none; }
   .btn-refresh {
@@ -166,7 +169,7 @@
 </head>
 <body>
 <header>
-  <h1>&#x1F68C; Bus Transfer</h1>
+  <h1 id="page-title" onclick="goBack()" title="Back to menu">&#x1F68C; Bus Transfer</h1>
   <div class="header-right">
     <span id="lastUpdate">Updated: <b id="updateTime">&ndash;</b></span>
     <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">
@@ -190,7 +193,7 @@
   <div class="card card-options">
     <h3>&#x1F4CB; Transfer Options</h3>
     <div id="optionA" class="option-card">
-      <h4>Transfer at Changi Women&#39;s Prison: Bus 5 &#x2192; Bus 2/2B at Stop 97059</h4>
+      <h4>Transfer at Changi Women's Prison: Bus 5 &#x2192; Bus 2/2B at Stop 97059</h4>
       <div class="detail">Same stop transfer &mdash; no crossing needed</div>
       <div class="wait-time" id="optAWait">...</div>
     </div>
@@ -226,6 +229,15 @@
 <footer>Auto-refreshes every 60s &middot; Data via BusRouter SG</footer>
 
 <script>
+/* ── Back to previous page (click on title) ── */
+function goBack() {
+  if (document.referrer || history.length > 1) {
+    history.back();
+  } else {
+    window.location.href = "index.html";   // fallback if opened directly (no history)
+  }
+}
+
 var STOPS_API = "https://data.busrouter.sg/v1/stops.json";
 var ARRIVALS_API = "https://arrivelah2.busrouter.sg/?id=";
 var REFRESH_SEC = 60;
@@ -456,7 +468,7 @@ function updateRecommendation(optA,optB) {
     if(aWait<=bWait){
       if(aIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
       recBox.className="recommendation rec-good";
-      recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women&#39;s Prison</div>'+
+      recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women\'s Prison</div>'+
         '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>'+recEstWarn;
     } else {
       if(bIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
@@ -467,7 +479,7 @@ function updateRecommendation(optA,optB) {
   } else if(aViable){
     if(aIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
     recBox.className="recommendation rec-good";
-    recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women&#39;s Prison</div>'+
+    recBox.innerHTML='<div class="rec-title">&#x2705; Transfer at Changi Women\'s Prison</div>'+
       '<div class="rec-detail">Bus 5 &#x2192; Bus '+aBusNo+' at Stop 97059<br>Wait '+aWait.toFixed(1)+' min at same stop</div>'+recEstWarn;
   } else if(bViable){
     if(bIsEst) recEstWarn='<div class="rec-warn">&#x26A0; Based on estimated arrival (no GPS)</div>';
