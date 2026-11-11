@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bus Arrival</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root { --bg:#070d1a; --card:#0f1a2e; --line:#1f2f4d; --txt:#e5ecf9; --mute:#8da2c6;
+          --green:#22c55e; --sun:#f5b324; --blue:#38a1e0; --purple:#a78bfa; }
+  * { box-sizing:border-box; }
+  html, body { max-width:100%; overflow-x:hidden; }
+  body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--txt); }
+  header { padding:16px 20px 6px; max-width:760px; margin:0 auto; }
+  header h1 { margin:0; font-size:20px; }
+  main { max-width:760px; margin:0 auto; padding:10px 16px 30px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+  .row + .row { margin-top:10px; }
+  label { display:flex; flex-direction:column; font-size:11px; color:var(--mute); gap:4px; text-transform:uppercase; letter-spacing:.04em; }
+  input, select { padding:8px 9px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#0a1324; color:var(--txt); color-scheme:dark; }
+  input[type=number] { width:118px; }
+  button { padding:9px 14px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-size:13px; cursor:pointer; }
+  button.ghost { background:#1b2a47; color:var(--txt); }
+
+  #status { display:none; font-size:12px; margin-top:10px; }
+  #status.err { display:block; color:#fca5a5; }
+  #info { font-size:12px; color:var(--mute); margin-top:10px; }
+  details#adv { margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+  details#adv summary { cursor:pointer; font-size:13px; color:var(--mute); padding:6px 0; list-style:none; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  details#adv summary::-webkit-details-marker { display:none; }
+  details#adv summary::after { content:"▾"; font-size:14px; }
+  details#adv[open] summary::after { content:"▴"; }
+
+  /* ---- top row: [bus service] [next refresh in ▬▬▬ 18s] [↻] - always ONE line, phone and desktop ---- */
+  .toprow { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; }
+  .toprow > label { flex:0 0 68px; width:68px; white-space:nowrap; overflow:visible; }   /* caption may overhang; keeps the bar right next to the box */
+  #svc { width:68px; height:46px; text-align:center; font-size:18px; padding:0 6px; }
+  .refresh { flex:1 1 auto; min-width:0; height:46px; display:flex; align-items:center; gap:10px; background:#0a1324; border:1px solid var(--line); border-radius:10px; padding:0 12px; }
+  .refresh .lbl2 { font-size:12px; color:var(--mute); white-space:nowrap; flex:0 0 auto; }
+  .refresh .short { display:none; }
+  .track { flex:1 1 auto; min-width:24px; height:8px; background:#1b2a47; border-radius:4px; overflow:hidden; }
+  .track div { height:100%; width:100%; background:linear-gradient(90deg,#00b4d8,#48cae4); border-radius:4px; transition:width 1s linear; }
+  #cd { flex:0 0 auto; font-size:15px; font-weight:700; color:#00b4d8; min-width:32px; text-align:right; white-space:nowrap; }
+  #refreshBtn { flex:0 0 auto; height:46px; min-width:46px; padding:0 14px; border-radius:10px; background:#00b4d8; color:#07202b; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap; }
+  #refreshBtn #rIcon { font-size:22px; line-height:1; }
+  #refreshBtn:disabled { background:#1b2a47; color:#8da2c6; cursor:default; }
+  .spin { display:inline-block; width:16px; height:16px; border:2px solid #8da2c6; border-top-color:transparent; border-radius:50%; animation:sp .7s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  @media (max-width:560px) {
+    main { padding:8px 10px 24px; } .card { padding:12px; }
+    input[type=number] { width:100px; }
+    #refreshBtn { width:46px; padding:0; }
+    #refreshBtn .rtxt { display:none; }          /* phone: icon-only button */
+    .refresh { padding:0 10px; gap:8px; }
+    #verdict h2 { font-size:26px; }
+  }
+  @media (max-width:390px) {
+    .refresh .full { display:none; } .refresh .short { display:inline; }   /* "Refresh in" on very narrow phones */
+    .toprow > label { flex-basis:58px; width:58px; } #svc { width:58px; }
+  }
+
+  /* verdict + bus picture */
+  #verdict { text-align:center; border:2px solid var(--green); border-radius:18px; padding:14px 12px; background:#0b1a2a; }
+  #verdict.either { border-color:var(--blue); }
+  #verdict h2 { margin:0; font-size:30px; color:var(--green); font-weight:800; }
+  #verdict.either h2 { color:var(--blue); }
+  #verdict p { margin:6px 0 0; font-size:14px; color:var(--mute); }
+  #verdict p b { color:var(--txt); }
+  #verdict small { display:block; margin-top:6px; font-size:12px; color:#6f84a8; }
+  #busWrap svg { width:100%; height:auto; max-height:560px; display:block; }
+  .lbl { fill:#9fb3d9; font-weight:700; }
+  .tiny { fill:#6f84a8; font-size:15px; letter-spacing:.12em; }
+
+  .bar { display:flex; height:16px; border-radius:8px; overflow:hidden; background:#16233d; }
+  .bar div { height:100%; }
+  .barlbl { display:flex; justify-content:space-between; font-size:11px; color:var(--mute); margin-top:4px; }
+  .legend { font-size:12px; color:var(--mute); display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+  /* map */
+  #map { height:340px; border-radius:12px; }
+  .me { width:18px; height:18px; border-radius:50%; background:#2563eb; border:3px solid #fff; box-shadow:0 0 0 4px rgba(37,99,235,.35); }
+  .num { width:22px; height:22px; border-radius:50%; background:#1b2a47; color:#fff; border:2px solid #fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .num.sel { background:#22c55e; color:#04210f; }
+  .bn { width:36px; height:36px; border-radius:50%; background:#4fc3f7; color:#fff; border:3px solid #fff; font-size:15px; font-weight:800; font-family:"Segoe UI",sans-serif; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px #4fc3f7bb, 0 2px 6px rgba(0,0,0,.45); text-shadow:0 1px 2px rgba(0,0,0,.35); }
+  .bn.sel { transform:scale(1.2); box-shadow:0 0 0 4px #22c55e, 0 2px 8px rgba(0,0,0,.5); }
+  .leaflet-popup-content { font-family:"Segoe UI",sans-serif; font-size:14px; line-height:1.45; color:#222; margin:12px 16px; }
+
+  /* arrival rows (tap to use that bus's time) */
+  .stoplist { display:flex; flex-direction:column; gap:8px; }
+  .stopbtn { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#0a1324; border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; color:var(--txt); cursor:pointer; }
+  .stopbtn.sel { border-color:var(--green); background:#0b2133; }
+  .stopbtn .n { flex:0 0 28px; height:28px; border-radius:50%; background:#1b2a47; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+  .stopbtn.sel .n { background:var(--green); color:#04210f; }
+  .stopbtn .t { flex:1; min-width:0; }
+  .stopbtn .t b { display:block; font-size:14px; }
+  .stopbtn .t span { font-size:12px; color:var(--mute); }
+  .stopbtn .d { font-size:12px; color:var(--mute); text-align:right; white-space:nowrap; }
+  .stopbtn.sel .d { color:var(--green); }
+  .busbtn .d b { display:block; font-size:20px; line-height:1.1; }
+  .busbtn .d small { font-size:11px; }
+  .others { margin-top:10px; font-size:12px; color:var(--mute); display:flex; flex-wrap:wrap; gap:6px; }
+  .others span { background:#0a1324; border:1px solid var(--line); border-radius:8px; padding:3px 8px; }
+  .others b { color:var(--txt); }
+  .upd { font-size:11px; color:#6f84a8; margin-top:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .upd label { flex-direction:row; align-items:center; text-transform:none; letter-spacing:0; font-size:12px; }
+  .upd input { padding:0; }
+  h3 { margin:0 0 8px; font-size:14px; color:var(--mute); font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚌 Bus Arrival</h1>
+</header>
+<main>
+  <div class="card">
+    <div class="toprow">
+      <label>Bus service <input id="svc" value="2" inputmode="text" autocomplete="off"></label>
+      <div class="refresh">
+        <span class="lbl2"><span class="full">Next refresh in</span><span class="short">Refresh in</span></span>
+        <div class="track"><div id="cdBar"></div></div>
+        <span id="cd">60s</span>
+      </div>
+      <button id="refreshBtn" type="button" aria-label="Refresh now" title="Refresh now"><span id="rIcon">↻</span><span class="rtxt">Refresh Now</span></button>
+    </div>
+    <div id="status"></div>
+    <details id="adv">
+      <summary id="advSum">⚙ Get off, date, time &amp; GPS</summary>
+      <div class="row">
+        <label>Get off at <select id="alight" style="max-width:100%"></select></label>
+      </div>
+      <div class="row">
+        <label>Date (SG) <input id="date" type="date" autocomplete="off"></label>
+        <label>Time (SG) <input id="time" type="time" autocomplete="off"></label>
+        <button class="ghost" id="now" type="button">Now</button>
+      </div>
+      <div class="row">
+        <label>Latitude <input id="lat" type="number" step="0.00001" autocomplete="off"></label>
+        <label>Longitude <input id="lng" type="number" step="0.00001" autocomplete="off"></label>
+        <button class="ghost" id="gps" type="button">📍 Auto-detect GPS</button>
+      </div>
+      <div id="info">Starting…</div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div id="map"></div>
+  </div>
+
+  <div class="card" id="arrCard" hidden>
+    <h3 id="arrTitle"></h3>
+    <div id="arrBody" class="stoplist"></div>
+    <div class="upd">
+      <span id="arrUpd"></span>
+      <label><input type="checkbox" id="arrAll"> Show all services at this stop</label>
+    </div>
+  </div>
+
+  <div class="card" id="verdict" hidden>
+    <h2 id="vTitle"></h2>
+    <p id="vSub"></p>
+    <small id="vInfo"></small>
+  </div>
+
+  <div class="card" id="busCard" hidden>
+    <div id="busWrap"></div>
+  </div>
+
+  <div class="card" id="routeCard" hidden>
+    <h3>Where the sun hits during your ride</h3>
+    <div class="bar" id="bar"></div>
+    <div class="barlbl"><span id="t0"></span><span id="t1"></span></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ================= CORE LOGIC ================= */
+const BASE = "https://data.busrouter.sg/v1/";
+const SPEED_M_PER_MIN = 20000 / 60;     // assume ~20 km/h average bus speed incl. stops
+const HOME_STOP = "97039";              // Bef Jln Bena - chosen by default when you are close to it
+const HOME_RADIUS_M = 150;
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+
+// Approximate sun position for Singapore. totalMin = minutes after 00:00 SG time on y-mo-d.
+function sunPosition(y, mo, d, totalMin, lat = 1.35, lon = 103.82, tz = 8) {
+  const utc = new Date(Date.UTC(y, mo - 1, d, -tz, Math.round(totalMin)));
+  const n = Math.floor((utc - Date.UTC(utc.getUTCFullYear(), 0, 0)) / 864e5);
+  const hours = utc.getUTCHours() + utc.getUTCMinutes() / 60;
+  const g = 2 * Math.PI / 365 * (n - 1 + (hours - 12) / 24);
+  const decl = 0.006918 - 0.399912*Math.cos(g) + 0.070257*Math.sin(g) - 0.006758*Math.cos(2*g)
+             + 0.000907*Math.sin(2*g) - 0.002697*Math.cos(3*g) + 0.00148*Math.sin(3*g);
+  const eqt = 229.18 * (0.000075 + 0.001868*Math.cos(g) - 0.032077*Math.sin(g)
+             - 0.014615*Math.cos(2*g) - 0.040849*Math.sin(2*g));
+  const ha = rad((hours * 60 + eqt + 4 * lon) / 4 - 180), la = rad(lat);
+  const elev = Math.asin(Math.sin(la)*Math.sin(decl) + Math.cos(la)*Math.cos(decl)*Math.cos(ha));
+  const az = Math.atan2(-Math.sin(ha)*Math.cos(decl),
+                        Math.sin(decl)*Math.cos(la) - Math.cos(decl)*Math.sin(la)*Math.cos(ha));
+  return { az: (deg(az) + 360) % 360, elev: deg(elev) };
+}
+function haversine(a, b) { // [lat,lng] -> metres
+  const dLat = rad(b[0]-a[0]), dLng = rad(b[1]-a[1]);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLng/2)**2;
+  return 12742000 * Math.asin(Math.sqrt(h));
+}
+function bearing(a, b) {
+  const p1 = rad(a[0]), p2 = rad(b[0]), dl = rad(b[1]-a[1]);
+  return (deg(Math.atan2(Math.sin(dl)*Math.cos(p2),
+          Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl))) + 360) % 360;
+}
+// angle of the sun relative to the bus nose: 0 = ahead, +90 = right, -90 = left, 180 = behind
+const relAngle = (heading, az) => ((az - heading + 540) % 360) - 180;
+// which side of the bus the sun shines on: "L", "R" or "N" (front/back/too low)
+function sunSide(rel, elev) {
+  if (elev < 8) return "N";
+  const a = Math.abs(rel);
+  return (a < 30 || a > 150) ? "N" : (rel > 0 ? "R" : "L");
+}
+function normStop(code, s) {
+  if (!s) return null;
+  if (Array.isArray(s)) return { code, lng: +s[0], lat: +s[1], name: s[2], road: s[3] };
+  return { code, lng: +(s.lng ?? s.lon ?? s.x), lat: +(s.lat ?? s.y), name: s.name, road: s.road };
+}
+// split the ride between boarding and alighting stops into segments with sun info
+function analyseRide(list, y, mo, d, startMin) {
+  const segs = []; let t = startMin;
+  for (let i = 0; i < list.length - 1; i++) {
+    const a = [list[i].lat, list[i].lng], b = [list[i+1].lat, list[i+1].lng];
+    const dist = haversine(a, b); if (dist < 1) continue;
+    const dur = dist / SPEED_M_PER_MIN, heading = bearing(a, b);
+    const sp = sunPosition(y, mo, d, t + dur / 2);
+    const rel = relAngle(heading, sp.az);
+    segs.push({ a, b, dist, dur, t0: t, heading, rel, elev: sp.elev, side: sunSide(rel, sp.elev) });
+    t += dur;
+  }
+  return segs;
+}
+function summarise(segs) {
+  const w = { L: 0, R: 0, N: 0 }, tot = segs.reduce((s, g) => s + g.dur, 0) || 1;
+  segs.forEach(g => w[g.side] += g.dur);
+  const pct = { L: Math.round(100 * w.L / tot), R: Math.round(100 * w.R / tot) };
+  pct.N = Math.max(0, 100 - pct.L - pct.R);
+  const allLow = segs.length > 0 && segs.every(g => g.elev < 8);
+  // The side that gets MORE sun is the "sunny" side; sit on the other one.
+  const sunnySide = w.L >= w.R ? "L" : "R";
+  const sunnyPct = pct[sunnySide], otherPct = pct[sunnySide === "L" ? "R" : "L"];
+  let sit = sunnySide === "L" ? "R" : "L", reason = "";
+  if (allLow) { sit = "E"; reason = "night"; }
+  else if (sunnyPct < 10) { sit = "E"; reason = "frontback"; }        // hardly any sun on the windows
+  else if (sunnyPct - otherPct < 5) { sit = "E"; reason = "equal"; }  // truly equal
+  // average direction of the sun (relative to the bus nose) on one side
+  const mean = side => {
+    let sx = 0, sy = 0, ww = 0;
+    segs.filter(g => g.side === side && g.elev >= 8).forEach(g => { sx += g.dur*Math.sin(rad(g.rel)); sy += g.dur*Math.cos(rad(g.rel)); ww += g.dur; });
+    if (!ww || Math.hypot(sx, sy) / ww < 0.2) return side === "L" ? -90 : 90;
+    return deg(Math.atan2(sx, sy));
+  };
+  const hi = segs.filter(g => g.side === sunnySide);
+  const elev = hi.length ? hi.reduce((s, g) => s + g.elev, 0) / hi.length : 0;
+  const frontBack = segs.filter(g => g.side === "N" && g.elev >= 8);
+  const fbRel = frontBack.length ? deg(Math.atan2(
+      frontBack.reduce((s, g) => s + g.dur*Math.sin(rad(g.rel)), 0), frontBack.reduce((s, g) => s + g.dur*Math.cos(rad(g.rel)), 0))) : null;
+  return { w, tot, pct, sit, reason, allLow, elev, sunnySide, sunnyPct, otherPct,
+           sunRel: sit === "E" ? fbRel : mean(sunnySide) };
+}
+/* ================= END CORE ================= */
+
+/* ================= BUS PICTURE ================= */
+function busSVG(sum) {
+  const C = 320, R = 262;
+  const either = sum.sit === "E";
+  const sunnyL = !either && sum.sunnySide === "L", sunnyR = !either && sum.sunnySide === "R";
+  const seat = (x, y, sunny) => `<rect x="${x}" y="${y}" width="36" height="36" rx="9" fill="${sunny ? '#8a5f1a' : '#22c55e'}"/>`;
+  let seats = "";
+  for (let k = 0; k < 5; k++) { const y = 215 + k * 53; seats += seat(247, y, sunnyL) + seat(357, y, sunnyR); }
+  // ONE sun only (the direction that shines most). Ray goes UNDER the labels, the sun itself is drawn LAST so nothing hides it.
+  let ray = "", ball = "";
+  if (sum.sunRel !== null && !sum.allLow) {
+    const th = rad(sum.sunRel), x = C + R * Math.sin(th), y = C - R * Math.cos(th);
+    ray = `<line x1="${x}" y1="${y}" x2="${C}" y2="${C}" stroke="#f5b324" stroke-opacity=".2" stroke-width="16" stroke-linecap="round"/>
+           <line x1="${x}" y1="${y}" x2="${C}" y2="${C}" stroke="#f5b324" stroke-opacity=".75" stroke-width="3" stroke-dasharray="9 7"/>`;
+    ball = `<circle cx="${x}" cy="${y}" r="28" fill="#f5b324" fill-opacity=".28"/><circle cx="${x}" cy="${y}" r="16" fill="#f5b324" stroke="#fff3c4" stroke-width="2"/>`;
+  }
+  // each label is drawn twice: a thick dark copy underneath (outline) and the coloured text on top
+  const txt = (x, y, size, weight, fill, content, cls) =>
+    `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="${weight}" fill="#0a1224" stroke="#0a1224" stroke-width="6" stroke-linejoin="round">${content.replace(/ fill="[^"]*"/g, "")}</text>
+     <text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="${weight}" ${cls ? 'class="' + cls + '"' : 'fill="' + fill + '"'}>${content}</text>`;
+  const label = (cx, name, isSunny, isSit, pct) =>
+    txt(cx, C - 8, 30, 700, "#9fb3d9", name, "lbl") +
+    txt(cx, C + 24, 19, 700, "#fff", either ? '<tspan fill="#38a1e0">EITHER ✓</tspan>'
+      : isSit ? '<tspan fill="#22c55e">SIT HERE ✓</tspan>' : '<tspan fill="#f5b324">SUNNY ☀</tspan>') +
+    txt(cx, C + 50, 16, 400, isSunny ? "#f5b324" : "#8da2c6", `sun ${pct}% of ride`);
+  return `<svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Top-down bus diagram showing the sunny and shady sides">
+    <rect x="4" y="4" width="632" height="632" rx="22" fill="#0a1224" stroke="#1f2f4d"/>
+    <line x1="${C}" y1="20" x2="${C}" y2="620" stroke="#1b2a47"/><line x1="20" y1="${C}" x2="620" y2="${C}" stroke="#1b2a47"/>
+    <text x="${C}" y="120" text-anchor="middle" class="tiny">FRONT ▲</text>
+    <text x="${C}" y="535" text-anchor="middle" class="tiny">BACK</text>
+    ${ray}
+    <rect x="225" y="135" width="190" height="370" rx="52" fill="#1c293f" stroke="#475569" stroke-width="6"/>
+    <path d="M252 160 Q${C} 148 388 160" stroke="#38a1e0" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <line x1="260" y1="485" x2="380" y2="485" stroke="#38a1e0" stroke-width="7" stroke-linecap="round"/>
+    <rect x="236" y="190" width="7" height="275" rx="3" fill="${sunnyL ? '#f5b324' : '#38a1e0'}"/>
+    <rect x="397" y="190" width="7" height="275" rx="3" fill="${sunnyR ? '#f5b324' : '#38a1e0'}"/>
+    <line x1="${C}" y1="205" x2="${C}" y2="465" stroke="#33445f" stroke-width="4" stroke-dasharray="7 9"/>
+    <circle cx="378" cy="178" r="12" fill="#e2e8f0"/><text x="378" y="203" text-anchor="middle" font-size="10" fill="#6f84a8">DRIVER</text>
+    ${seats}
+    <polygon points="${C},282 ${C+26},338 ${C},325 ${C-26},338" fill="#22c55e"/>
+    ${label(140, "LEFT", sunnyL, sum.sit === "L", sum.pct.L)}
+    ${label(500, "RIGHT", sunnyR, sum.sit === "R", sum.pct.R)}
+    ${ball}
+  </svg>`;
+}
+/* ================= END BUS PICTURE ================= */
+
+/* ================= PAGE ================= */
+const $ = id => document.getElementById(id);
+const cache = {}; let stopsDB = null, servicesDB = null;
+let map, layer, busLayer, meMarker, userPos = null, timer = null;
+
+function sgNow() {
+  const p = {};
+  new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date()).forEach(x => p[x.type] = x.value);
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+}
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function updateSum() {
+  const d = $("date").value, t = $("time").value;
+  $("advSum").textContent = "⚙ " + (d ? +d.slice(8, 10) + " " + MONTHS[+d.slice(5, 7) - 1] + " " : "") + t + " · " +
+    (userPos ? userPos[0].toFixed(4) + ", " + userPos[1].toFixed(4) : "locating…");
+  const so = $("alight").selectedOptions && $("alight").selectedOptions[0];
+  if ($("alight").value && so) $("advSum").textContent += " · off: " + so.text;
+}
+function setNow() { const n = sgNow(); $("date").value = n.date; $("time").value = n.time; updateSum(); }
+// errors stay visible on the main card; everything else goes into the collapsed settings panel
+function status(msg, err) {
+  if (err) { $("status").textContent = msg; $("status").className = "err"; }
+  else { $("status").textContent = ""; $("status").className = ""; $("info").textContent = msg; }
+}
+const fmt = m => { m = Math.round(m) % 1440; return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); };
+
+async function getJSON(name) {
+  if (cache[name]) return cache[name];
+  const r = await fetch(BASE + name);
+  if (!r.ok) throw new Error(name + " – HTTP " + r.status);
+  return (cache[name] = await r.json());
+}
+async function ensureData() {
+  if (stopsDB) return;
+  status("Loading bus data …");
+  [stopsDB, servicesDB] = await Promise.all([getJSON("stops.min.json"), getJSON("services.min.json")]);
+}
+const routeStops = codes => codes.map(c => normStop(c, stopsDB[c])).filter(s => s && isFinite(s.lat) && isFinite(s.lng));
+
+let chosenKey = null, lastSvc = null, fitNear = true, nearList = [];
+const MAX_STOPS = 6;
+
+// fromUser: undefined = GPS fix, true = map tap / drag (never moves the map view), "typed" = typed coordinates, "silent" = no re-run
+function setPos(lat, lng, fromUser) {
+  userPos = [lat, lng];
+  if (fromUser !== "silent") { chosenKey = null; if (fromUser !== true) fitNear = true; }
+  $("lat").value = lat.toFixed(5); $("lng").value = lng.toFixed(5); updateSum();
+  if (map) {
+    if (!meMarker) {
+      meMarker = L.marker(userPos, { draggable: true, icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(map);
+      meMarker.on("dragend", () => { const p = meMarker.getLatLng(); setPos(p.lat, p.lng, true); });
+    } else meMarker.setLatLng(userPos);
+  }
+  if (fromUser !== "silent") schedule();
+}
+// Getting the GPS location ALSO resets date + time to the current Singapore time (and drops any bus-time you tapped earlier)
+function syncToNow() { setNow(); arrSel = null; }
+function getGPS() {
+  syncToNow();
+  if (!navigator.geolocation) { status("GPS not available – using Singapore centre. Tap the map to set your location.", true); fallbackPos(); return; }
+  status("Getting your GPS location …");
+  navigator.geolocation.getCurrentPosition(
+    p => { syncToNow(); busFit = true; setPos(p.coords.latitude, p.coords.longitude); if (map) map.setView(userPos, 15); },
+    () => { status("GPS blocked or unavailable – using Singapore centre. Tap the map to set your location.", true); if (!userPos) fallbackPos(); },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+}
+function fallbackPos() { setPos(1.3521, 103.8198); }
+function schedule() { clearTimeout(timer); timer = setTimeout(run, 250); }
+
+async function run() {
+  try {
+    if (!userPos) return;
+    await ensureData();
+    const svcNo = $("svc").value.trim().toUpperCase();
+    const svc = servicesDB[svcNo];
+    if (!svc) throw new Error("Bus service " + svcNo + " not found.");
+    if (svcNo !== lastSvc) { chosenKey = null; lastSvc = svcNo; fitNear = true; }
+    const lists = svc.routes.map(routeStops);
+
+    // candidate boarding stops in every direction (the last stop of a direction is excluded - nobody boards there)
+    const cands = [];
+    lists.forEach((l, di) => l.forEach((s, i) => {
+      if (i < l.length - 1) cands.push({ di, i, s, key: di + ":" + s.code, dist: haversine(userPos, [s.lat, s.lng]), to: l[l.length - 1].name });
+    }));
+    if (!cands.length) throw new Error("No stops found for bus " + svcNo + ".");
+    cands.sort((x, y) => x.dist - y.dist);
+    nearList = cands.slice(0, MAX_STOPS);
+
+    if (!nearList.some(c => c.key === chosenKey)) {
+      // default stop: Bef Jln Bena if this bus stops there and you are within HOME_RADIUS_M of it, otherwise the nearest stop
+      const home = cands.find(c => c.s.code === HOME_STOP && c.dist <= HOME_RADIUS_M);
+      if (home) {
+        chosenKey = home.key;
+        if (!nearList.includes(home)) nearList = [home, ...nearList.slice(0, MAX_STOPS - 1)];
+      } else chosenKey = nearList[0].key;
+    }
+    const pick = nearList.find(c => c.key === chosenKey);
+    const list = lists[pick.di], board = pick.i;
+
+    // get-off menu
+    const prevAl = $("alight").value;
+    const after = list.slice(board + 1);
+    $("alight").innerHTML = `<option value="">End of route (${list[list.length-1].name})</option>` +
+      after.slice(0, -1).map(s => `<option value="${s.code}">${s.name}</option>`).join("");
+    $("alight").value = [...$("alight").options].some(o => o.value === prevAl) ? prevAl : "";
+    let endIdx = list.length - 1;
+    if ($("alight").value) { const k = list.findIndex((s, i) => i > board && s.code === $("alight").value); if (k > 0) endIdx = k; }
+
+    const [y, mo, d] = $("date").value.split("-").map(Number);
+    const [hh, mm] = $("time").value.split(":").map(Number);
+    const startMin = hh * 60 + mm;
+    loadArrivals(pick.s.code, pick.s.name, [pick.s.lat, pick.s.lng]);
+    const segs = analyseRide(list.slice(board, endIdx + 1), y, mo, d, startMin);
+    if (!segs.length) throw new Error("No ride found from this stop. Try another stop or the Get-off stop.");
+    const sum = summarise(segs);
+
+    renderVerdict(sum, segs, list[board], pick.dist, startMin, pick.to);
+    renderBar(segs, sum, startMin);
+    renderMap(list, board, endIdx, segs);
+    status(`Bus ${svcNo} · ${svc.name}`); updateSum();
+  } catch (e) {
+    status("Failed: " + e.message, true);
+    console.error(e);
+  }
+}
+
+function renderVerdict(sum, segs, boardStop, distM, startMin, toName) {
+  const V = $("verdict"); V.hidden = false; $("busCard").hidden = false;
+  const rideMin = Math.round(sum.tot);
+  const side = sum.sit === "L" ? "LEFT" : sum.sit === "R" ? "RIGHT" : null;
+  const sunny = sum.sunnySide === "L" ? "LEFT" : "RIGHT";
+  V.className = "card" + (side ? "" : " either");
+  if (side) {
+    $("vTitle").textContent = `Sit on the ${side} side`;
+    $("vSub").innerHTML = `The <b>${sunny}</b> windows get sun for about <b>${sum.sunnyPct}%</b> of your ride. The ${side} side only gets about <b>${sum.otherPct}%</b>.`;
+  } else {
+    $("vTitle").textContent = "Either side is fine";
+    $("vSub").textContent = sum.reason === "night" ? "The sun is down or very low during your ride."
+      : sum.reason === "frontback" ? `Very little sun reaches the windows (left ${sum.pct.L}%, right ${sum.pct.R}%). It is mostly in front of or behind the bus.`
+      : `Both sides get about the same sun (left ${sum.pct.L}%, right ${sum.pct.R}%).`;
+  }
+  $("vInfo").textContent = `Board at ${boardStop.name} (${Math.round(distM)} m away), towards ${toName} · about ${rideMin} min ride · left/right as seen facing the front of the bus`;
+  $("busWrap").innerHTML = busSVG(sum);
+}
+function renderBar(segs, sum, startMin) {
+  $("routeCard").hidden = false;
+  const col = { L: "#f5b324", R: "#a78bfa", N: "#566684" };   // where the sun hits
+  $("bar").innerHTML = segs.map(g =>
+    `<div title="${fmt(g.t0)}" style="width:${100 * g.dur / sum.tot}%;background:${col[g.side]}"></div>`).join("");
+  $("t0").textContent = fmt(startMin);
+  $("t1").textContent = fmt(startMin + sum.tot);
+  $("legend").innerHTML =
+    `<span><span class="dot" style="background:${col.L}"></span>Sun on LEFT side · ${sum.pct.L}%</span>
+     <span><span class="dot" style="background:${col.R}"></span>Sun on RIGHT side · ${sum.pct.R}%</span>
+     <span><span class="dot" style="background:${col.N}"></span>No sun on windows · ${sum.pct.N}%</span>`;
+}
+function renderMap(list, board, endIdx, segs) {
+  if (!window.L || !map) return;
+  layer.clearLayers();
+  L.polyline(list.map(s => [s.lat, s.lng]), { color: "#64748b", weight: 3, opacity: .45, dashArray: "4 6" }).addTo(layer);
+  const col = { L: "#f5b324", R: "#a78bfa", N: "#94a3b8" };
+  segs.forEach(g => L.polyline([g.a, g.b], { color: col[g.side], weight: 6, opacity: .95, interactive: false }).addTo(layer));
+  const e = list[endIdx];
+  L.circleMarker([e.lat, e.lng], { radius: 8, color: "#fff", weight: 2, fillColor: "#ef4444", fillOpacity: 1, bubblingMouseEvents: false })
+    .bindTooltip("Get off: " + e.name).addTo(layer);
+  // lettered, clickable candidate stops (letters so they are not confused with bus numbers)
+  nearList.forEach((c, k) => {
+    const sel = c.key === chosenKey, letter = String.fromCharCode(65 + k);
+    L.marker([c.s.lat, c.s.lng], {
+      zIndexOffset: sel ? 1000 : 0,
+      icon: L.divIcon({ className: "", html: `<div class="num${sel ? " sel" : ""}">${letter}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] })
+    }).bindTooltip(sel ? c.s.name : `Stop ${letter}: ${c.s.name} (towards ${c.to})`, sel ? { permanent: true, direction: "top", offset: [0, -12] } : {})
+      .on("click", () => { chosenKey = c.key; run(); }).addTo(layer);
+  });
+  const b = nearList.find(c => c.key === chosenKey).s;
+  L.polyline([userPos, [b.lat, b.lng]], { color: "#2563eb", weight: 3, dashArray: "3 6", interactive: false }).addTo(layer);
+  if (fitNear) map.fitBounds(L.latLngBounds([userPos, ...nearList.map(c => [c.s.lat, c.s.lng])]).pad(.15), { maxZoom: 17 });
+  fitNear = false;
+}
+
+/* ================= BUS ARRIVALS ================= */
+const ARR_URL = "https://arrivelah2.busrouter.sg/?id=";
+const LOAD = { SEA: ["Seats", "#22c55e"], SDA: ["Standing", "#f5b324"], LSD: ["Full", "#ef4444"] };
+const TYPE = { SD: "Single deck", DD: "Double deck", BD: "Bendy" };
+const hhmm = d => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Singapore", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+const ymd = d => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+let arrStop = null, arrName = "", arrPos = null, arrData = null, arrErr = null, arrAt = null, busFit = true, busKey = "", arrSel = null, busMarkers = {}, arrLoading = false;
+
+const minsTo = t => Math.round((new Date(t) - Date.now()) / 60000);
+const minsTxt = m => m <= 0 ? "Arr" : m + " min";
+const minsCol = m => m <= 3 ? "#ef4444" : m <= 10 ? "#f5b324" : "#22c55e";
+// only buses the API reports with a real live position (monitored = 1 and a non-zero lat/lng)
+const hasLive = b => +b.monitored === 1 && isFinite(+b.lat) && isFinite(+b.lng) && +b.lat !== 0 && +b.lng !== 0;
+// up to 3 distinct upcoming buses (the feed repeats "subsequent" as "next2")
+function slots(svc) {
+  const seen = new Set(), out = [];
+  ["next", "subsequent", "next2", "next3"].forEach(k => {
+    const b = svc[k]; if (!b || !b.time || seen.has(b.time)) return;
+    seen.add(b.time); out.push(b);
+  });
+  return out.slice(0, 3);
+}
+function loadArrivals(code, name, pos) {
+  if (code === arrStop && arrData) { renderArrivals(); return; }
+  // keep the old rows (dimmed) and old bus markers on screen until the new stop's data arrives - no blank flash
+  arrStop = code; arrName = name; arrPos = pos || null; arrErr = null; arrSel = null; arrLoading = true; busFit = true;
+  renderArrivals(); fetchArrivals();
+}
+
+// refresh countdown (60 s) + refresh button
+const REFRESH_SEC = 60;
+let nextAt = Date.now() + REFRESH_SEC * 1000, fetching = false;
+function resetCountdown() { nextAt = Date.now() + REFRESH_SEC * 1000; drawCountdown(); }
+function drawCountdown() {
+  const left = Math.max(0, Math.ceil((nextAt - Date.now()) / 1000));
+  $("cd").textContent = left + "s";
+  $("cdBar").style.width = (100 * left / REFRESH_SEC) + "%";
+  $("refreshBtn").disabled = fetching;
+  $("rIcon").innerHTML = fetching ? '<span class="spin"></span>' : "↻";
+  return left;
+}
+async function fetchArrivals() {
+  if (!arrStop) { resetCountdown(); return; }
+  if (fetching) return;
+  const code = arrStop;
+  fetching = true; resetCountdown();
+  let j = null, err = null;
+  try {
+    const r = await fetch(ARR_URL + encodeURIComponent(code), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    j = await r.json();
+  } catch (e) { err = e.message; }
+  fetching = false;
+  if (code !== arrStop) { fetchArrivals(); return; }       // you picked another stop meanwhile - drop this answer, fetch the new stop
+  if (err) { arrErr = err; if (arrLoading) arrData = null; }
+  else { arrData = j.services || []; arrErr = null; arrAt = new Date(); }
+  arrLoading = false; resetCountdown();
+  renderArrivals();
+}
+function renderArrivals() {
+  if (!arrStop) return;
+  $("arrCard").hidden = false;
+  const svcNo = $("svc").value.trim().toUpperCase();
+  $("arrTitle").textContent = `Bus ${svcNo} arrivals · ${arrName} (${arrStop})`;
+  const body = $("arrBody");
+  $("arrCard").style.opacity = arrLoading && arrData ? ".55" : "";
+  $("arrCard").style.pointerEvents = arrLoading && arrData ? "none" : "";
+  if (!arrData) {
+    body.innerHTML = `<span style="font-size:13px;color:${arrErr ? "#fca5a5" : "var(--mute)"}">${arrErr
+      ? "Could not load arrival info (" + arrErr + "). If you opened this file from your PC and it is blocked, host the page or run: python -m http.server"
+      : "Loading arrival info …"}</span>`;
+    $("arrUpd").textContent = ""; if (!arrLoading) showBuses(null); return;
+  }
+  const svc = arrData.find(s => String(s.no).toUpperCase() === svcNo);
+  const labels = ["Next", "2nd", "3rd"];
+  if (!svc || !slots(svc).length) {
+    body.innerHTML = `<span style="font-size:13px;color:var(--mute)">No arrival info for bus ${svcNo} at this stop right now (not in operation, or no bus is shown yet).</span>`;
+    showBuses(null);
+  } else {
+    const list = slots(svc);
+    body.innerHTML = list.map((b, i) => {
+      const m = minsTo(b.time), live = +b.monitored === 1;
+      const ld = LOAD[b.load] || [b.load || "", "#8da2c6"];
+      return `<button type="button" class="stopbtn busbtn${b.time === arrSel ? " sel" : ""}" data-t="${b.time}" data-i="${i}">
+        <div class="n">${i + 1}</div>
+        <div class="t"><b>${labels[i]} bus · ${hhmm(new Date(b.time))}</b>
+          <span>${live ? "Live" : "Scheduled"} · ${ld[0]}${TYPE[b.type] ? " · " + TYPE[b.type] : ""}${b.feature === "WAB" ? " · ♿" : ""}</span></div>
+        <div class="d"><b style="color:${minsCol(m)}">${minsTxt(m)}</b><small>${b.time === arrSel ? "sun check set" : "tap to use"}</small></div></button>`;
+    }).join("");
+    showBuses(svc);
+  }
+  if ($("arrAll").checked) {
+    const others = arrData.filter(s => String(s.no).toUpperCase() !== svcNo).map(s => {
+      const l = slots(s).map(b => minsTxt(minsTo(b.time))).join(", ");
+      return `<span><b>${s.no}</b> ${l || "–"}</span>`;
+    });
+    body.innerHTML += `<div class="others">${others.join("") || "No other services."}</div>`;
+  }
+  $("arrUpd").textContent = arrLoading ? "Updating …" : arrAt ? `Updated ${hhmm(arrAt)} · auto-refresh every 60 s` : "";
+}
+// draw the selected service's live buses on the map (redrawn only when a bus moves or the selection changes)
+function showBuses(svc) {
+  if (!busLayer) return;
+  const buses = svc ? slots(svc).map((b, i) => ({ b, i })).filter(x => hasLive(x.b)) : [];
+  const key = arrStop + "|" + (svc ? svc.no : "") + "|" + arrSel + "|" + buses.map(x => x.b.lat + "," + x.b.lng + "," + x.b.time).join(";");
+  if (key === busKey) return;
+  busKey = key;
+  busLayer.clearLayers(); busMarkers = {};
+  const pts = [];
+  const canHover = window.matchMedia && matchMedia("(hover: hover)").matches;
+  buses.forEach(({ b, i }) => {
+    const pos = [+b.lat, +b.lng]; pts.push(pos);
+    const sel = b.time === arrSel, m = minsTo(b.time);
+    const ld = (LOAD[b.load] || [b.load || ""])[0];
+    const loadTxt = { SEA: "Seats Available", SDA: "Standing Available", LSD: "Limited Standing" }[b.load] || ld;
+    const popup = `<div style="min-width:170px"><b>Bus ${svc.no}</b>${svc.operator ? " (" + svc.operator + ")" : ""}<br>`
+      + `Arrival: <b>${hhmm(new Date(b.time))}</b> (~${m} min)<br>`
+      + `Type: ${{ SD: "Single Deck", DD: "Double Deck", BD: "Bendy" }[b.type] || b.type || "-"}${loadTxt ? " &nbsp;|&nbsp; " + loadTxt : ""}`
+      + (b.feature === "WAB" ? "<br>Wheelchair Accessible" : "") + `</div>`;
+    const mk = L.marker(pos, { zIndexOffset: sel ? 4000 : 3000 - i,
+        icon: L.divIcon({ className: "", iconSize: [36, 36], iconAnchor: [18, 18], html: `<div class="bn${sel ? " sel" : ""}">${svc.no}</div>` }) })
+      .bindPopup(popup, { offset: [0, -10], autoPan: false }).addTo(busLayer);
+    if (canHover) { mk.on("mouseover", () => mk.openPopup()); mk.on("mouseout", () => mk.closePopup()); }
+    busMarkers[b.time] = mk;
+  });
+  // first time for a newly chosen stop: zoom so the stop, you and the approaching buses are all visible
+  if (busFit && pts.length && map) {
+    const all = [...pts]; if (arrPos) all.push(arrPos); if (userPos) all.push(userPos);
+    map.fitBounds(L.latLngBounds(all).pad(.2), { maxZoom: 17 });
+    busFit = false;
+  }
+}
+$("arrBody").addEventListener("click", e => {
+  const btn = e.target.closest ? e.target.closest(".busbtn") : null;
+  if (!btn) return;
+  arrSel = btn.dataset.t;
+  const d = new Date(arrSel);
+  $("date").value = ymd(d); $("time").value = hhmm(d); updateSum();
+  renderArrivals(); schedule();
+  const mk = busMarkers[arrSel];
+  if (mk && map) map.panTo(mk.getLatLng());
+});
+$("arrAll").addEventListener("change", renderArrivals);
+/* ================= END BUS ARRIVALS ================= */
+
+/* ---- init ---- */
+function initMap() {
+  if (!window.L) { $("map").textContent = "Map could not load (no internet to unpkg.com)."; return; }
+  map = L.map("map").setView([1.3521, 103.8198], 12);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+  layer = L.layerGroup().addTo(map);
+  busLayer = L.layerGroup().addTo(map);
+  map.on("click", e => setPos(e.latlng.lat, e.latlng.lng, true));
+}
+["svc", "alight", "date", "time"].forEach(id => $(id).addEventListener("change", () => { updateSum(); schedule(); }));
+$("svc").addEventListener("input", schedule);
+["lat", "lng"].forEach(id => $(id).addEventListener("change", () => {
+  const la = parseFloat($("lat").value), ln = parseFloat($("lng").value);
+  if (isFinite(la) && isFinite(ln)) setPos(la, ln, "typed");
+}));
+$("now").onclick = () => { syncToNow(); schedule(); };
+$("gps").onclick = getGPS;
+$("refreshBtn").addEventListener("click", fetchArrivals);
+setInterval(() => { if (drawCountdown() === 0 && !fetching) fetchArrivals(); }, 1000);
+setInterval(() => { if (arrData && !arrLoading) renderArrivals(); }, 30000);
+
+// Coming back to a page that was left open / restored by the phone browser: re-detect GPS, which also resets the time to now
+let hiddenAt = 0;
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { hiddenAt = Date.now(); return; }
+  if (hiddenAt && Date.now() - hiddenAt > 60000) getGPS();
+});
+window.addEventListener("pageshow", e => { if (e.persisted) getGPS(); });
+
+setNow();
+initMap();
+getGPS();
+drawCountdown();
+</script>
+</body>
+</html>
