@@ -13,6 +13,9 @@
   body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--txt); }
   header { padding:16px 20px 6px; max-width:760px; margin:0 auto; }
   header h1 { margin:0; font-size:20px; }
+  /* Clickable title = back to previous page */
+  #page-title { cursor:pointer; display:inline-block; }
+  #page-title:hover { text-decoration:underline; }
   main { max-width:760px; margin:0 auto; padding:10px 16px 30px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
   .row { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
@@ -111,7 +114,7 @@
 </head>
 <body>
 <header>
-  <h1>🚌 Bus Arrival</h1>
+  <h1 id="page-title" onclick="goBack()" title="Back to menu">🚌 Bus Arrival</h1>
 </header>
 <main>
   <div class="card">
@@ -177,6 +180,15 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+/* ================= BACK TO PREVIOUS PAGE (click on title) ================= */
+function goBack() {
+  if (document.referrer || history.length > 1) {
+    history.back();
+  } else {
+    window.location.href = "index.html";   // fallback if opened directly (no history)
+  }
+}
+
 /* ================= CORE LOGIC ================= */
 const BASE = "https://data.busrouter.sg/v1/";
 const SPEED_M_PER_MIN = 20000 / 60;     // assume ~20 km/h average bus speed incl. stops
