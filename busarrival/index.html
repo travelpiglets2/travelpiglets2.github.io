@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+<!-- PWA manifest: this is what tells Chrome on Android the site is installable -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Android / Chrome install + theming -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#2563eb">
 
-<!-- Icons (normal website icons only - no PWA manifest, no service worker) -->
+<!-- iOS install + theming (Safari ignores the manifest, so these are still needed) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bus Navigator">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- Icons -->
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
@@ -220,7 +232,7 @@ body{
             <div class="chevron">›</div>
         </a>
 
-        <!-- NEW: Bus Arrival + Seating Plan (same folder as index.html) -->
+        <!-- Bus Arrival + Seating Plan (same folder as index.html) -->
         <a href="bus_side_planner.html" class="card">
             <div class="icon teal">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M3 10h18"></path><path d="M12 4v6"></path><circle cx="7.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle><circle cx="16.5" cy="19" r="1.4" fill="#0d9488" stroke="none"></circle></svg>
@@ -275,15 +287,14 @@ body{
 </div>
 
 <script>
-  // Plain website mode (same as the gallery page): no PWA / no service worker.
-  // This also removes any old service worker + cache left on the phone from the previous app version.
+  // Register the service worker so Chrome recognizes this as an installable PWA
+  // (manifest + service worker + icons = Chrome mints a real WebAPK on "Add to Home screen").
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function (regs) {
-      regs.forEach(function (r) { r.unregister(); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then((reg) => console.log('Service worker registered:', reg.scope))
+        .catch((err) => console.error('Service worker registration failed:', err));
     });
-  }
-  if (window.caches) {
-    caches.keys().then(function (keys) { keys.forEach(function (k) { caches.delete(k); }); });
   }
 </script>
 
